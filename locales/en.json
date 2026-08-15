@@ -357,6 +357,8 @@
     "tracks_count": "Total {count} audio assets",
     "popular_categories": "Popular Categories",
     "all_cats": "All",
+    "login_discord": "Discord Login",
+    "logout": "Logout",
     "save": "Save",
     "cancel": "Cancel",
     "close": "Close"

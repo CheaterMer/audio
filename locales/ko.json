@@ -357,6 +357,8 @@
     "tracks_count": "총 {count}개의 오디오 에셋",
     "popular_categories": "인기 카테고리",
     "all_cats": "전체",
+    "login_discord": "Discord 로그인",
+    "logout": "로그아웃",
     "save": "저장",
     "cancel": "취소",
     "close": "닫기"
