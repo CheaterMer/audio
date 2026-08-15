@@ -2612,173 +2612,290 @@
             document.getElementById('playerTotalTime').textContent = t.dur || '0:00';
             document.getElementById('playerPlayBtn').textContent = '⏸';
 
-            // Reset YouTube player container
-            const ytBox = document.getElementById('ytPlayerContainer');
-            if (ytBox) ytBox.innerHTML = '';
-            isYtPlayingMode = false;
+        /* ─── YOUTUBE IFRAME API SYNC & PROGRESS BAR ─── */
+        let ytPlayerInstance = null;
+        let ytProgressInterval = null;
+        let isYtApiLoaded = false;
 
-            const triggerYtFallback = () => {
-                if (t.yt && !isYtPlayingMode) {
-                    isYtPlayingMode = true;
-                    if (ytBox) {
-                        ytBox.innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/${t.yt}?autoplay=1&enablejsapi=1" frameborder="0" allow="autoplay"></iframe>`;
-                    }
-                    showToast('Roblox 음원 불가 - YouTube 공식 음원으로 전환 재생합니다 🎵', 'info');
-                    document.getElementById('playerPlayBtn').textContent = '⏸';
-                } else if (!isYtPlayingMode) {
-                    document.getElementById('playerPlayBtn').textContent = '▶';
-                    showToast('해당 트랙은 웹 미리듣기가 지원되지 않는 에셋입니다 (Roblox ID: ' + t.assetId + ')', 'error');
+        function loadYtIframeApi() {
+            if (isYtApiLoaded || window.YT) return;
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            document.head.appendChild(tag);
+            isYtApiLoaded = true;
+        }
+
+        loadYtIframeApi();
+
+        function startYtProgressPolling(fallbackDuration = 0) {
+            if (ytProgressInterval) clearInterval(ytProgressInterval);
+            ytProgressInterval = setInterval(() => {
+                if (isYtPlayingMode && ytPlayerInstance && typeof ytPlayerInstance.getCurrentTime === 'function') {
+                    try {
+                        const cur = ytPlayerInstance.getCurrentTime() || 0;
+                        const dur = ytPlayerInstance.getDuration() || fallbackDuration || 0;
+                        if (dur > 0) {
+                            const percent = Math.min(100, Math.max(0, (cur / dur) * 100));
+                            document.getElementById('dockProgressFill').style.width = percent + '%';
+                            document.getElementById('playerCurTime').textContent = fmtTime(cur);
+                            document.getElementById('playerTotalTime').textContent = fmtTime(dur);
+                        }
+                    } catch(e) {}
                 }
-            };
-
-            playerAudio.onerror = () => {
-                triggerYtFallback();
-            };
-
-            // Try backend audio stream first
-            const previewUrl = `${API_BASE}/api/audio/preview/${t.id}`;
-            playerAudio.src = previewUrl;
-            playerAudio.volume = isMuted ? 0 : currentVolume;
-            playerAudio.play().then(() => {
-                isYtPlayingMode = false;
-            }).catch(e => {
-                triggerYtFallback();
-            });
+            }, 200);
         }
 
-        function toggleFav(id) {
-            const t = tracksData.find(x => String(x.id) === String(id));
-            if (t) {
-                t.favorited = !t.favorited;
-                renderCards();
-                updateCounts();
+        function playYouTubeTrack(ytId, durationSec) {
+            isYtPlayingMode = true;
+            playerAudio.pause();
+            playerAudio.src = '';
+
+            const ytBox = document.getElementById('ytPlayerContainer');
+            if (!ytBox) return;
+            ytBox.style.display = 'block';
+
+            if (!ytPlayerInstance && window.YT && window.YT.Player) {
+                ytBox.innerHTML = '<div id="ytActualPlayer"></div>';
+                ytPlayerInstance = new YT.Player('ytActualPlayer', {
+                    height: '1',
+                    width: '1',
+                    videoId: ytId,
+                    playerVars: {
+                        autoplay: 1,
+                        controls: 0,
+                        enablejsapi: 1,
+                        origin: window.location.origin
+                    },
+                    events: {
+                        onReady: (e) => {
+                            if (isMuted || currentVolume === 0) e.target.mute();
+                            else { e.target.unMute(); e.target.setVolume(currentVolume * 100); }
+                            e.target.playVideo();
+                            document.getElementById('playerPlayBtn').textContent = '⏸';
+                            startYtProgressPolling(durationSec);
+                        },
+                        onStateChange: (e) => {
+                            if (e.data === YT.PlayerState.PLAYING) {
+                                document.getElementById('playerPlayBtn').textContent = '⏸';
+                                startYtProgressPolling(durationSec);
+                            } else if (e.data === YT.PlayerState.PAUSED) {
+                                document.getElementById('playerPlayBtn').textContent = '▶';
+                            } else if (e.data === YT.PlayerState.ENDED) {
+                                if (ytProgressInterval) clearInterval(ytProgressInterval);
+                                playNextTrack();
+                            }
+                        }
+                    }
+                });
+            } else if (ytPlayerInstance && typeof ytPlayerInstance.loadVideoById === 'function') {
+                ytPlayerInstance.loadVideoById(ytId);
+                if (isMuted || currentVolume === 0) ytPlayerInstance.mute();
+                else { ytPlayerInstance.unMute(); ytPlayerInstance.setVolume(currentVolume * 100); }
+                ytPlayerInstance.playVideo();
+                document.getElementById('playerPlayBtn').textContent = '⏸';
+                startYtProgressPolling(durationSec);
+            } else {
+                // Fallback direct iframe with postMessage
+                ytBox.innerHTML = `<iframe id="ytIframeEmbed" width="1" height="1" src="https://www.youtube.com/embed/${ytId}?autoplay=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}" frameborder="0" allow="autoplay"></iframe>`;
+                document.getElementById('playerPlayBtn').textContent = '⏸';
             }
+
+            showToast('Roblox 음원 불가 - YouTube 공식 음원으로 전환 재생합니다 🎵', 'info');
         }
 
-        function togglePlayState() {
-            if (isYtPlayingMode) {
-                const ytBox = document.getElementById('ytPlayerContainer');
-                if (ytBox && ytBox.innerHTML) {
-                    ytBox.innerHTML = '';
+        const triggerYtFallback = (t) => {
+            if (t && t.yt && !isYtPlayingMode) {
+                playYouTubeTrack(t.yt, t.durationSec || 0);
+            } else if (!isYtPlayingMode) {
+                document.getElementById('playerPlayBtn').textContent = '▶';
+                showToast('해당 트랙은 웹 미리듣기가 지원되지 않는 에셋입니다 (Roblox ID: ' + (t ? t.assetId : '') + ')', 'error');
+            }
+        };
+
+        playerAudio.onerror = () => {
+            const t = tracksData.find(x => String(x.id) === String(currentPlayingTrackId));
+            triggerYtFallback(t);
+        };
+
+        // Try backend audio stream first
+        const previewUrl = `${API_BASE}/api/audio/preview/${t.id}`;
+        playerAudio.src = previewUrl;
+        playerAudio.volume = isMuted ? 0 : currentVolume;
+        playerAudio.play().then(() => {
+            isYtPlayingMode = false;
+            if (ytProgressInterval) clearInterval(ytProgressInterval);
+            if (ytPlayerInstance && typeof ytPlayerInstance.pauseVideo === 'function') {
+                try { ytPlayerInstance.pauseVideo(); } catch(e) {}
+            }
+        }).catch(e => {
+            triggerYtFallback(t);
+        });
+    }
+
+    function toggleFav(id) {
+        const t = tracksData.find(x => String(x.id) === String(id));
+        if (t) {
+            t.favorited = !t.favorited;
+            renderCards();
+            updateCounts();
+        }
+    }
+
+    function togglePlayState() {
+        if (isYtPlayingMode && ytPlayerInstance && typeof ytPlayerInstance.getPlayerState === 'function') {
+            try {
+                const s = ytPlayerInstance.getPlayerState();
+                if (s === 1) { // PLAYING
+                    ytPlayerInstance.pauseVideo();
                     document.getElementById('playerPlayBtn').textContent = '▶';
-                    isYtPlayingMode = false;
+                } else {
+                    ytPlayerInstance.playVideo();
+                    document.getElementById('playerPlayBtn').textContent = '⏸';
                 }
                 return;
-            }
+            } catch(e) {}
+        }
 
-            if (playerAudio.src && !playerAudio.paused) {
-                playerAudio.pause();
+        if (playerAudio.src && !playerAudio.paused) {
+            playerAudio.pause();
+            document.getElementById('playerPlayBtn').textContent = '▶';
+        } else if (playerAudio.src) {
+            playerAudio.play().then(() => {
+                document.getElementById('playerPlayBtn').textContent = '⏸';
+            }).catch(() => {
                 document.getElementById('playerPlayBtn').textContent = '▶';
-            } else if (playerAudio.src) {
-                playerAudio.play().then(() => {
-                    document.getElementById('playerPlayBtn').textContent = '⏸';
-                }).catch(() => {
-                    document.getElementById('playerPlayBtn').textContent = '▶';
-                });
-            } else if (tracksData.length > 0) {
-                playTrackDemo(tracksData[0].id);
-            }
+            });
+        } else if (tracksData.length > 0) {
+            playTrackDemo(tracksData[0].id);
+        }
+    }
+
+    function playPrevTrack() {
+        const list = getFilteredTracks();
+        if (list.length === 0) return;
+        const idx = list.findIndex(x => String(x.id) === String(currentPlayingTrackId));
+        const prevIdx = (idx > 0) ? idx - 1 : list.length - 1;
+        playTrackDemo(list[prevIdx].id);
+    }
+
+    function playNextTrack() {
+        const list = getFilteredTracks();
+        if (list.length === 0) return;
+        const idx = list.findIndex(x => String(x.id) === String(currentPlayingTrackId));
+        const nextIdx = (idx >= 0 && idx < list.length - 1) ? idx + 1 : 0;
+        playTrackDemo(list[nextIdx].id);
+    }
+
+    function seekTrack(event) {
+        const bar = document.getElementById('dockProgressBar');
+        if (!bar) return;
+        const rect = bar.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+        const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+
+        if (isYtPlayingMode && ytPlayerInstance && typeof ytPlayerInstance.seekTo === 'function') {
+            try {
+                const dur = ytPlayerInstance.getDuration() || 0;
+                if (dur > 0) {
+                    const targetSec = ratio * dur;
+                    ytPlayerInstance.seekTo(targetSec, true);
+                    document.getElementById('dockProgressFill').style.width = (ratio * 100) + '%';
+                    document.getElementById('playerCurTime').textContent = fmtTime(targetSec);
+                }
+                return;
+            } catch(e) {}
         }
 
-        function playPrevTrack() {
-            const list = getFilteredTracks();
-            if (list.length === 0) return;
-            const idx = list.findIndex(x => String(x.id) === String(currentPlayingTrackId));
-            const prevIdx = (idx > 0) ? idx - 1 : list.length - 1;
-            playTrackDemo(list[prevIdx].id);
-        }
-
-        function playNextTrack() {
-            const list = getFilteredTracks();
-            if (list.length === 0) return;
-            const idx = list.findIndex(x => String(x.id) === String(currentPlayingTrackId));
-            const nextIdx = (idx >= 0 && idx < list.length - 1) ? idx + 1 : 0;
-            playTrackDemo(list[nextIdx].id);
-        }
-
-        function seekTrack(event) {
-            if (!playerAudio.duration || isNaN(playerAudio.duration)) return;
-            const bar = document.getElementById('dockProgressBar');
-            const rect = bar.getBoundingClientRect();
-            const clickX = event.clientX - rect.left;
-            const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+        if (playerAudio.duration && !isNaN(playerAudio.duration)) {
             playerAudio.currentTime = ratio * playerAudio.duration;
         }
+    }
 
-        playerAudio.ontimeupdate = () => {
-            if (playerAudio.duration && !isNaN(playerAudio.duration)) {
-                const percent = (playerAudio.currentTime / playerAudio.duration) * 100;
-                document.getElementById('dockProgressFill').style.width = percent + '%';
-                document.getElementById('playerCurTime').textContent = fmtTime(playerAudio.currentTime);
-            }
-        };
+    playerAudio.ontimeupdate = () => {
+        if (!isYtPlayingMode && playerAudio.duration && !isNaN(playerAudio.duration)) {
+            const percent = (playerAudio.currentTime / playerAudio.duration) * 100;
+            document.getElementById('dockProgressFill').style.width = percent + '%';
+            document.getElementById('playerCurTime').textContent = fmtTime(playerAudio.currentTime);
+        }
+    };
 
-        playerAudio.onended = () => {
+    playerAudio.onended = () => {
+        if (!isYtPlayingMode) {
             playNextTrack();
-        };
+        }
+    };
 
-        /* ─── REALTIME VOLUME CONTROLS ─── */
-        let currentVolume = 0.7;
-        let isMuted = false;
+    /* ─── REALTIME VOLUME CONTROLS ─── */
+    let currentVolume = 0.7;
+    let isMuted = false;
 
-        function initVolume() {
+    function initVolume() {
+        try {
+            const savedVol = localStorage.getItem('kadio_audio_volume');
+            if (savedVol !== null && !isNaN(savedVol)) {
+                currentVolume = parseFloat(savedVol);
+            }
+        } catch(e) {}
+        
+        setPlayerVolume(currentVolume);
+        const slider = document.getElementById('volumeSlider');
+        if (slider) slider.value = currentVolume;
+        updateVolumeIcon(currentVolume);
+    }
+
+    function changeVolume(val) {
+        currentVolume = parseFloat(val);
+        isMuted = (currentVolume === 0);
+        setPlayerVolume(currentVolume);
+        try {
+            localStorage.setItem('kadio_audio_volume', currentVolume);
+            if (currentVolume > 0) {
+                localStorage.setItem('kadio_last_non_zero_volume', currentVolume);
+            }
+        } catch(e) {}
+        updateVolumeIcon(currentVolume);
+    }
+
+    function toggleMute() {
+        const slider = document.getElementById('volumeSlider');
+        if (isMuted || currentVolume === 0) {
+            isMuted = false;
+            let lastVol = 0.7;
             try {
-                const savedVol = localStorage.getItem('kadio_audio_volume');
-                if (savedVol !== null && !isNaN(savedVol)) {
-                    currentVolume = parseFloat(savedVol);
+                const saved = localStorage.getItem('kadio_last_non_zero_volume');
+                if (saved && !isNaN(saved)) lastVol = parseFloat(saved);
+            } catch(e) {}
+            currentVolume = (lastVol > 0) ? lastVol : 0.7;
+        } else {
+            try {
+                localStorage.setItem('kadio_last_non_zero_volume', currentVolume);
+            } catch(e) {}
+            isMuted = true;
+            currentVolume = 0;
+        }
+        if (slider) slider.value = currentVolume;
+        setPlayerVolume(currentVolume);
+        try {
+            localStorage.setItem('kadio_audio_volume', currentVolume);
+        } catch(e) {}
+        updateVolumeIcon(currentVolume);
+    }
+
+    function setPlayerVolume(vol) {
+        const safeVol = Math.max(0, Math.min(1, vol));
+        if (playerAudio) {
+            playerAudio.volume = safeVol;
+        }
+        if (ytPlayerInstance && typeof ytPlayerInstance.setVolume === 'function') {
+            try {
+                if (isMuted || safeVol === 0) {
+                    ytPlayerInstance.mute();
+                } else {
+                    ytPlayerInstance.unMute();
+                    ytPlayerInstance.setVolume(safeVol * 100);
                 }
             } catch(e) {}
-            
-            setPlayerVolume(currentVolume);
-            const slider = document.getElementById('volumeSlider');
-            if (slider) slider.value = currentVolume;
-            updateVolumeIcon(currentVolume);
-        }
-
-        function changeVolume(val) {
-            currentVolume = parseFloat(val);
-            isMuted = (currentVolume === 0);
-            setPlayerVolume(currentVolume);
-            try {
-                localStorage.setItem('kadio_audio_volume', currentVolume);
-                if (currentVolume > 0) {
-                    localStorage.setItem('kadio_last_non_zero_volume', currentVolume);
-                }
-            } catch(e) {}
-            updateVolumeIcon(currentVolume);
-        }
-
-        function toggleMute() {
-            const slider = document.getElementById('volumeSlider');
-            if (isMuted || currentVolume === 0) {
-                isMuted = false;
-                let lastVol = 0.7;
-                try {
-                    const saved = localStorage.getItem('kadio_last_non_zero_volume');
-                    if (saved && !isNaN(saved)) lastVol = parseFloat(saved);
-                } catch(e) {}
-                currentVolume = (lastVol > 0) ? lastVol : 0.7;
-            } else {
-                try {
-                    localStorage.setItem('kadio_last_non_zero_volume', currentVolume);
-                } catch(e) {}
-                isMuted = true;
-                currentVolume = 0;
-            }
-            if (slider) slider.value = currentVolume;
-            setPlayerVolume(currentVolume);
-            try {
-                localStorage.setItem('kadio_audio_volume', currentVolume);
-            } catch(e) {}
-            updateVolumeIcon(currentVolume);
-        }
-
-        function setPlayerVolume(vol) {
-            const safeVol = Math.max(0, Math.min(1, vol));
-            if (playerAudio) {
-                playerAudio.volume = safeVol;
-            }
-            // YouTube iframe volume sync via postMessage
+            // Fallback iframe volume sync via postMessage
             const ytBox = document.getElementById('ytPlayerContainer');
             if (ytBox) {
                 const iframe = ytBox.querySelector('iframe');
