@@ -1754,7 +1754,7 @@
                     <input type="hidden" id="editTrackId" />
                     
                     <div style="display:flex;gap:14px;margin-bottom:14px;align-items:center;">
-                        <img id="editImgPreview" src="/images/icon128.png" 
+                        <img id="editImgPreview" src="./images/icon128.png" 
                             style="width:72px;height:72px;border-radius:10px;object-fit:cover;border:1px solid var(--border-subtle);background:#161b22;"
                             onerror="this.onerror=null;this.src=DEFAULT_FALLBACK_IMG;" />
                         <div style="flex:1;">
@@ -2177,8 +2177,6 @@
             if (document.getElementById('badgePendingCount')) document.getElementById('badgePendingCount').textContent = pendingCount;
             document.getElementById('viewSubTitle').textContent = `총 ${total}개의 오디오 에셋이 준비되어 있습니다.`;
         }
-
-        const DEFAULT_FALLBACK_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'%3E%3Crect width='128' height='128' rx='16' fill='%2311161d'/%3E%3Cpath d='M76 34v36.3a14 14 0 1 0 8 12.7V46l24-6v-6z' fill='%2300e5ff' opacity='0.8'/%3E%3C/svg%3E";
 
         function renderCategoryChips() {
             const carousel = document.getElementById('catChipsCarousel');
