@@ -1821,6 +1821,21 @@
                 </div>
             </div>
         </div>
+
+        <!-- ─── LOGIN REQUIRED MODAL (DISCORD AUTH GATE) ─── -->
+        <div class="modal-overlay" id="loginRequiredModal">
+            <div class="modal-box" style="width:min(440px, 92vw);text-align:center;padding:34px 26px;border:1px solid rgba(88,101,242,0.3);box-shadow:0 16px 48px rgba(0,0,0,0.7);">
+                <div style="font-size:48px;margin-bottom:14px;filter:drop-shadow(0 4px 12px rgba(88,101,242,0.5));">🔒</div>
+                <h2 style="font-size:20px;font-weight:800;margin-bottom:8px;color:#fff;">Discord 로그인이 필요합니다</h2>
+                <p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:24px;">
+                    음원 미리듣기 및 라이브러리 전체 기능은<br /><strong style="color:var(--accent-cyan)">Discord 계정 인증 후 무료로 무제한 이용</strong>하실 수 있습니다.
+                </p>
+                <button class="quick-tool-btn" style="background:#5865F2;color:#fff;border:none;font-weight:700;font-size:14px;height:46px;width:100%;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;box-shadow:0 8px 24px rgba(88,101,242,0.4);" onclick="loginWithDiscord()">
+                    <span>🎮</span> <span>Discord로 로그인하고 바로 듣기</span>
+                </button>
+                <button style="background:none;border:none;color:var(--text-muted);margin-top:16px;cursor:pointer;font-size:12px;font-weight:500;" onclick="closeModal('loginRequiredModal')">다음에 하기</button>
+            </div>
+        </div>
     </div>
 
     <!-- AUDIO PLAYER ELEMENT -->
@@ -1832,6 +1847,8 @@
         let tracksData = [];
         let isSelectionMode = false;
         let isAdminMode = false;
+        let isUserLoggedIn = false;
+        let currentLoggedUser = null;
         let selectedTrackIds = new Set();
         let currentView = 'all';
         let currentCategory = null;
@@ -1945,23 +1962,28 @@
             if (backdrop) backdrop.classList.toggle('active', isOpen);
         }
 
-        function updateAdminUI(username = 'Admin', tier = 'admin') {
+        function updateAuthUI(username = 'Guest', tier = 'guest', isLoggedIn = false, isAdmin = false) {
+            isUserLoggedIn = isLoggedIn;
+            isAdminMode = isAdmin;
+
             const loginBtn = document.getElementById('discordLoginBtn');
             const profileBadge = document.getElementById('userProfileBadge');
             const profileName = document.getElementById('userProfileName');
             const profileTierIcon = document.getElementById('userProfileTierIcon');
             const adminToggleBtn = document.getElementById('adminModeToggleBtn');
 
-            if (isAdminMode) {
+            if (isLoggedIn) {
                 if (loginBtn) loginBtn.style.display = 'none';
                 if (profileBadge) {
                     profileBadge.style.display = 'inline-flex';
                     if (profileName) profileName.textContent = username;
-                    if (profileTierIcon) profileTierIcon.textContent = (tier === 'owner') ? '👑' : '🛡️';
+                    if (profileTierIcon) {
+                        profileTierIcon.textContent = (tier === 'owner' ? '👑' : tier === 'admin' ? '🛡️' : '👤');
+                    }
                 }
-                if (adminToggleBtn) adminToggleBtn.style.display = 'inline-flex';
+                if (adminToggleBtn) adminToggleBtn.style.display = isAdmin ? 'inline-flex' : 'none';
                 document.querySelectorAll('.admin-only-feature').forEach(el => {
-                    el.style.display = '';
+                    el.style.display = isAdmin ? '' : 'none';
                 });
             } else {
                 if (loginBtn) loginBtn.style.display = 'inline-flex';
@@ -1972,6 +1994,10 @@
                 });
             }
             applyAudioI18n();
+        }
+
+        function updateAdminUI(username = 'Admin', tier = 'admin') {
+            updateAuthUI(username, tier, true, true);
         }
 
         function loginWithDiscord() {
@@ -1988,12 +2014,14 @@
             } catch(e) {}
             currentAdminToken = null;
             isAdminMode = false;
-            updateAdminUI();
+            isUserLoggedIn = false;
+            currentLoggedUser = null;
+            updateAuthUI('Guest', 'guest', false, false);
             showToast('로그아웃되었습니다.', 'info');
         }
 
         async function checkAdminTokenFromUrl() {
-            // 0. Check localStorage cached admin token
+            // 0. Check localStorage cached admin / user token
             let tokenToVerify = null;
             try {
                 const saved = localStorage.getItem('kadio_admin_token');
@@ -2011,17 +2039,16 @@
                 // Clean up URL query parameters without page reload
                 const cleanUrl = window.location.origin + window.location.pathname;
                 window.history.replaceState({}, document.title, cleanUrl);
-                showToast('Discord 관리자 로그인이 성공적으로 완료되었습니다! 👑', 'success');
+                showToast('Discord 로그인이 성공적으로 완료되었습니다! 🎵', 'success');
             }
 
             if (tokenToVerify) {
                 try {
                     const res = await apiFetch(`/api/audio/check-admin-token/${encodeURIComponent(tokenToVerify)}`);
                     const json = await res.json();
-                    if (json.status === 'success' && json.isAdmin) {
-                        isAdminMode = true;
+                    if (json.status === 'success' && (json.isLoggedIn || json.isAdmin)) {
                         currentAdminToken = tokenToVerify;
-                        updateAdminUI(json.username || 'Admin', json.tier || 'admin');
+                        updateAuthUI(json.username || 'User', json.tier || 'member', true, !!json.isAdmin);
                         return;
                     } else {
                         // Invalid/expired token
@@ -2030,20 +2057,18 @@
                 } catch(e) {}
             }
 
-            // 2. Check if current user is logged in as Discord Admin/Owner via cookie session
+            // 2. Check if current user is logged in via cookie session
             try {
                 const res = await apiFetch('/api/audio/check-admin-session');
                 const json = await res.json();
-                if (json.status === 'success' && json.isAdmin) {
-                    isAdminMode = true;
-                    updateAdminUI(json.username || 'Admin', json.tier || 'admin');
+                if (json.status === 'success' && (json.isLoggedIn || json.isAdmin)) {
+                    updateAuthUI(json.username || 'User', json.tier || 'member', true, !!json.isAdmin);
                     return;
                 }
             } catch(e) {}
 
-            // 3. Normal non-admin visitor
-            isAdminMode = false;
-            updateAdminUI();
+            // 3. Normal non-logged in guest visitor
+            updateAuthUI('Guest', 'guest', false, false);
         }
 
         function toggleAdminMode() {
@@ -2708,10 +2733,15 @@
                     height: '1',
                     width: '1',
                     videoId: ytId,
+                    host: 'https://www.youtube-nocookie.com',
                     playerVars: {
                         autoplay: 1,
                         controls: 0,
                         enablejsapi: 1,
+                        playsinline: 1,
+                        rel: 0,
+                        iv_load_policy: 3,
+                        modestbranding: 1,
                         origin: window.location.origin
                     },
                     events: {
@@ -2736,15 +2766,18 @@
                     }
                 });
             } else if (ytPlayerInstance && typeof ytPlayerInstance.loadVideoById === 'function') {
-                ytPlayerInstance.loadVideoById(ytId);
+                ytPlayerInstance.loadVideoById({
+                    videoId: ytId,
+                    startSeconds: 0
+                });
                 if (isMuted || currentVolume === 0) ytPlayerInstance.mute();
                 else { ytPlayerInstance.unMute(); ytPlayerInstance.setVolume(currentVolume * 100); }
                 ytPlayerInstance.playVideo();
                 document.getElementById('playerPlayBtn').textContent = '⏸';
                 startYtProgressPolling(durationSec);
             } else {
-                // Fallback direct iframe with postMessage
-                ytBox.innerHTML = `<iframe id="ytIframeEmbed" width="1" height="1" src="https://www.youtube.com/embed/${ytId}?autoplay=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}" frameborder="0" allow="autoplay"></iframe>`;
+                // Fallback direct privacy iframe with ads reduction params
+                ytBox.innerHTML = `<iframe id="ytIframeEmbed" width="1" height="1" src="https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&enablejsapi=1&playsinline=1&rel=0&iv_load_policy=3&modestbranding=1&origin=${encodeURIComponent(window.location.origin)}" frameborder="0" allow="autoplay"></iframe>`;
                 document.getElementById('playerPlayBtn').textContent = '⏸';
             }
 
@@ -2766,6 +2799,13 @@
         };
 
         function playTrackDemo(id) {
+            // LOGIN GATE: Require Discord authentication to preview tracks
+            if (!isUserLoggedIn && !isAdminMode) {
+                openModal('loginRequiredModal');
+                showToast('🔒 오디오 미리듣기는 Discord 로그인 후 이용 가능합니다.', 'info');
+                return;
+            }
+
             const t = tracksData.find(x => String(x.id) === String(id));
             if (!t) return;
             currentPlayingTrackId = id;
