@@ -2622,19 +2622,6 @@
             }, 3500);
         }
 
-        function playTrackDemo(id) {
-            const t = tracksData.find(x => String(x.id) === String(id));
-            if (!t) return;
-            currentPlayingTrackId = id;
-            document.getElementById('playerTitle').textContent = t.title;
-            document.getElementById('playerSub').textContent = `🎵 ${t.assetId}`;
-            let cover = t.imageUrl;
-            if (!cover && t.yt) cover = `https://img.youtube.com/vi/${t.yt}/mqdefault.jpg`;
-            if (!cover) cover = DEFAULT_FALLBACK_IMG;
-            document.getElementById('playerCoverImg').src = cover;
-            document.getElementById('playerTotalTime').textContent = t.dur || '0:00';
-            document.getElementById('playerPlayBtn').textContent = '⏸';
-
         /* ─── YOUTUBE IFRAME API SYNC & PROGRESS BAR ─── */
         let ytPlayerInstance = null;
         let ytProgressInterval = null;
@@ -2726,36 +2713,49 @@
             showToast('Roblox 음원 불가 - YouTube 공식 음원으로 전환 재생합니다 🎵', 'info');
         }
 
-        const triggerYtFallback = (t) => {
+        function triggerYtFallback(t) {
             if (t && t.yt && !isYtPlayingMode) {
                 playYouTubeTrack(t.yt, t.durationSec || 0);
             } else if (!isYtPlayingMode) {
                 document.getElementById('playerPlayBtn').textContent = '▶';
                 showToast('해당 트랙은 웹 미리듣기가 지원되지 않는 에셋입니다 (Roblox ID: ' + (t ? t.assetId : '') + ')', 'error');
             }
-        };
+        }
 
         playerAudio.onerror = () => {
             const t = tracksData.find(x => String(x.id) === String(currentPlayingTrackId));
             triggerYtFallback(t);
         };
 
-        // Try backend audio stream first
-        const previewUrl = `${API_BASE}/api/audio/preview/${t.id}`;
-        playerAudio.src = previewUrl;
-        playerAudio.volume = isMuted ? 0 : currentVolume;
-        playerAudio.play().then(() => {
-            isYtPlayingMode = false;
-            if (ytProgressInterval) clearInterval(ytProgressInterval);
-            if (ytPlayerInstance && typeof ytPlayerInstance.pauseVideo === 'function') {
-                try { ytPlayerInstance.pauseVideo(); } catch(e) {}
-            }
-        }).catch(e => {
-            triggerYtFallback(t);
-        });
-    }
+        function playTrackDemo(id) {
+            const t = tracksData.find(x => String(x.id) === String(id));
+            if (!t) return;
+            currentPlayingTrackId = id;
+            document.getElementById('playerTitle').textContent = t.title;
+            document.getElementById('playerSub').textContent = `🎵 ${t.assetId}`;
+            let cover = t.imageUrl;
+            if (!cover && t.yt) cover = `https://img.youtube.com/vi/${t.yt}/mqdefault.jpg`;
+            if (!cover) cover = DEFAULT_FALLBACK_IMG;
+            document.getElementById('playerCoverImg').src = cover;
+            document.getElementById('playerTotalTime').textContent = t.dur || '0:00';
+            document.getElementById('playerPlayBtn').textContent = '⏸';
 
-    function toggleFav(id) {
+            // Try backend audio stream first
+            const previewUrl = `${API_BASE}/api/audio/preview/${t.id}`;
+            playerAudio.src = previewUrl;
+            playerAudio.volume = isMuted ? 0 : currentVolume;
+            playerAudio.play().then(() => {
+                isYtPlayingMode = false;
+                if (ytProgressInterval) clearInterval(ytProgressInterval);
+                if (ytPlayerInstance && typeof ytPlayerInstance.pauseVideo === 'function') {
+                    try { ytPlayerInstance.pauseVideo(); } catch(e) {}
+                }
+            }).catch(e => {
+                triggerYtFallback(t);
+            });
+        }
+
+        function toggleFav(id) {
         const t = tracksData.find(x => String(x.id) === String(id));
         if (t) {
             t.favorited = !t.favorited;
@@ -2904,20 +2904,21 @@
         updateVolumeIcon(currentVolume);
     }
 
-    function setPlayerVolume(vol) {
-        const safeVol = Math.max(0, Math.min(1, vol));
-        if (playerAudio) {
-            playerAudio.volume = safeVol;
-        }
-        if (ytPlayerInstance && typeof ytPlayerInstance.setVolume === 'function') {
-            try {
-                if (isMuted || safeVol === 0) {
-                    ytPlayerInstance.mute();
-                } else {
-                    ytPlayerInstance.unMute();
-                    ytPlayerInstance.setVolume(safeVol * 100);
-                }
-            } catch(e) {}
+        function setPlayerVolume(vol) {
+            const safeVol = Math.max(0, Math.min(1, vol));
+            if (playerAudio) {
+                playerAudio.volume = safeVol;
+            }
+            if (ytPlayerInstance && typeof ytPlayerInstance.setVolume === 'function') {
+                try {
+                    if (isMuted || safeVol === 0) {
+                        ytPlayerInstance.mute();
+                    } else {
+                        ytPlayerInstance.unMute();
+                        ytPlayerInstance.setVolume(safeVol * 100);
+                    }
+                } catch(e) {}
+            }
             // Fallback iframe volume sync via postMessage
             const ytBox = document.getElementById('ytPlayerContainer');
             if (ytBox) {
