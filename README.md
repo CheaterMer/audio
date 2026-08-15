@@ -4,22 +4,31 @@
 
 ---
 
-## 🚀 GitHub Pages 배포 방법 (3단계)
+## 🚀 GitHub Pages 배포 링크
 
-### 1단계: GitHub에 새 저장소 생성
-1. [GitHub](https://github.com/)에 로그인 후 새 Repository를 생성합니다 (예: `audio-vault` 또는 `my-audio-web`).
-2. 저장소 공개 범위를 **Public**으로 설정합니다.
+- **저장소 주소**: `https://github.com/CheaterMer/my-audio-web`
+- **배포 후 사이트 주소**: `https://cheatermer.github.io/my-audio-web/`
 
-### 2단계: 파일 업로드
-이 `deploy-github-pages` 폴더 안의 모든 파일과 폴더를 해당 GitHub 저장소에 업로드(Commit & Push)합니다:
-- `index.html`
-- `locales/` 폴더
-- `images/` 폴더
+---
 
-### 3단계: GitHub Pages 활성화
-1. GitHub 저장소의 **[Settings]** ➔ 좌측 메뉴의 **[Pages]** 클릭.
-2. **Build and deployment** 섹션의 **Branch**를 `main` (또는 `master`), 폴더를 `/(root)` 로 선택 후 **[Save]** 클릭.
-3. 1~2분 후 생성되는 URL(예: `https://<사용자아이디>.github.io/<저장소이름>/`)로 접속하면 끝! 🎉
+## 🛠️ 업로드 방법 (택 1)
+
+### 방법 A. 원클릭 푸시 배치 파일 실행
+1. `deploy-github-pages` 폴더 안의 **`push-github.bat`** 파일을 더블 클릭하여 실행합니다.
+2. 브라우저 로그인 창이 뜨면 `CheaterMer` 계정으로 로그인/승인하면 자동으로 업로드됩니다.
+
+### 방법 B. 웹 브라우저에서 직접 업로드
+1. [https://github.com/CheaterMer/my-audio-web](https://github.com/CheaterMer/my-audio-web) 접속
+2. 상단의 **[Add file] ➔ [Upload files]** 클릭
+3. 이 `deploy-github-pages` 폴더의 모든 파일(`index.html`, `locales/`, `images/`)을 드래그 앤 드롭하여 업로드 후 **[Commit changes]** 클릭.
+
+---
+
+## 🌐 GitHub Pages 활성화 (최초 1회)
+
+1. [https://github.com/CheaterMer/my-audio-web/settings/pages](https://github.com/CheaterMer/my-audio-web/settings/pages) 접속.
+2. **Build and deployment** ➔ **Branch**를 `main`, 폴더를 `/(root)`로 선택하고 **[Save]** 클릭.
+3. 1분 후 `https://cheatermer.github.io/my-audio-web/` 로 접속하시면 전 세계 어디서나 접속 가능합니다! 🎉
 
 ---
 
