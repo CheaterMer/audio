@@ -1541,7 +1541,7 @@
         <!-- FLOATING DOCK MINI PLAYER -->
         <div class="floating-player-dock" id="floatingPlayerDock">
             <div class="dock-left-track">
-                <img src="/images/icon128.png" class="dock-cover" id="playerCoverImg"
+                <img src="./images/icon128.png" class="dock-cover" id="playerCoverImg"
                     onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'128\' height=\'128\' viewBox=\'0 0 128 128\'%3E%3Crect width=\'128\' height=\'128\' rx=\'16\' fill=\'%2311161d\'/%3E%3Cpath d=\'M76 34v36.3a14 14 0 1 0 8 12.7V46l24-6v-6z\' fill=\'%2300e5ff\' opacity=\'0.8\'/%3E%3C/svg%3E';" />
                 <div class="dock-track-info">
                     <span class="dock-track-title" id="playerTitle">재생 중인 곡 없음</span>
@@ -1852,10 +1852,33 @@
             return fetch(fullUrl, options);
         }
 
+        const DEFAULT_FALLBACK_IMG = './images/icon128.png';
+
         const playerAudio = document.getElementById('globalAudioPlayer');
 
         let categoryTranslations = {}; // { categoryKey: { ko: "...", en: "..." } }
         let categoryMetadataMap = {}; // { category: imageUrl }
+
+        // Local Storage Offline Cache Helpers
+        function saveToCache(key, data) {
+            try {
+                localStorage.setItem('kadio_cache_' + key, JSON.stringify({
+                    timestamp: Date.now(),
+                    payload: data
+                }));
+            } catch(e) {}
+        }
+
+        function getFromCache(key) {
+            try {
+                const raw = localStorage.getItem('kadio_cache_' + key);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                return parsed && parsed.payload ? parsed.payload : null;
+            } catch(e) {
+                return null;
+            }
+        }
 
         function t(key, fallback = '') {
             if (window.i18n && typeof window.i18n.t === 'function') {
@@ -1987,15 +2010,21 @@
         }
 
         async function loadCategoryTranslations() {
+            // 1. Try restoring from offline cache first
+            const cachedTrans = getFromCache('category_translations');
+            if (cachedTrans) categoryTranslations = cachedTrans;
+            const cachedMeta = getFromCache('category_metadata');
+            if (cachedMeta) categoryMetadataMap = cachedMeta;
+
+            // 2. Fetch fresh from backend
             try {
                 const res = await apiFetch('/api/audio/categories/translations');
                 const json = await res.json();
                 if (json.status === 'success' && json.data) {
                     categoryTranslations = json.data;
+                    saveToCache('category_translations', categoryTranslations);
                 }
-            } catch(e) {
-                console.warn('Failed to load category translations:', e);
-            }
+            } catch(e) {}
 
             try {
                 const res2 = await apiFetch('/api/audio/categories/metadata');
@@ -2003,6 +2032,7 @@
                 if (json2.status === 'success' && Array.isArray(json2.data)) {
                     categoryMetadataMap = {};
                     json2.data.forEach(m => { categoryMetadataMap[m.category] = m.imageUrl; });
+                    saveToCache('category_metadata', categoryMetadataMap);
                 }
             } catch(e) {}
         }
@@ -2016,41 +2046,66 @@
             return cat;
         }
 
+        function parseRawTracksData(rawList) {
+            return rawList.map(t => {
+                let ytId = '';
+                if (t.youtubeUrl) {
+                    const m = t.youtubeUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+                    if (m) ytId = m[1];
+                }
+                return {
+                    id: t.id,
+                    title: t.title || 'Untitled Track',
+                    cat: t.category || t.gameName || 'Music',
+                    assetId: t.audioAssetId || t.id,
+                    dur: fmtTime(t.duration),
+                    durationSec: t.duration || 0,
+                    status: t.status || 'active',
+                    imageUrl: t.imageUrl || '',
+                    previewUrl: t.previewUrl || '',
+                    youtubeUrl: t.youtubeUrl || '',
+                    yt: ytId,
+                    serverPlayable: t.serverPlayable,
+                    clientPlayable: t.clientPlayable,
+                    isVerifiedLocked: (t.isVerifiedLocked === 1 || t.isVerifiedLocked === true) ? 1 : 0,
+                    favorited: false
+                };
+            });
+        }
+
         async function loadRealAudios() {
             initVolume();
             await checkAdminTokenFromUrl();
             await loadCategoryTranslations();
+
+            // 1. Instant Fast Render from Offline Cache if available
+            const cachedRawTracks = getFromCache('tracks_data');
+            if (cachedRawTracks && Array.isArray(cachedRawTracks) && cachedRawTracks.length > 0) {
+                tracksData = parseRawTracksData(cachedRawTracks);
+                updateCounts();
+                renderCategoryChips();
+                if (!restoreAudioState()) {
+                    switchMainView('all');
+                }
+            }
+
+            // 2. Fetch fresh active tracks from backend
+            let isOnline = false;
             try {
                 const res = await apiFetch('/api/audio/list');
                 const json = await res.json();
                 if (json.status === 'success' && Array.isArray(json.data)) {
-                    tracksData = json.data.map(t => {
-                        let ytId = '';
-                        if (t.youtubeUrl) {
-                            const m = t.youtubeUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
-                            if (m) ytId = m[1];
-                        }
-                        return {
-                            id: t.id,
-                            title: t.title || 'Untitled Track',
-                            cat: t.category || t.gameName || 'Music',
-                            assetId: t.audioAssetId || t.id,
-                            dur: fmtTime(t.duration),
-                            durationSec: t.duration || 0,
-                            status: t.status || 'active',
-                            imageUrl: t.imageUrl || '',
-                            previewUrl: t.previewUrl || '',
-                            youtubeUrl: t.youtubeUrl || '',
-                            yt: ytId,
-                            serverPlayable: t.serverPlayable,
-                            clientPlayable: t.clientPlayable,
-                            isVerifiedLocked: (t.isVerifiedLocked === 1 || t.isVerifiedLocked === true) ? 1 : 0,
-                            favorited: false
-                        };
-                    });
+                    tracksData = parseRawTracksData(json.data);
+                    saveToCache('tracks_data', json.data);
+                    isOnline = true;
                 }
             } catch (e) {
-                console.warn('[Main] Failed to fetch /api/audio/list:', e);
+                console.warn('[Main] Server unreachable, running in offline cache mode:', e);
+                if (tracksData.length > 0) {
+                    showToast('📡 서버 연결 끊김: 오프라인 캐시 모드로 작동 중입니다.', 'info');
+                } else {
+                    showToast('서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.', 'error');
+                }
             }
 
             updateCounts();
@@ -2058,7 +2113,11 @@
             if (!restoreAudioState()) {
                 switchMainView('all');
             }
-            loadAdminStats();
+
+            // Only load admin stats if user is admin
+            if (isAdminMode) {
+                loadAdminStats();
+            }
             applyAudioI18n();
         }
 
