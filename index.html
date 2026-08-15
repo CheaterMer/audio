@@ -1496,7 +1496,9 @@
                 </div>
                 <div class="batch-bar-actions">
                     <button class="batch-action-pill change-cat" onclick="openBulkCategoryModal()">📁 카테고리 일괄 변경</button>
-                    <button class="batch-action-pill approve" id="batchApproveBtn" style="display:none;" onclick="handleBulkApprove()">✓ 일괄 승인</button>
+                    <button class="batch-action-pill approve" id="batchApproveBtn" onclick="handleBulkApprove()">✓ 일괄 승인</button>
+                    <button class="batch-action-pill" style="background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3);color:#f87171;" onclick="handleBulkReject()">✕ 일괄 거절</button>
+                    <button class="batch-action-pill" style="background:rgba(168,85,247,0.15);border-color:rgba(168,85,247,0.3);color:#c084fc;" onclick="openBulkPlayabilityModal()">⚡ 재생 상태 일괄 변경</button>
                     <button class="batch-action-pill delete" onclick="handleBulkDelete()">🗑️ 선택 삭제</button>
                 </div>
             </div>
@@ -1818,6 +1820,62 @@
 
                     <button class="quick-tool-btn primary" style="width:100%;height:42px;justify-content:center;margin-top:14px;"
                         onclick="saveEditTrack()">저장 완료</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── BULK PLAYABILITY CHANGE MODAL ─── -->
+        <div class="modal-overlay" id="bulkPlayabilityModal">
+            <div class="modal-box" style="width:min(520px, 95vw);">
+                <div class="modal-header">
+                    <span class="modal-title">⚡ 재생 상태 일괄 변경</span>
+                    <button class="modal-close-btn" onclick="closeModal('bulkPlayabilityModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">
+                        선택된 <strong style="color:var(--accent-cyan)" id="bulkPlayCountText">0</strong>개 곡의 재생 상태를 일괄 변경합니다. <strong>'변경 안함'</strong> 항목은 기존 값이 유지됩니다.
+                    </p>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                        <div class="form-group">
+                            <label style="font-size:12px;font-weight:700;">🖥️ 서버 재생 (serverPlayable)</label>
+                            <select class="form-input" id="bulkServerPlayable" style="background:#161b22;">
+                                <option value="">변경 안함</option>
+                                <option value="1">✅ 재생 가능 (1)</option>
+                                <option value="0">❌ 재생 불가 (0)</option>
+                                <option value="-1">⏳ 미확인 (-1)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size:12px;font-weight:700;">🎮 클라이언트 재생 (clientPlayable)</label>
+                            <select class="form-input" id="bulkClientPlayable" style="background:#161b22;">
+                                <option value="">변경 안함</option>
+                                <option value="1">✅ 재생 가능 (1)</option>
+                                <option value="0">❌ 재생 불가 (0)</option>
+                                <option value="-1">⏳ 미확인 (-1)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size:12px;font-weight:700;">🔍 검증 상태 (verificationStatus)</label>
+                            <select class="form-input" id="bulkVerificationStatus" style="background:#161b22;">
+                                <option value="">변경 안함</option>
+                                <option value="passed">✅ 검증 통과 (passed)</option>
+                                <option value="failed">❌ 검증 실패 (failed)</option>
+                                <option value="pending">⏳ 대기중 (pending)</option>
+                                <option value="unverified">🔘 미검증 (unverified)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size:12px;font-weight:700;">🔒 수동 고정 (isVerifiedLocked)</label>
+                            <select class="form-input" id="bulkIsVerifiedLocked" style="background:#161b22;">
+                                <option value="">변경 안함</option>
+                                <option value="1">🔒 고정 활성화</option>
+                                <option value="0">🔓 고정 해제</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button class="quick-tool-btn primary" style="width:100%;height:44px;justify-content:center;margin-top:18px;font-size:14px;font-weight:700;" onclick="executeBulkPlayability()">⚡ 일괄 적용 실행</button>
                 </div>
             </div>
         </div>
@@ -2452,6 +2510,7 @@
                         <div class="card-footer-actions">
                             <span style="font-size:11px;color:var(--text-muted);">${t.dur}</span>
                             <div class="mini-btn-group">
+                                ${(isAdminMode && t.status === 'pending_review') ? `<button class="card-action-icon-btn" title="승인" style="color:#10b981;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleApprove('${t.id}')">✓</button><button class="card-action-icon-btn" title="거절" style="color:#f87171;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleReject('${t.id}')">✕</button>` : ''}
                                 ${isAdminMode ? `<button class="card-action-icon-btn" title="정보 수정" style="color:var(--accent-gold);" onclick="event.stopPropagation();openEditTrackModal('${t.id}')">✏️</button>` : ''}
                                 <button class="card-action-icon-btn" title="Asset ID 복사" onclick="event.stopPropagation();navigator.clipboard.writeText('${t.assetId}');showToast('Asset ID 복사 완료: ' + '${t.assetId}', 'success')">📋</button>
                                 <a class="card-action-icon-btn" href="https://create.roblox.com/store/asset/${t.assetId}" target="_blank" onclick="event.stopPropagation()" title="Roblox Store 링크">↗</a>
@@ -3059,39 +3118,161 @@
             }
         }
 
+        async function handleSingleApprove(id) {
+            try {
+                const res = await apiFetch('/api/audio/bulk/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...(currentAdminToken ? { 'x-admin-token': currentAdminToken } : {}) },
+                    body: JSON.stringify({ audioIds: [id] })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast('✓ 오디오가 승인되었습니다.', 'success');
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '승인에 실패했습니다.', 'error');
+                }
+            } catch(e) {
+                showToast('승인 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        async function handleSingleReject(id) {
+            if (!confirm('이 오디오를 거절하시겠습니까?')) return;
+            try {
+                const res = await apiFetch('/api/audio/bulk/reject', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...(currentAdminToken ? { 'x-admin-token': currentAdminToken } : {}) },
+                    body: JSON.stringify({ audioIds: [id], action: 'reject' })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast('✕ 오디오가 거절되었습니다.', 'success');
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '거절에 실패했습니다.', 'error');
+                }
+            } catch(e) {
+                showToast('거절 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
         async function handleBulkApprove() {
-            if (selectedTrackIds.size === 0) return;
+            if (selectedTrackIds.size === 0) { showToast('선택된 곡이 없습니다.', 'info'); return; }
             if (!confirm(`선택한 ${selectedTrackIds.size}개 곡을 일괄 승인하시겠습니까?`)) return;
             try {
-                for (const id of selectedTrackIds) {
-                    await fetch(`/api/audio/approve-and-update/${id}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({})
-                    });
+                const res = await apiFetch('/api/audio/bulk/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...(currentAdminToken ? { 'x-admin-token': currentAdminToken } : {}) },
+                    body: JSON.stringify({ audioIds: Array.from(selectedTrackIds) })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(`✓ ${json.count || selectedTrackIds.size}개 곡이 일괄 승인되었습니다.`, 'success');
+                    selectedTrackIds.clear();
+                    toggleMultiSelectMode();
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '일괄 승인에 실패했습니다.', 'error');
                 }
-                showToast(`선택한 ${selectedTrackIds.size}개 곡이 승인되었습니다.`, 'success');
-                selectedTrackIds.clear();
-                toggleMultiSelectMode();
-                await loadRealAudios();
             } catch(e) {
                 showToast('일괄 승인 중 오류가 발생했습니다.', 'error');
             }
         }
 
-        async function handleBulkDelete() {
-            if (selectedTrackIds.size === 0) return;
-            if (!confirm(`선택한 ${selectedTrackIds.size}개 곡을 영구 삭제하시겠습니까?`)) return;
+        async function handleBulkReject() {
+            if (selectedTrackIds.size === 0) { showToast('선택된 곡이 없습니다.', 'info'); return; }
+            if (!confirm(`선택한 ${selectedTrackIds.size}개 곡을 일괄 거절하시겠습니까?`)) return;
             try {
-                for (const id of selectedTrackIds) {
-                    await fetch(`/api/audio/${id}`, { method: 'DELETE' });
+                const res = await apiFetch('/api/audio/bulk/reject', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...(currentAdminToken ? { 'x-admin-token': currentAdminToken } : {}) },
+                    body: JSON.stringify({ audioIds: Array.from(selectedTrackIds), action: 'reject' })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(`✕ ${json.count || selectedTrackIds.size}개 곡이 일괄 거절되었습니다.`, 'success');
+                    selectedTrackIds.clear();
+                    toggleMultiSelectMode();
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '일괄 거절에 실패했습니다.', 'error');
                 }
-                showToast(`선택한 ${selectedTrackIds.size}개 곡이 삭제되었습니다.`, 'success');
-                selectedTrackIds.clear();
-                toggleMultiSelectMode();
-                await loadRealAudios();
+            } catch(e) {
+                showToast('일괄 거절 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        async function handleBulkDelete() {
+            if (selectedTrackIds.size === 0) { showToast('선택된 곡이 없습니다.', 'info'); return; }
+            if (!confirm(`선택한 ${selectedTrackIds.size}개 곡을 영구 삭제하시겠습니까? (블랙리스트에 추가됩니다)`)) return;
+            try {
+                const res = await apiFetch('/api/audio/bulk/reject', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...(currentAdminToken ? { 'x-admin-token': currentAdminToken } : {}) },
+                    body: JSON.stringify({ audioIds: Array.from(selectedTrackIds), action: 'delete' })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(`🗑️ ${json.count || selectedTrackIds.size}개 곡이 영구 삭제되었습니다.`, 'success');
+                    selectedTrackIds.clear();
+                    toggleMultiSelectMode();
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '일괄 삭제에 실패했습니다.', 'error');
+                }
             } catch(e) {
                 showToast('일괄 삭제 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        function openBulkPlayabilityModal() {
+            if (selectedTrackIds.size === 0) { showToast('선택된 곡이 없습니다.', 'info'); return; }
+            document.getElementById('bulkPlayCountText').textContent = selectedTrackIds.size;
+            // Reset selects
+            document.getElementById('bulkServerPlayable').value = '';
+            document.getElementById('bulkClientPlayable').value = '';
+            document.getElementById('bulkVerificationStatus').value = '';
+            document.getElementById('bulkIsVerifiedLocked').value = '';
+            openModal('bulkPlayabilityModal');
+        }
+
+        async function executeBulkPlayability() {
+            if (selectedTrackIds.size === 0) return;
+            const srvPlay = document.getElementById('bulkServerPlayable').value;
+            const cliPlay = document.getElementById('bulkClientPlayable').value;
+            const verifSt = document.getElementById('bulkVerificationStatus').value;
+            const verifLk = document.getElementById('bulkIsVerifiedLocked').value;
+
+            if (!srvPlay && !cliPlay && !verifSt && !verifLk) {
+                showToast('변경할 항목을 1개 이상 선택해주세요.', 'error');
+                return;
+            }
+
+            const payload = { audioIds: Array.from(selectedTrackIds) };
+            if (srvPlay !== '') payload.serverPlayable = Number(srvPlay);
+            if (cliPlay !== '') payload.clientPlayable = Number(cliPlay);
+            if (verifSt !== '') payload.verificationStatus = verifSt;
+            if (verifLk !== '') payload.isVerifiedLocked = Number(verifLk);
+
+            try {
+                const res = await apiFetch('/api/audio/bulk/playability', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', ...(currentAdminToken ? { 'x-admin-token': currentAdminToken } : {}) },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(`⚡ ${json.count || selectedTrackIds.size}개 곡의 재생 상태가 일괄 변경되었습니다.`, 'success');
+                    closeModal('bulkPlayabilityModal');
+                    selectedTrackIds.clear();
+                    toggleMultiSelectMode();
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '재생 상태 변경에 실패했습니다.', 'error');
+                }
+            } catch(e) {
+                showToast('재생 상태 일괄 변경 중 오류가 발생했습니다.', 'error');
             }
         }
 
