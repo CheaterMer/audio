@@ -1,0 +1,3124 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>AudioVault - Next-Gen Audio Dashboard</title>
+    <link rel="icon" type="image/png" href="/images/icon128.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap"
+        rel="stylesheet" />
+    <script src="/js/i18n.js"></script>
+    <style>
+        :root {
+            --bg-base: #090c10;
+            --bg-surface: rgba(22, 27, 34, 0.75);
+            --bg-card: rgba(26, 32, 44, 0.65);
+            --bg-card-hover: rgba(36, 44, 60, 0.9);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(84, 199, 255, 0.4);
+            --accent-cyan: #00e5ff;
+            --accent-purple: #8b5cf6;
+            --accent-indigo: #6366f1;
+            --accent-pink: #ec4899;
+            --accent-green: #10b981;
+            --accent-gold: #f59e0b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --radius-xl: 20px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'DM Mono', monospace;
+            --font-brand: 'Syne', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 15% 20%, rgba(99, 102, 241, 0.16), transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(0, 229, 255, 0.12), transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.05), transparent 60%);
+            background-attachment: fixed;
+        }
+
+        /* ─── APP LAYOUT ─── */
+        .app-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* ─── SIDEBAR ─── */
+        .sidebar {
+            width: 270px;
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 18px;
+            z-index: 50;
+            flex-shrink: 0;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 0 6px;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-brand);
+            font-weight: 800;
+            color: #000;
+            font-size: 16px;
+            box-shadow: 0 4px 20px rgba(0, 229, 255, 0.35);
+        }
+
+        .brand-title {
+            font-family: var(--font-brand);
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-badge {
+            font-size: 10px;
+            font-family: var(--font-mono);
+            background: rgba(84, 199, 255, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(84, 199, 255, 0.3);
+            padding: 2px 6px;
+            border-radius: 6px;
+            margin-left: 6px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin: 18px 8px 8px 8px;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 600;
+            background: transparent;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-btn.active {
+            color: #fff;
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.22), rgba(0, 229, 255, 0.12));
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-badge {
+            font-size: 11px;
+            font-family: var(--font-mono);
+            background: rgba(255, 255, 255, 0.07);
+            padding: 2px 8px;
+            border-radius: 10px;
+            color: var(--text-muted);
+        }
+
+        .nav-btn.active .nav-badge {
+            background: var(--accent-indigo);
+            color: #fff;
+        }
+
+        .category-scroll-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 6px;
+            padding-right: 4px;
+        }
+
+        .cat-chip-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: 1px solid transparent;
+        }
+
+        .cat-chip-item:hover,
+        .cat-chip-item.active {
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            border-color: var(--border-subtle);
+        }
+
+        .cat-thumb {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            background: #1e293b;
+            object-fit: cover;
+        }
+
+        .cat-count {
+            margin-left: auto;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+        }
+
+        .sidebar-bottom-actions {
+            margin-top: auto;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .admin-unified-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 700;
+            background: linear-gradient(135deg, rgba(84, 199, 255, 0.12), rgba(99, 102, 241, 0.15));
+            border: 1px solid rgba(84, 199, 255, 0.35);
+            color: var(--accent-cyan);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.1);
+        }
+
+        .admin-unified-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(84, 199, 255, 0.22), rgba(99, 102, 241, 0.28));
+            border-color: var(--accent-cyan);
+            box-shadow: 0 6px 20px rgba(0, 229, 255, 0.25);
+        }
+
+        /* ─── MAIN CONTENT ─── */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            position: relative;
+            padding: 24px 36px 120px 36px;
+        }
+
+        /* ─── TOP BAR ─── */
+        .top-navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            position: relative;
+            background: transparent;
+            margin-bottom: 24px;
+            padding: 4px 0;
+            z-index: 40;
+            flex-wrap: wrap;
+        }
+
+        .search-pill-box {
+            position: relative;
+            flex: 1;
+            min-width: 280px;
+            max-width: 480px;
+        }
+
+        .search-pill-box input {
+            width: 100%;
+            height: 42px;
+            background: rgba(22, 27, 34, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 0 40px 0 44px;
+            color: #fff;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .search-pill-box input:focus {
+            border-color: var(--accent-cyan);
+            background: rgba(30, 38, 50, 0.95);
+            box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.18);
+        }
+
+        .search-icon-left {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-tool-btn {
+            height: 40px;
+            padding: 0 14px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-tool-btn:hover {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        .quick-tool-btn.primary {
+            background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .quick-tool-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+        }
+
+        .quick-tool-btn.admin-mode-active {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .quick-tool-btn.active-select-mode {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        /* ─── QUICK CATEGORIES CAROUSEL ─── */
+        .category-carousel {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow-x: auto;
+            margin: 0 0 28px 0;
+            padding: 6px 2px;
+            scrollbar-width: none;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .category-carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cat-tag-pill {
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .cat-tag-pill:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
+        .cat-tag-pill.active {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+            font-weight: 700;
+        }
+
+        /* ─── LIGHT THEME HIGH CONTRAST ─── */
+        body.light-theme {
+            --bg-base: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f1f5f9;
+            --border-subtle: #cbd5e1;
+            --border-hover: rgba(99, 102, 241, 0.5);
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            background-color: #f8fafc;
+            color: #0f172a;
+            background-image: none;
+        }
+        body.light-theme .sidebar {
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+        }
+        body.light-theme .brand-title {
+            background: linear-gradient(135deg, #0f172a, #334155);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        body.light-theme .search-pill-box input {
+            background: #ffffff;
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+        }
+        body.light-theme .search-pill-box input:focus {
+            background: #ffffff;
+            border-color: var(--accent-indigo);
+        }
+        body.light-theme .quick-tool-btn {
+            background: #ffffff;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+        }
+        body.light-theme .quick-tool-btn:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+        body.light-theme .cat-tag-pill {
+            background: #ffffff;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+        }
+        body.light-theme .cat-tag-pill.active {
+            background: #0f172a;
+            color: #ffffff;
+            border-color: #0f172a;
+        }
+        body.light-theme .track-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        body.light-theme .track-card:hover {
+            background: #f8fafc;
+            border-color: var(--accent-indigo);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.12);
+        }
+        body.light-theme .track-name {
+            color: #0f172a;
+            font-weight: 700;
+        }
+        body.light-theme .roblox-id-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+        body.light-theme .floating-player-dock {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+        body.light-theme .dock-track-title {
+            color: #0f172a;
+        }
+        body.light-theme .dock-btn {
+            color: #334155;
+        }
+        body.light-theme .dock-play-btn {
+            background: #0f172a;
+            color: #ffffff;
+        }
+        body.light-theme .modal-box {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+        }
+        body.light-theme .modal-title {
+            color: #0f172a;
+        }
+        body.light-theme .form-input {
+            background: #f8fafc;
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+        }
+        body.light-theme .pagination-bar {
+            background: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        body.light-theme .page-btn {
+            background: #f1f5f9 !important;
+            color: #334155 !important;
+            border-color: #cbd5e1 !important;
+        }
+        body.light-theme .page-btn:hover:not(:disabled) {
+            background: #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+        body.light-theme .page-btn.active {
+            background: var(--accent-indigo) !important;
+            color: #ffffff !important;
+            border-color: var(--accent-indigo) !important;
+        }
+        body.light-theme #pageSizeSelect {
+            background: #ffffff !important;
+            color: #0f172a !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        .cat-tag-pill {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .page-btn {
+            min-width: 34px;
+            height: 34px;
+            padding: 0 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            user-select: none;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .page-btn.active {
+            background: var(--accent-indigo);
+            color: #fff;
+            border-color: var(--accent-indigo);
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .cat-tag-pill:hover {
+            background: rgba(255, 255, 255, 0.09);
+            color: #fff;
+        }
+
+        .cat-tag-pill.active {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+            font-weight: 700;
+        }
+
+        /* ─── BATCH ACTION BAR ─── */
+        .batch-floating-bar {
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            border-radius: var(--radius-md);
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(16px);
+            animation: slideInDown 0.3s ease;
+        }
+
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .batch-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .batch-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .batch-action-pill {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.18s ease;
+        }
+
+        .batch-action-pill.change-cat {
+            background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+            color: #fff;
+        }
+
+        .batch-action-pill.approve {
+            background: #10b981;
+            color: #fff;
+        }
+
+        .batch-action-pill.delete {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        /* ─── TRACK CARDS & CATEGORY GALLERY ─── */
+        .view-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 10px 0 16px 0;
+        }
+
+        .view-title-wrap h1 {
+            font-size: 22px;
+            font-weight: 800;
+            font-family: var(--font-brand);
+            letter-spacing: -0.5px;
+        }
+
+        .view-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .tracks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 16px;
+        }
+
+        /* ─── CARD DESIGN ─── */
+        .track-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .track-card:hover {
+            transform: translateY(-4px);
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+        }
+
+        .track-card.selected {
+            border-color: var(--accent-indigo) !important;
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.18), rgba(13, 17, 23, 0.95)) !important;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5) !important;
+        }
+
+        .card-cover-wrap {
+            position: relative;
+            width: 100%;
+            height: 125px;
+            background: #11161d;
+            overflow: hidden;
+        }
+
+        .card-cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.35s ease;
+        }
+
+        .track-card:hover .card-cover-img {
+            transform: scale(1.06);
+        }
+
+        .card-checkbox {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .card-checkbox input {
+            cursor: pointer;
+            accent-color: var(--accent-indigo);
+        }
+
+        .play-overlay-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.5);
+            opacity: 0;
+            transform: translateY(6px);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 5;
+        }
+
+        .track-card:hover .play-overlay-btn {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card-category-badge {
+            position: absolute;
+            top: 8px;
+            left: 36px;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            z-index: 4;
+        }
+
+        .card-fav-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            border: none;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            z-index: 4;
+        }
+
+        .card-fav-btn:hover,
+        .card-fav-btn.active {
+            color: #fbbf24;
+            background: rgba(0, 0, 0, 0.85);
+        }
+
+        .card-body {
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .track-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #f1f5f9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .track-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+        }
+
+        .roblox-id-badge {
+            color: var(--accent-cyan);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-indicators {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .dot-indicator {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot-green {
+            background: var(--accent-green);
+            box-shadow: 0 0 6px rgba(16, 185, 129, 0.8);
+        }
+
+        .dot-blue {
+            background: #38bdf8;
+            box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
+        }
+
+        .dot-gold {
+            background: var(--accent-gold);
+            box-shadow: 0 0 6px rgba(245, 158, 11, 0.8);
+        }
+
+        .card-footer-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 8px;
+            margin-top: 4px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .mini-btn-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .card-action-icon-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .card-action-icon-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-color: var(--border-subtle);
+        }
+
+        /* ─── CATEGORY GALLERY GRID (NEW VIEW) ─── */
+        .category-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 16px;
+        }
+
+        .category-gallery-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            position: relative;
+            height: 140px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 16px;
+        }
+
+        .category-gallery-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 10px 25px rgba(0, 229, 255, 0.2);
+        }
+
+        .cat-card-bg-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.35;
+            transition: opacity 0.25s ease, transform 0.3s ease;
+        }
+
+        .category-gallery-card:hover .cat-card-bg-img {
+            opacity: 0.6;
+            transform: scale(1.05);
+        }
+
+        .cat-card-title {
+            position: relative;
+            z-index: 2;
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            font-family: var(--font-brand);
+        }
+
+        .cat-card-count {
+            position: relative;
+            z-index: 2;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--accent-cyan);
+            margin-top: 2px;
+        }
+
+        /* ─── FLOATING DOCK MINI PLAYER ─── */
+        .floating-player-dock {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(840px, 92vw);
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            border-radius: 22px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .dock-left-track {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 220px;
+            flex-shrink: 0;
+        }
+
+        .dock-cover {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            object-fit: cover;
+            background: #1e293b;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .dock-track-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .dock-track-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dock-track-sub {
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--accent-cyan);
+        }
+
+        .dock-center-controls {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            max-width: 380px;
+        }
+
+        .dock-control-btns {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dock-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .dock-btn:hover {
+            color: #fff;
+        }
+
+        .dock-play-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #fff;
+            color: #000;
+            font-weight: 800;
+            box-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+            border: none;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .dock-play-btn:hover {
+            transform: scale(1.08);
+            background: var(--accent-cyan);
+        }
+
+        .dock-progress-wrap {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+        }
+
+        .dock-progress-bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .dock-progress-fill {
+            width: 42%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-indigo));
+            border-radius: 2px;
+        }
+
+        .dock-right-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 160px;
+            justify-content: flex-end;
+        }
+
+        /* ─── MODAL OVERLAYS ─── */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(10px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-box {
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-lg);
+            width: min(650px, 95vw);
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 17px;
+            font-weight: 800;
+            font-family: var(--font-brand);
+            color: #fff;
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .modal-close-btn:hover {
+            color: #fff;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-tabs {
+            display: flex;
+            gap: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .modal-tab-btn {
+            padding: 8px 14px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+
+        .modal-tab-btn.active {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 38px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 0 12px;
+            color: #fff;
+            font-size: 13px;
+        }
+
+        /* ─── MOBILE RESPONSIVE ENHANCEMENTS ─── */
+        .mobile-menu-toggle {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-subtle);
+            color: #fff;
+            font-size: 18px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .mobile-menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--accent-cyan);
+        }
+
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 95;
+        }
+
+        @media (max-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -290px;
+                width: 280px;
+                height: 100vh;
+                z-index: 100;
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(290px);
+            }
+
+            .sidebar-backdrop.active {
+                display: block;
+            }
+
+            .mobile-menu-toggle {
+                display: inline-flex;
+            }
+
+            .main-wrapper {
+                padding: 16px 16px 130px 16px;
+            }
+
+            .top-navbar {
+                gap: 10px;
+            }
+
+            .search-pill-box {
+                min-width: 100%;
+                order: 3;
+            }
+
+            .navbar-right {
+                width: 100%;
+                justify-content: flex-end;
+                order: 2;
+            }
+
+            .tracks-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 12px;
+            }
+
+            .track-card {
+                border-radius: 12px;
+            }
+
+            .track-name {
+                font-size: 13px;
+            }
+
+            .floating-player-dock {
+                width: 100%;
+                left: 0;
+                bottom: 0;
+                transform: none;
+                border-radius: 16px 16px 0 0;
+                padding: 10px 16px;
+                box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.5);
+            }
+
+            .dock-right-actions {
+                display: none;
+            }
+
+            .dock-left-track {
+                max-width: 140px;
+            }
+
+            .dock-track-title {
+                max-width: 90px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tracks-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .card-body {
+                padding: 8px;
+            }
+
+            .card-category-badge {
+                font-size: 9px;
+                padding: 2px 6px;
+            }
+
+            .track-meta-row {
+                margin: 4px 0;
+            }
+
+            .roblox-id-badge {
+                font-size: 10px;
+            }
+
+            .quick-tool-btn {
+                height: 36px;
+                padding: 0 10px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR BACKDROP FOR MOBILE -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileSidebar(false)"></div>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="appSidebar">
+            <div class="brand-logo" style="justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="logo-icon">AV</div>
+                    <div class="brand-title">AudioVault <span class="brand-badge">PRO</span></div>
+                </div>
+                <button class="modal-close-btn mobile-menu-toggle" style="display:none;" onclick="toggleMobileSidebar(false)">&times;</button>
+            </div>
+
+            <div class="nav-section-title">메인 라이브러리</div>
+            <div class="nav-menu">
+                <button class="nav-btn active" id="navAllTracks" onclick="switchMainView('all')">
+                    <div class="nav-left"><span>🎵</span> <span data-i18n="audio_ui.nav_all">전체 오디오</span></div>
+                    <span class="nav-badge" id="badgeAllCount">0</span>
+                </button>
+                <button class="nav-btn" id="navFavs" onclick="switchMainView('favorites')">
+                    <div class="nav-left"><span>★</span> <span data-i18n="audio_ui.nav_favorites">즐겨찾기</span></div>
+                    <span class="nav-badge" id="badgeFavsCount">0</span>
+                </button>
+                <button class="nav-btn" id="navCategories" onclick="switchMainView('categories')">
+                    <div class="nav-left"><span>📁</span> <span data-i18n="audio_ui.nav_categories">카테고리 탐색</span></div>
+                    <span class="nav-badge" id="badgeCatsCount">0</span>
+                </button>
+                <button class="nav-btn" id="navPending" onclick="switchMainView('pending')">
+                    <div class="nav-left"><span>⏳</span> <span data-i18n="audio_ui.nav_pending">검토 대기</span></div>
+                    <span class="nav-badge" id="badgePendingCount" style="background:rgba(245,158,11,0.2);color:#fbbf24;">0</span>
+                </button>
+            </div>
+
+            <div class="nav-section-title" data-i18n="audio_ui.popular_categories">인기 카테고리</div>
+            <div class="category-scroll-list" id="sidebarCategoryList">
+                <!-- Loaded dynamically -->
+            </div>
+
+            <div class="sidebar-bottom-actions admin-only-feature" style="display:none;">
+                <button class="admin-unified-btn" onclick="openUnifiedAdminModal()">
+                    <span>⚙️</span> <span data-i18n="audio_ui.nav_admin_settings">관리자 통합 설정</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-wrapper">
+            <!-- TOP NAVBAR -->
+            <header class="top-navbar">
+                <button class="mobile-menu-toggle" onclick="toggleMobileSidebar()" title="메뉴 열기">☰</button>
+                <div class="search-pill-box">
+                    <span class="search-icon-left">🔍</span>
+                    <input type="text" id="searchInput" placeholder="제목, 카테고리, Roblox Asset ID 검색 (실시간 DB 연동)..." data-i18n-ph="audio_ui.search_placeholder" />
+                </div>
+
+                <div class="navbar-right">
+                    <select class="lang-select quick-tool-btn" id="audioLangSelect" onchange="onAudioLangChange(this.value)" style="padding:0 8px;font-weight:700;background:rgba(22,27,34,0.9);color:#fff;border:1px solid var(--border-subtle);border-radius:20px;outline:none;cursor:pointer;">
+                        <option value="ko">🇰🇷 한국어</option>
+                        <option value="en">🇺🇸 English</option>
+                        <option value="ja">🇯🇵 日本語</option>
+                        <option value="zh">🇨🇳 简体中文</option>
+                        <option value="ru">🇷🇺 Русский</option>
+                    </select>
+                    <button class="quick-tool-btn admin-mode-active" id="adminModeToggleBtn" style="display:none;" onclick="toggleAdminMode()">
+                        <span>🛡️</span> <span id="adminModeBtnText" data-i18n="audio_ui.admin_mode_on">관리자 모드 ON</span>
+                    </button>
+                    <button class="quick-tool-btn admin-only-feature" id="toggleSelectModeBtn" style="display:none;" onclick="toggleMultiSelectMode()">
+                        <span>☑️</span> <span data-i18n="audio_ui.select_mode">다중 선택 모드</span>
+                    </button>
+                    <button class="quick-tool-btn primary admin-only-feature" id="addAudioNavBtn" style="display:none;" onclick="openAddAudioModal()">
+                        <span>➕</span> <span data-i18n="audio_ui.add_audio">오디오 추가</span>
+                    </button>
+                    <button class="quick-tool-btn" onclick="toggleThemeMode()">
+                        <span id="themeEmoji">🌙</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- HORIZONTAL QUICK CATEGORIES (방문자 인기 기준 칩) -->
+            <div class="category-carousel" id="catChipsCarousel">
+                <!-- Loaded dynamically -->
+            </div>
+
+            <!-- BATCH ACTION BAR (다중 선택 활성화 시 노출) -->
+            <div class="batch-floating-bar" id="batchActionBar" style="display:none;">
+                <div class="batch-bar-left">
+                    <span>선택된 곡: <strong style="color:var(--accent-cyan)" id="batchCountText">0</strong>개</span>
+                    <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:12px;"
+                        onclick="selectAllBatch(true)">전체 선택</button>
+                    <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:12px;"
+                        onclick="selectAllBatch(false)">선택 해제</button>
+                </div>
+                <div class="batch-bar-actions">
+                    <button class="batch-action-pill change-cat" onclick="openBulkCategoryModal()">📁 카테고리 일괄 변경</button>
+                    <button class="batch-action-pill approve" id="batchApproveBtn" style="display:none;" onclick="handleBulkApprove()">✓ 일괄 승인</button>
+                    <button class="batch-action-pill delete" onclick="handleBulkDelete()">🗑️ 선택 삭제</button>
+                </div>
+            </div>
+
+            <!-- VIEW HEADER -->
+            <div class="view-header">
+                <div class="view-title-wrap">
+                    <h1 id="viewTitle">전체 오디오 라이브러리</h1>
+                    <div class="view-subtitle" id="viewSubTitle">데이터베이스에서 오디오를 로드하는 중...</div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="quick-tool-btn" onclick="refreshAudios()">🔄 실시간 DB 새로고침</button>
+                </div>
+            </div>
+
+            <!-- 1. TRACKS GRID CONTAINER -->
+            <div class="tracks-grid" id="tracksGrid">
+                <!-- 트랙 카드들이 동적으로 렌더링됩니다 -->
+            </div>
+
+            <!-- PAGINATION & PAGE SIZE CONTROLS BAR -->
+            <div class="pagination-bar" id="paginationBar" style="display:flex;align-items:center;justify-content:space-between;margin-top:28px;padding:14px 20px;background:rgba(15,23,42,0.85);border:1px solid var(--border-subtle);border-radius:var(--radius-md);backdrop-filter:blur(12px);flex-wrap:wrap;gap:14px;">
+                <!-- Left: Page Info & Page Size Selector -->
+                <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                    <span style="font-size:13px;color:var(--text-secondary);font-weight:600;" id="paginationInfoText">총 0개 중 0-0 표시</span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <label for="pageSizeSelect" style="font-size:12px;color:var(--text-muted);font-weight:700;">목록 개수:</label>
+                        <select id="pageSizeSelect" onchange="onPageSizeChange(this.value)" class="quick-tool-btn" style="height:32px;padding:0 10px;font-size:12px;font-weight:700;background:rgba(22,27,34,0.95);color:#fff;border:1px solid var(--border-subtle);border-radius:8px;outline:none;cursor:pointer;">
+                            <option value="20">20개씩 보기</option>
+                            <option value="40" selected>40개씩 보기</option>
+                            <option value="60">60개씩 보기</option>
+                            <option value="100">100개씩 보기</option>
+                            <option value="200">200개씩 보기</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Right: Navigation Buttons -->
+                <div class="pagination-btn-group" id="paginationBtnGroup" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <!-- Dynamically rendered buttons -->
+                </div>
+            </div>
+
+            <!-- 2. CATEGORY GALLERY GRID (카테고리 탭 선택 시 노출) -->
+            <div class="category-gallery-grid" id="categoryGalleryGrid" style="display:none;">
+                <!-- 카테고리 갤러리 카드들이 렌더링됩니다 -->
+            </div>
+        </main>
+
+        <!-- FLOATING DOCK MINI PLAYER -->
+        <div class="floating-player-dock" id="floatingPlayerDock">
+            <div class="dock-left-track">
+                <img src="/images/icon128.png" class="dock-cover" id="playerCoverImg"
+                    onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'128\' height=\'128\' viewBox=\'0 0 128 128\'%3E%3Crect width=\'128\' height=\'128\' rx=\'16\' fill=\'%2311161d\'/%3E%3Cpath d=\'M76 34v36.3a14 14 0 1 0 8 12.7V46l24-6v-6z\' fill=\'%2300e5ff\' opacity=\'0.8\'/%3E%3C/svg%3E';" />
+                <div class="dock-track-info">
+                    <span class="dock-track-title" id="playerTitle">재생 중인 곡 없음</span>
+                    <span class="dock-track-sub" id="playerSub">오디오 카드를 클릭하여 재생</span>
+                </div>
+            </div>
+
+            <div class="dock-center-controls">
+                <div class="dock-control-btns">
+                    <button class="dock-btn" onclick="alert('셔플 모드')">🔀</button>
+                    <button class="dock-btn" onclick="playPrevTrack()">⏮</button>
+                    <button class="dock-play-btn" id="playerPlayBtn" onclick="togglePlayState()">▶</button>
+                    <button class="dock-btn" onclick="playNextTrack()">⏭</button>
+                    <button class="dock-btn" onclick="alert('반복 모드')">🔁</button>
+                </div>
+                <div class="dock-progress-wrap">
+                    <span id="playerCurTime">0:00</span>
+                    <div class="dock-progress-bar" id="dockProgressBar" onclick="seekTrack(event)">
+                        <div class="dock-progress-fill" id="dockProgressFill" style="width: 0%;"></div>
+                    </div>
+                    <span id="playerTotalTime">0:00</span>
+                </div>
+            </div>
+
+            <div class="dock-right-actions">
+                <button class="dock-btn" id="volMuteBtn" onclick="toggleMute()" title="음소거 토글" style="padding:0 4px;font-size:14px;background:none;border:none;cursor:pointer;">🔊</button>
+                <div class="volume-slider-wrap" style="position:relative;display:flex;align-items:center;width:80px;height:24px;cursor:pointer;">
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.7" 
+                        oninput="changeVolume(this.value)" 
+                        style="width:100%;height:5px;accent-color:var(--accent-cyan);cursor:pointer;outline:none;border-radius:3px;" />
+                </div>
+                <button class="dock-btn" id="playerDetailBtn" onclick="openCurrentTrackDetail()" title="상세 정보">ℹ️</button>
+            </div>
+        </div>
+
+        <!-- ─── UNIFIED ADMIN MODAL ─── -->
+        <div class="modal-overlay" id="unifiedAdminModal">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <span class="modal-title">⚙️ 관리자 통합 설정 센터</span>
+                    <button class="modal-close-btn" onclick="closeModal('unifiedAdminModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-tabs">
+                        <button class="modal-tab-btn active" onclick="switchAdminTab('stats', this)">📊 DB 통계 요약</button>
+                        <button class="modal-tab-btn" onclick="switchAdminTab('catImg', this)">🖼️ 이미지 & 번역</button>
+                        <button class="modal-tab-btn" onclick="switchAdminTab('rename', this)">🏷️ 카테고리 이름 변경</button>
+                        <button class="modal-tab-btn" onclick="switchAdminTab('blacklist', this)">🚫 카테고리 숨김</button>
+                        <button class="modal-tab-btn" onclick="switchAdminTab('restore', this)">🗑️ 에셋 복원</button>
+                        <button class="modal-tab-btn" onclick="switchAdminTab('optimize', this)">⚡ 유지보수/최적화</button>
+                    </div>
+
+                    <!-- 1. DB STATS TAB -->
+                    <div id="adminTabStats">
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+                            <div style="background:rgba(255,255,255,0.04);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06)">
+                                <div style="font-size:11px;color:var(--text-muted)">총 오디오 수</div>
+                                <div style="font-size:20px;font-weight:800;color:#fff;font-family:var(--font-mono)" id="adminStatTotal">0</div>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.04);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06)">
+                                <div style="font-size:11px;color:var(--text-muted)">활성 승인곡</div>
+                                <div style="font-size:20px;font-weight:800;color:var(--accent-green);font-family:var(--font-mono)" id="adminStatActive">0</div>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.04);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06)">
+                                <div style="font-size:11px;color:var(--text-muted)">검토 대기곡</div>
+                                <div style="font-size:20px;font-weight:800;color:var(--accent-gold);font-family:var(--font-mono)" id="adminStatPending">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. CATEGORY IMAGE & MULTILINGUAL TRANSLATION TAB -->
+                    <div id="adminTabCatImg" style="display:none;">
+                        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">카테고리별 대표 배경 이미지와 국가별 다국어 번역명을 설정합니다.</p>
+                        <div class="form-group">
+                            <label>카테고리 선택 (*필수)</label>
+                            <select class="form-input" id="adminCatSelect" style="background:#161b22;" onchange="onAdminCatSelectChange()"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>대표 이미지 URL</label>
+                            <input type="text" class="form-input" id="adminCatImgUrl" placeholder="https://example.com/image.png" />
+                        </div>
+                        <div style="margin-top:14px;padding:12px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid var(--border-subtle);">
+                            <div style="font-size:12px;font-weight:700;color:var(--accent-cyan);margin-bottom:10px;">🌐 국가별 카테고리 번역 등록 (선택)</div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                                <div class="form-group" style="margin-bottom:6px;">
+                                    <label style="font-size:11px;">🇰🇷 한국어 (KO)</label>
+                                    <input type="text" class="form-input" id="catTrans_ko" placeholder="한국어 표기" />
+                                </div>
+                                <div class="form-group" style="margin-bottom:6px;">
+                                    <label style="font-size:11px;">🇺🇸 영어 (EN)</label>
+                                    <input type="text" class="form-input" id="catTrans_en" placeholder="English Name" />
+                                </div>
+                                <div class="form-group" style="margin-bottom:6px;">
+                                    <label style="font-size:11px;">🇯🇵 일본어 (JA)</label>
+                                    <input type="text" class="form-input" id="catTrans_ja" placeholder="日本語" />
+                                </div>
+                                <div class="form-group" style="margin-bottom:6px;">
+                                    <label style="font-size:11px;">🇨🇳 중국어 (ZH)</label>
+                                    <input type="text" class="form-input" id="catTrans_zh" placeholder="简体中文" />
+                                </div>
+                                <div class="form-group" style="grid-column:1/-1;margin-bottom:6px;">
+                                    <label style="font-size:11px;">🇷🇺 러시아어 (RU)</label>
+                                    <input type="text" class="form-input" id="catTrans_ru" placeholder="Русский" />
+                                </div>
+                            </div>
+                        </div>
+                        <button class="quick-tool-btn primary" style="width:100%;height:40px;justify-content:center;margin-top:14px;" onclick="saveCategoryImgAndTranslations()">이미지 & 다국어 번역 일괄 저장</button>
+                    </div>
+
+                    <!-- 3. CATEGORY RENAME TAB (NEW) -->
+                    <div id="adminTabRename" style="display:none;">
+                        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">선택한 기존 카테고리에 속한 모든 오디오 곡들의 카테고리명을 새로운 이름으로 영구 일괄 변경합니다.</p>
+                        <div class="form-group">
+                            <label>변경할 기존 카테고리</label>
+                            <select class="form-input" id="adminRenameOldCat" style="background:#161b22;"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>새로운 카테고리 이름</label>
+                            <input type="text" class="form-input" id="adminRenameNewCat" placeholder="예: Vocaloid Collection" />
+                        </div>
+                        <button class="quick-tool-btn primary" style="width:100%;height:40px;justify-content:center;margin-top:10px;" onclick="executeCategoryRename()">🏷️ 카테고리 이름 일괄 변경 실행</button>
+                    </div>
+
+                    <!-- 4. CATEGORY BLACKLIST TAB -->
+                    <div id="adminTabBlacklist" style="display:none;">
+                        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">체크된 카테고리는 일반 사용자에게 숨김 처리됩니다.</p>
+                        <div id="adminCatBlacklistGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:240px;overflow-y:auto;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;"></div>
+                        <button class="quick-tool-btn primary" style="margin-top:12px;" onclick="saveCatBlacklist()">숨김 설정 저장</button>
+                    </div>
+
+                    <!-- 5. RESTORE DELETED AUDIOS TAB -->
+                    <div id="adminTabRestore" style="display:none;">
+                        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">과거 삭제 처리되어 차단된 에셋 ID 블랙리스트 목록입니다. 복원 시 다시 등록할 수 있습니다.</p>
+                        <div id="adminDeletedAudiosList" style="max-height:240px;overflow-y:auto;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;font-size:12px;">
+                            <div style="color:var(--text-muted);text-align:center;padding:20px;">삭제된 에셋 목록을 로드하는 중...</div>
+                        </div>
+                    </div>
+
+                    <!-- 6. OPTIMIZE TAB -->
+                    <div id="adminTabOptimize" style="display:none;">
+                        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">데이터베이스 단편화를 정리하고 파일 용량을 최적화합니다.</p>
+                        <button class="quick-tool-btn primary" onclick="runVacuum()">⚡ SQLite VACUUM 최적화 실행</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── ADD AUDIO MODAL ─── -->
+        <div class="modal-overlay" id="addAudioModal">
+            <div class="modal-box" style="width:min(500px, 95vw);">
+                <div class="modal-header">
+                    <span class="modal-title">➕ 신규 오디오 등록</span>
+                    <button class="modal-close-btn" onclick="closeModal('addAudioModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Roblox Audio Asset ID (*필수)</label>
+                        <input type="text" class="form-input" id="newAssetId" placeholder="예: 82589156727915" />
+                    </div>
+                    <div class="form-group">
+                        <label>곡 제목 (Title)</label>
+                        <input type="text" class="form-input" id="newTitle" placeholder="오디오 제목 입력" />
+                    </div>
+                    <div class="form-group">
+                        <label>카테고리 (Category)</label>
+                        <input type="text" class="form-input" id="newCategory" placeholder="예: FNF, Vocaloid, Undertale 등" />
+                    </div>
+                    <div class="form-group">
+                        <label>유튜브 링크 또는 커버 이미지 URL (선택)</label>
+                        <input type="text" class="form-input" id="newYtUrl" placeholder="https://youtube.com/watch?v=..." />
+                    </div>
+                    <button class="quick-tool-btn primary" style="width:100%;height:42px;justify-content:center;"
+                        onclick="submitAddAudio()">등록 완료</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── BULK CATEGORY MODAL ─── -->
+        <div class="modal-overlay" id="bulkCategoryModal">
+            <div class="modal-box" style="width:min(460px, 95vw);">
+                <div class="modal-header">
+                    <span class="modal-title">📁 카테고리 일괄 변경</span>
+                    <button class="modal-close-btn" onclick="closeModal('bulkCategoryModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">선택한 <strong
+                            id="bulkModalCount" style="color:var(--accent-cyan)">0</strong>개 곡의 카테고리를 한 번에 변경합니다.</p>
+                    <div class="form-group">
+                        <label>기존 카테고리에서 선택</label>
+                        <select class="form-input" id="bulkSelectExisting" style="background:#161b22;"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>또는 새 카테고리 직접 입력</label>
+                        <input type="text" class="form-input" id="bulkCustomInput" placeholder="신규 카테고리명" />
+                    </div>
+                    <button class="quick-tool-btn primary" style="width:100%;height:42px;justify-content:center;"
+                        onclick="executeBulkCategory()">일괄 변경 적용</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── EDIT TRACK MODAL (FULL RESTORE: YOUTUBE SEARCH & IMAGE MAPPING) ─── -->
+        <div class="modal-overlay" id="editTrackModal">
+            <div class="modal-box" style="width:min(540px, 95vw);max-height:88vh;">
+                <div class="modal-header">
+                    <span class="modal-title">✏️ <span data-i18n="audio_ui.edit_track">오디오 정보 수정 & 맵핑</span></span>
+                    <button class="modal-close-btn" onclick="closeModal('editTrackModal')">&times;</button>
+                </div>
+                <div class="modal-body" style="overflow-y:auto;">
+                    <input type="hidden" id="editTrackId" />
+                    
+                    <div style="display:flex;gap:14px;margin-bottom:14px;align-items:center;">
+                        <img id="editImgPreview" src="/images/icon128.png" 
+                            style="width:72px;height:72px;border-radius:10px;object-fit:cover;border:1px solid var(--border-subtle);background:#161b22;"
+                            onerror="this.onerror=null;this.src=DEFAULT_FALLBACK_IMG;" />
+                        <div style="flex:1;">
+                            <div class="form-group" style="margin-bottom:6px;">
+                                <label style="font-size:11px;">Roblox Asset ID</label>
+                                <input type="text" class="form-input" id="editAssetId" disabled style="opacity:0.6;font-family:var(--font-mono);height:32px;" />
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label style="font-size:11px;">카테고리 (Category)</label>
+                                <input type="text" class="form-input" id="editCategory" style="height:32px;" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>곡 제목 (Title)</label>
+                        <div style="display:flex;gap:8px;">
+                            <input type="text" class="form-input" id="editTitle" placeholder="곡 제목" />
+                            <button class="quick-tool-btn" type="button" onclick="searchYoutubeForEdit()" style="white-space:nowrap;background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);">
+                                🔍 유튜브 검색
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>커버 이미지 URL (Image Mapping)</label>
+                        <input type="text" class="form-input" id="editImageUrl" placeholder="https://example.com/cover.jpg" oninput="document.getElementById('editImgPreview').src=this.value.trim()||DEFAULT_FALLBACK_IMG" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>유튜브 영상 링크 (YouTube URL)</label>
+                        <input type="text" class="form-input" id="editYtUrl" placeholder="https://youtube.com/watch?v=..." />
+                    </div>
+
+                    <!-- Force Lock Setting (자동 재검증 방지 강제 고정) -->
+                    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(245,158,11,0.09);border:1px solid rgba(245,158,11,0.3);border-radius:8px;margin-top:10px;">
+                        <input type="checkbox" id="editIsVerifiedLocked" style="width:16px;height:16px;cursor:pointer;accent-color:#f59e0b;" />
+                        <label for="editIsVerifiedLocked" style="font-size:12px;font-weight:700;color:#f59e0b;cursor:pointer;margin:0;" title="체크 시 Roblox Studio 자동 재검증 대상에서 영구 제외되고 현재 설정이 강제 고정됩니다.">
+                            🔒 오디오 강제 수동 고정 (자동 재검증/초기화 방지)
+                        </label>
+                    </div>
+
+                    <!-- YouTube Search Results Panel -->
+                    <div id="editYtResultsBox" style="display:none;margin-top:10px;padding:10px;background:rgba(0,0,0,0.35);border-radius:8px;border:1px solid var(--border-subtle);">
+                        <div style="font-size:12px;font-weight:700;color:var(--accent-cyan);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+                            <span>🎬 유튜브 검색 추천 결과 (클릭 시 자동 맵핑)</span>
+                            <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:11px;" onclick="document.getElementById('editYtResultsBox').style.display='none'">&times; 닫기</button>
+                        </div>
+                        <div id="editYtResultsList" style="display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto;">
+                            <!-- Dynamically loaded results -->
+                        </div>
+                    </div>
+
+                    <button class="quick-tool-btn primary" style="width:100%;height:42px;justify-content:center;margin-top:14px;"
+                        onclick="saveEditTrack()">저장 완료</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIO PLAYER ELEMENT -->
+    <audio id="globalAudioPlayer" preload="none"></audio>
+    <div id="ytPlayerContainer" style="display:none;"></div>
+
+    <!-- SCRIPT FOR REAL DB INTEGRATION & INTERACTIVE APP -->
+    <script>
+        let tracksData = [];
+        let isSelectionMode = false;
+        let isAdminMode = false;
+        let selectedTrackIds = new Set();
+        let currentView = 'all';
+        let currentCategory = null;
+        let currentPage = 1;
+        let pageSize = 40;
+        let currentPlayingTrackId = null;
+
+        // Auto-detect API Base URL: Use absolute backend URL on GitHub Pages / cross-origin
+        const API_BASE = (window.location.hostname.includes('github.io') || (window.location.hostname === 'localhost' && window.location.port !== '3000'))
+            ? 'https://mer.r-e.kr'
+            : '';
+
+        let currentAdminToken = null;
+
+        // Unified API fetch helper with CORS, credentials, and x-admin-token header
+        async function apiFetch(urlPath, options = {}) {
+            const fullUrl = urlPath.startsWith('http') ? urlPath : `${API_BASE}${urlPath}`;
+            const headers = options.headers || {};
+            if (currentAdminToken && !headers['x-admin-token']) {
+                headers['x-admin-token'] = currentAdminToken;
+            }
+            options.headers = headers;
+            if (!options.credentials && API_BASE) {
+                options.credentials = 'include';
+            }
+            return fetch(fullUrl, options);
+        }
+
+        const playerAudio = document.getElementById('globalAudioPlayer');
+
+        let categoryTranslations = {}; // { categoryKey: { ko: "...", en: "..." } }
+        let categoryMetadataMap = {}; // { category: imageUrl }
+
+        function t(key, fallback = '') {
+            if (window.i18n && typeof window.i18n.t === 'function') {
+                const res = window.i18n.t(key);
+                if (res && res !== key) return res;
+            }
+            return fallback || key;
+        }
+
+        function applyAudioI18n() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                const trans = t(key);
+                if (trans) el.textContent = trans;
+            });
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+                const key = el.getAttribute('data-i18n-ph');
+                const trans = t(key);
+                if (trans) el.placeholder = trans;
+            });
+            const adminBtnText = document.getElementById('adminModeBtnText');
+            if (adminBtnText) {
+                adminBtnText.textContent = isAdminMode ? t('audio_ui.admin_mode_on', '관리자 모드 ON') : t('audio_ui.admin_mode_off', '관리자 모드 OFF');
+            }
+        }
+
+        async function onAudioLangChange(lang) {
+            if (window.i18n && typeof window.i18n.setLanguage === 'function') {
+                await window.i18n.setLanguage(lang);
+            }
+            applyAudioI18n();
+            renderCategoryChips();
+            renderCards();
+            if (currentView === 'categories') renderCategoryGallery();
+        }
+
+        function toggleMobileSidebar(force) {
+            const sidebar = document.getElementById('appSidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (!sidebar) return;
+            const isOpen = (typeof force === 'boolean') ? force : !sidebar.classList.contains('mobile-open');
+            sidebar.classList.toggle('mobile-open', isOpen);
+            if (backdrop) backdrop.classList.toggle('active', isOpen);
+        }
+
+        async function checkAdminTokenFromUrl() {
+            // 1. Check URL query params for ?token=... or ?admin_token=... (GitHub Pages support)
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryToken = urlParams.get('token') || urlParams.get('admin_token');
+            if (queryToken) {
+                try {
+                    const res = await apiFetch(`/api/audio/check-admin-token/${encodeURIComponent(queryToken)}`);
+                    const json = await res.json();
+                    if (json.status === 'success' && json.isAdmin) {
+                        isAdminMode = true;
+                        currentAdminToken = queryToken;
+                        const btn = document.getElementById('adminModeToggleBtn');
+                        if (btn) btn.style.display = 'inline-flex';
+                        document.querySelectorAll('.admin-only-feature').forEach(el => {
+                            el.style.display = '';
+                        });
+                        applyAudioI18n();
+                        return;
+                    }
+                } catch(e) {}
+            }
+
+            // 2. Check if current user is logged in as Discord Admin/Owner
+            try {
+                const res = await apiFetch('/api/audio/check-admin-session');
+                const json = await res.json();
+                if (json.status === 'success' && json.isAdmin) {
+                    isAdminMode = true;
+                    const btn = document.getElementById('adminModeToggleBtn');
+                    if (btn) btn.style.display = 'inline-flex';
+                    document.querySelectorAll('.admin-only-feature').forEach(el => {
+                        el.style.display = '';
+                    });
+                    applyAudioI18n();
+                    return;
+                }
+            } catch(e) {}
+
+            // 3. Check URL path for /audio/edit/:token
+            const match = window.location.pathname.match(/\/audio\/edit\/([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                const token = match[1];
+                try {
+                    const res = await apiFetch(`/api/audio/check-admin-token/${token}`);
+                    const json = await res.json();
+                    if (json.status === 'success' && json.isAdmin) {
+                        isAdminMode = true;
+                        currentAdminToken = token;
+                        
+                        const btn = document.getElementById('adminModeToggleBtn');
+                        if (btn) btn.style.display = 'inline-flex';
+                        
+                        document.querySelectorAll('.admin-only-feature').forEach(el => {
+                            el.style.display = '';
+                        });
+                        applyAudioI18n();
+                        return;
+                    }
+                } catch(e) {}
+            }
+
+            // 4. Normal non-admin visitor: completely hide admin toggle button and admin features
+            isAdminMode = false;
+            const btn = document.getElementById('adminModeToggleBtn');
+            if (btn) btn.style.display = 'none';
+            document.querySelectorAll('.admin-only-feature').forEach(el => {
+                el.style.display = 'none';
+            });
+            applyAudioI18n();
+        }
+
+        function toggleAdminMode() {
+            isAdminMode = !isAdminMode;
+            const btn = document.getElementById('adminModeToggleBtn');
+            if (btn) btn.classList.toggle('admin-mode-active', isAdminMode);
+            
+            document.querySelectorAll('.admin-only-feature').forEach(el => {
+                el.style.display = isAdminMode ? '' : 'none';
+            });
+            
+            applyAudioI18n();
+            renderCards();
+            showToast(isAdminMode ? '🛡️ 관리자 모드가 활성화되었습니다.' : '일반 사용자 모드로 전환되었습니다.', 'info');
+        }
+
+        async function loadCategoryTranslations() {
+            try {
+                const res = await apiFetch('/api/audio/categories/translations');
+                const json = await res.json();
+                if (json.status === 'success' && json.data) {
+                    categoryTranslations = json.data;
+                }
+            } catch(e) {
+                console.warn('Failed to load category translations:', e);
+            }
+
+            try {
+                const res2 = await apiFetch('/api/audio/categories/metadata');
+                const json2 = await res2.json();
+                if (json2.status === 'success' && Array.isArray(json2.data)) {
+                    categoryMetadataMap = {};
+                    json2.data.forEach(m => { categoryMetadataMap[m.category] = m.imageUrl; });
+                }
+            } catch(e) {}
+        }
+
+        function getCategoryDisplayName(cat) {
+            if (!cat) return '기타';
+            const lang = (window.i18n && typeof window.i18n.getLang === 'function' ? window.i18n.getLang() : 'ko') || 'ko';
+            if (categoryTranslations[cat] && categoryTranslations[cat][lang]) {
+                return categoryTranslations[cat][lang];
+            }
+            return cat;
+        }
+
+        async function loadRealAudios() {
+            initVolume();
+            await checkAdminTokenFromUrl();
+            await loadCategoryTranslations();
+            try {
+                const res = await apiFetch('/api/audio/list');
+                const json = await res.json();
+                if (json.status === 'success' && Array.isArray(json.data)) {
+                    tracksData = json.data.map(t => {
+                        let ytId = '';
+                        if (t.youtubeUrl) {
+                            const m = t.youtubeUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+                            if (m) ytId = m[1];
+                        }
+                        return {
+                            id: t.id,
+                            title: t.title || 'Untitled Track',
+                            cat: t.category || t.gameName || 'Music',
+                            assetId: t.audioAssetId || t.id,
+                            dur: fmtTime(t.duration),
+                            durationSec: t.duration || 0,
+                            status: t.status || 'active',
+                            imageUrl: t.imageUrl || '',
+                            previewUrl: t.previewUrl || '',
+                            youtubeUrl: t.youtubeUrl || '',
+                            yt: ytId,
+                            serverPlayable: t.serverPlayable,
+                            clientPlayable: t.clientPlayable,
+                            isVerifiedLocked: (t.isVerifiedLocked === 1 || t.isVerifiedLocked === true) ? 1 : 0,
+                            favorited: false
+                        };
+                    });
+                }
+            } catch (e) {
+                console.warn('[Main] Failed to fetch /api/audio/list:', e);
+            }
+
+            updateCounts();
+            renderCategoryChips();
+            if (!restoreAudioState()) {
+                switchMainView('all');
+            }
+            loadAdminStats();
+            applyAudioI18n();
+        }
+
+        function saveAudioState() {
+            try {
+                const state = {
+                    view: currentView || 'all',
+                    category: currentCategory || null,
+                    page: currentPage || 1,
+                    pageSize: pageSize || 40,
+                    search: document.getElementById('searchInput')?.value || ''
+                };
+                sessionStorage.setItem('kadio_audio_state', JSON.stringify(state));
+            } catch(e) {}
+        }
+
+        function restoreAudioState() {
+            try {
+                const raw = sessionStorage.getItem('kadio_audio_state');
+                if (!raw) return false;
+                const state = JSON.parse(raw);
+                if (state) {
+                    currentCategory = state.category || null;
+                    currentPage = state.page || 1;
+                    if (state.pageSize) {
+                        pageSize = parseInt(state.pageSize, 10) || 40;
+                        const sel = document.getElementById('pageSizeSelect');
+                        if (sel) sel.value = String(pageSize);
+                    }
+                    if (state.search) {
+                        const sInput = document.getElementById('searchInput');
+                        if (sInput) sInput.value = state.search;
+                    }
+                    switchMainView(state.view || 'all');
+                    return true;
+                }
+            } catch(e) {}
+            return false;
+        }
+
+        function fmtTime(sec) {
+            if (!sec || isNaN(sec)) return '0:00';
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function updateCounts() {
+            const total = tracksData.length;
+            const favCount = tracksData.filter(t => t.favorited).length;
+            const pendingCount = tracksData.filter(t => t.status === 'pending_review').length;
+            const cats = new Set(tracksData.map(t => t.cat).filter(Boolean));
+
+            document.getElementById('badgeAllCount').textContent = total;
+            if (document.getElementById('badgeFavsCount')) document.getElementById('badgeFavsCount').textContent = favCount;
+            if (document.getElementById('badgeCatsCount')) document.getElementById('badgeCatsCount').textContent = cats.size;
+            if (document.getElementById('badgePendingCount')) document.getElementById('badgePendingCount').textContent = pendingCount;
+            document.getElementById('viewSubTitle').textContent = `총 ${total}개의 오디오 에셋이 준비되어 있습니다.`;
+        }
+
+        const DEFAULT_FALLBACK_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'%3E%3Crect width='128' height='128' rx='16' fill='%2311161d'/%3E%3Cpath d='M76 34v36.3a14 14 0 1 0 8 12.7V46l24-6v-6z' fill='%2300e5ff' opacity='0.8'/%3E%3C/svg%3E";
+
+        function renderCategoryChips() {
+            const carousel = document.getElementById('catChipsCarousel');
+            const counts = {};
+            tracksData.forEach(t => {
+                if (t.cat) counts[t.cat] = (counts[t.cat] || 0) + 1;
+            });
+
+            const sortedCats = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).slice(0, 12);
+            let html = `<div class="cat-tag-pill ${!currentCategory ? 'active' : ''}" onclick="filterByCat('all')">${t('audio_ui.all_cats', '전체')} (${tracksData.length})</div>`;
+            sortedCats.forEach(cat => {
+                const displayName = getCategoryDisplayName(cat);
+                html += `<div class="cat-tag-pill ${currentCategory === cat ? 'active' : ''}" onclick="filterByCat('${cat}')">${displayName} (${counts[cat]})</div>`;
+            });
+            carousel.innerHTML = html;
+
+            // Popular categories in sidebar
+            const sidebarCatList = document.getElementById('sidebarCategoryList');
+            if (sidebarCatList) {
+                sidebarCatList.innerHTML = sortedCats.slice(0, 7).map(cat => {
+                    const sample = tracksData.find(t => t.cat === cat && t.yt);
+                    let thumb = categoryMetadataMap[cat] || (sample ? `https://img.youtube.com/vi/${sample.yt}/mqdefault.jpg` : DEFAULT_FALLBACK_IMG);
+                    const displayName = getCategoryDisplayName(cat);
+                    return `
+                        <div class="cat-chip-item ${currentCategory === cat ? 'active' : ''}" onclick="filterByCat('${cat}')">
+                            <img src="${thumb}" class="cat-thumb" onerror="this.onerror=null;this.src=DEFAULT_FALLBACK_IMG;" />
+                            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${displayName}</span>
+                            <span class="cat-count">${counts[cat]}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function getFilteredTracks() {
+            let list = tracksData;
+            if (currentView === 'favorites') {
+                list = list.filter(t => t.favorited);
+            } else if (currentView === 'pending') {
+                list = list.filter(t => t.status === 'pending_review');
+            }
+
+            if (currentCategory && currentCategory !== 'all') {
+                list = list.filter(t => t.cat && t.cat.toLowerCase() === currentCategory.toLowerCase());
+            }
+
+            const query = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
+            if (query) {
+                list = list.filter(t => 
+                    (t.title && t.title.toLowerCase().includes(query)) ||
+                    (t.cat && t.cat.toLowerCase().includes(query)) ||
+                    (getCategoryDisplayName(t.cat).toLowerCase().includes(query)) ||
+                    (t.assetId && String(t.assetId).includes(query))
+                );
+            }
+
+            return list;
+        }
+
+        function onPageSizeChange(val) {
+            pageSize = parseInt(val, 10) || 40;
+            currentPage = 1;
+            renderCards();
+            saveAudioState();
+        }
+
+        function goToPage(page) {
+            const list = getFilteredTracks();
+            const totalPages = Math.ceil(list.length / pageSize) || 1;
+            currentPage = Math.max(1, Math.min(totalPages, page));
+            renderCards();
+            saveAudioState();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderPagination(totalCount) {
+            const paginationBar = document.getElementById('paginationBar');
+            const infoText = document.getElementById('paginationInfoText');
+            const btnGroup = document.getElementById('paginationBtnGroup');
+            if (!paginationBar || !btnGroup) return;
+
+            if (currentView === 'categories' || totalCount === 0) {
+                paginationBar.style.display = 'none';
+                return;
+            }
+
+            paginationBar.style.display = 'flex';
+            const totalPages = Math.ceil(totalCount / pageSize) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const startIdx = (currentPage - 1) * pageSize + 1;
+            const endIdx = Math.min(currentPage * pageSize, totalCount);
+            if (infoText) {
+                infoText.textContent = `총 ${totalCount.toLocaleString()}개 중 ${startIdx}-${endIdx} 표시 (페이지 ${currentPage} / ${totalPages})`;
+            }
+
+            // Generate page buttons
+            let btnsHtml = '';
+            
+            // First & Prev buttons
+            btnsHtml += `<button class="page-btn" onclick="goToPage(1)" ${currentPage === 1 ? 'disabled' : ''} title="첫 페이지">⏮</button>`;
+            btnsHtml += `<button class="page-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} title="이전 페이지">◀</button>`;
+
+            // Page numbers calculation (show around current page)
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+
+            if (startPage > 1) {
+                btnsHtml += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
+                if (startPage > 2) btnsHtml += `<span style="color:var(--text-muted);padding:0 4px;">...</span>`;
+            }
+
+            for (let p = startPage; p <= endPage; p++) {
+                btnsHtml += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) btnsHtml += `<span style="color:var(--text-muted);padding:0 4px;">...</span>`;
+                btnsHtml += `<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+            }
+
+            // Next & Last buttons
+            btnsHtml += `<button class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} title="다음 페이지">▶</button>`;
+            btnsHtml += `<button class="page-btn" onclick="goToPage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''} title="마지막 페이지">⏭</button>`;
+
+            btnGroup.innerHTML = btnsHtml;
+        }
+
+        function renderCards() {
+            const list = getFilteredTracks();
+            const grid = document.getElementById('tracksGrid');
+            const totalPages = Math.ceil(list.length / pageSize) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const paged = list.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+            if (paged.length === 0) {
+                grid.innerHTML = `<div style="grid-column:1/-1;padding:60px 20px;text-align:center;color:var(--text-muted)">🔍 ${t('audio_ui.no_tracks', '검색 조건에 일치하는 오디오가 없습니다.')}</div>`;
+                renderPagination(0);
+                return;
+            }
+
+            renderPagination(list.length);
+
+            grid.innerHTML = paged.map(t => {
+                const isSelected = selectedTrackIds.has(t.id);
+                let cover = t.imageUrl;
+                if (!cover && t.yt) cover = `https://img.youtube.com/vi/${t.yt}/mqdefault.jpg`;
+                if (!cover) cover = categoryMetadataMap[t.cat] || DEFAULT_FALLBACK_IMG;
+
+                const displayName = getCategoryDisplayName(t.cat);
+
+                return `
+                <div class="track-card ${isSelected ? 'selected' : ''}" onclick="onCardClick('${t.id}', event)">
+                    <div class="card-cover-wrap">
+                        ${isSelectionMode ? `<label class="card-checkbox" onclick="event.stopPropagation()"><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelectTrack('${t.id}')" /></label>` : ''}
+                        <img src="${cover}" class="card-cover-img" onerror="this.onerror=null;this.src=DEFAULT_FALLBACK_IMG;" />
+                        <span class="card-category-badge">${displayName}</span>
+                        <button class="card-fav-btn ${t.favorited ? 'active' : ''}" onclick="event.stopPropagation();toggleFav('${t.id}')">★</button>
+                        <!-- 오직 이 재생 버튼을 누를 때만 재생 실행! -->
+                        <div class="play-overlay-btn" title="재생" onclick="event.stopPropagation();playTrackDemo('${t.id}')">▶</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="track-name" title="${t.title}">${t.title}</div>
+                        <div class="track-meta-row">
+                            <span class="roblox-id-badge">🎵 ${t.assetId}</span>
+                            <div class="status-indicators">
+                                ${t.isVerifiedLocked === 1 ? '<span style="font-size:11px;color:#f59e0b;font-weight:700;" title="관리자 수동 고정 (자동 재검증 방지)">🔒</span>' : ''}
+                                <span class="dot-indicator ${t.serverPlayable === 1 ? 'dot-green' : 'dot-gold'}" title="Server 검증: ${t.serverPlayable}"></span>
+                                <span class="dot-indicator ${t.clientPlayable === 1 ? 'dot-blue' : 'dot-gold'}" title="Client 검증: ${t.clientPlayable}"></span>
+                                ${t.status === 'pending_review' ? '<span class="dot-indicator dot-gold" title="검토 대기중"></span>' : ''}
+                            </div>
+                        </div>
+                        <div class="card-footer-actions">
+                            <span style="font-size:11px;color:var(--text-muted);">${t.dur}</span>
+                            <div class="mini-btn-group">
+                                ${isAdminMode ? `<button class="card-action-icon-btn" title="정보 수정" style="color:var(--accent-gold);" onclick="event.stopPropagation();openEditTrackModal('${t.id}')">✏️</button>` : ''}
+                                <button class="card-action-icon-btn" title="Asset ID 복사" onclick="event.stopPropagation();navigator.clipboard.writeText('${t.assetId}');showToast('Asset ID 복사 완료: ' + '${t.assetId}', 'success')">📋</button>
+                                <a class="card-action-icon-btn" href="https://create.roblox.com/store/asset/${t.assetId}" target="_blank" onclick="event.stopPropagation()" title="Roblox Store 링크">↗</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function openEditTrackModal(trackId) {
+            const t = tracksData.find(x => String(x.id) === String(trackId));
+            if (!t) return;
+            document.getElementById('editTrackId').value = t.id;
+            document.getElementById('editAssetId').value = t.assetId;
+            document.getElementById('editTitle').value = t.title;
+            document.getElementById('editCategory').value = t.cat;
+            document.getElementById('editYtUrl').value = t.youtubeUrl || '';
+            document.getElementById('editImageUrl').value = t.imageUrl || '';
+            document.getElementById('editIsVerifiedLocked').checked = (t.isVerifiedLocked === 1);
+            
+            let cover = t.imageUrl;
+            if (!cover && t.yt) cover = `https://img.youtube.com/vi/${t.yt}/mqdefault.jpg`;
+            if (!cover) cover = DEFAULT_FALLBACK_IMG;
+            document.getElementById('editImgPreview').src = cover;
+            
+            document.getElementById('editYtResultsBox').style.display = 'none';
+            document.getElementById('editYtResultsList').innerHTML = '';
+            document.getElementById('editTrackModal').classList.add('open');
+        }
+
+        async function searchYoutubeForEdit() {
+            const title = document.getElementById('editTitle').value.trim();
+            if (!title) {
+                showToast('검색할 곡 제목을 입력해주세요.', 'error');
+                return;
+            }
+
+            const box = document.getElementById('editYtResultsBox');
+            const list = document.getElementById('editYtResultsList');
+            box.style.display = 'block';
+            list.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:12px;">🔍 유튜브 추천 영상을 검색하는 중...</div>`;
+
+            try {
+                const res = await apiFetch(`/api/audio/youtube-search?q=${encodeURIComponent(title)}`);
+                const json = await res.json();
+                if (json.status === 'success' && Array.isArray(json.data) && json.data.length > 0) {
+                    list.innerHTML = json.data.map(r => `
+                        <div style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:6px;background:rgba(255,255,255,0.04);cursor:pointer;transition:all 0.2s;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.12)'" 
+                            onmouseout="this.style.background='rgba(255,255,255,0.04)'"
+                            onclick="selectYtResult('${r.videoUrl}', '${r.thumbnail}', '${r.title.replace(/'/g, "\\'")}')">
+                            <img src="${r.thumbnail}" style="width:70px;height:42px;border-radius:4px;object-fit:cover;flex-shrink:0;" />
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:12px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.title}</div>
+                                <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">${r.author || 'YouTube'} · ${r.duration || ''}</div>
+                            </div>
+                            <span style="font-size:11px;color:var(--accent-cyan);font-weight:700;flex-shrink:0;">맵핑 ➔</span>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = `<div style="text-align:center;padding:14px;color:var(--text-muted);font-size:12px;">일치하는 유튜브 영상 검색 결과가 없습니다.</div>`;
+                }
+            } catch(e) {
+                list.innerHTML = `<div style="text-align:center;padding:14px;color:#ef4444;font-size:12px;">유튜브 검색 중 서버 오류 발생</div>`;
+            }
+        }
+
+        function selectYtResult(videoUrl, thumbUrl, videoTitle) {
+            document.getElementById('editYtUrl').value = videoUrl;
+            document.getElementById('editImageUrl').value = thumbUrl;
+            document.getElementById('editImgPreview').src = thumbUrl;
+            showToast('🎬 유튜브 링크 및 커버 이미지가 성공적으로 맵핑되었습니다!', 'success');
+        }
+
+        async function saveEditTrack() {
+            const id = document.getElementById('editTrackId').value;
+            const title = document.getElementById('editTitle').value.trim();
+            const cat = document.getElementById('editCategory').value.trim();
+            const ytUrl = document.getElementById('editYtUrl').value.trim();
+            const imgUrl = document.getElementById('editImageUrl').value.trim();
+            const isLocked = document.getElementById('editIsVerifiedLocked').checked ? 1 : 0;
+
+            if (!id) return;
+
+            try {
+                const res = await apiFetch(`/api/audio/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: title,
+                        gameName: cat,
+                        youtubeUrl: ytUrl,
+                        imageUrl: imgUrl,
+                        isVerifiedLocked: isLocked
+                    })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast('오디오 정보 및 고정 설정이 성공적으로 저장되었습니다!', 'success');
+                    closeModal('editTrackModal');
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '수정 실패', 'error');
+                }
+            } catch(e) {
+                showToast('수정 중 서버 통신 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        function renderCategoryGallery() {
+            const grid = document.getElementById('categoryGalleryGrid');
+            const counts = {};
+            tracksData.forEach(t => {
+                if (t.cat) counts[t.cat] = (counts[t.cat] || 0) + 1;
+            });
+
+            const sortedCats = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+
+            grid.innerHTML = sortedCats.map(cat => {
+                const sample = tracksData.find(t => t.cat === cat && t.yt);
+                let thumb = categoryMetadataMap[cat] || (sample ? `https://img.youtube.com/vi/${sample.yt}/mqdefault.jpg` : DEFAULT_FALLBACK_IMG);
+                const displayName = getCategoryDisplayName(cat);
+                return `
+                <div class="category-gallery-card" onclick="filterByCat('${cat}')">
+                    <img src="${thumb}" class="cat-card-bg-img" onerror="this.onerror=null;this.src=DEFAULT_FALLBACK_IMG;" />
+                    <div class="cat-card-title">${displayName}</div>
+                    <div class="cat-card-count">${counts[cat]} Tracks</div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function switchMainView(view) {
+            currentView = view;
+            currentPage = 1;
+            document.querySelectorAll('.sidebar .nav-btn').forEach(b => b.classList.remove('active'));
+            const tracksGrid = document.getElementById('tracksGrid');
+            const catGrid = document.getElementById('categoryGalleryGrid');
+            const catCarousel = document.getElementById('catChipsCarousel');
+            const title = document.getElementById('viewTitle');
+            const sub = document.getElementById('viewSubTitle');
+
+            const paginationBar = document.getElementById('paginationBar');
+
+            if (view === 'categories') {
+                document.getElementById('navCategories').classList.add('active');
+                tracksGrid.style.display = 'none';
+                if (paginationBar) paginationBar.style.display = 'none';
+                catGrid.style.display = 'grid';
+                catCarousel.style.display = 'none';
+                title.textContent = t('audio_ui.nav_categories', '카테고리별 탐색');
+                sub.textContent = `총 ${new Set(tracksData.map(t => t.cat)).size}개 카테고리 갤러리`;
+                renderCategoryGallery();
+            } else {
+                tracksGrid.style.display = 'grid';
+                catGrid.style.display = 'none';
+                catCarousel.style.display = 'flex';
+
+                if (view === 'all') {
+                    document.getElementById('navAllTracks').classList.add('active');
+                    title.textContent = currentCategory ? `${getCategoryDisplayName(currentCategory)}` : t('audio_ui.nav_all', '전체 오디오 라이브러리');
+                    sub.textContent = `총 ${getFilteredTracks().length}개의 오디오 에셋`;
+                } else if (view === 'favorites') {
+                    document.getElementById('navFavs').classList.add('active');
+                    title.textContent = t('audio_ui.nav_favorites', '내 즐겨찾기 목록');
+                    sub.textContent = `즐겨찾기한 ${tracksData.filter(t => t.favorited).length}개 오디오`;
+                } else if (view === 'pending') {
+                    document.getElementById('navPending').classList.add('active');
+                    title.textContent = t('audio_ui.nav_pending', '검토 대기중인 오디오');
+                    sub.textContent = `관리자 승인 대기 ${tracksData.filter(t => t.status === 'pending_review').length}개 오디오`;
+                }
+                renderCards();
+            }
+            saveAudioState();
+            toggleMobileSidebar(false);
+        }
+
+        function filterByCat(cat) {
+            currentCategory = (cat === 'all') ? null : cat;
+            switchMainView('all');
+            renderCategoryChips();
+            saveAudioState();
+            toggleMobileSidebar(false);
+        }
+
+        function toggleSelectTrack(id) {
+            if (selectedTrackIds.has(id)) selectedTrackIds.delete(id);
+            else selectedTrackIds.add(id);
+            updateBatchCounts();
+            renderCards();
+        }
+
+        function selectAllBatch(all) {
+            const list = getFilteredTracks();
+            if (all) list.forEach(t => selectedTrackIds.add(t.id));
+            else selectedTrackIds.clear();
+            updateBatchCounts();
+            renderCards();
+        }
+
+        function updateBatchCounts() {
+            document.getElementById('batchCountText').textContent = selectedTrackIds.size;
+            document.getElementById('bulkModalCount').textContent = selectedTrackIds.size;
+        }
+
+        function toggleMultiSelectMode() {
+            isSelectionMode = !isSelectionMode;
+            const btn = document.getElementById('toggleSelectModeBtn');
+            const bar = document.getElementById('batchActionBar');
+            btn.classList.toggle('active-select-mode', isSelectionMode);
+            bar.style.display = isSelectionMode ? 'flex' : 'none';
+            if (!isSelectionMode) selectedTrackIds.clear();
+            updateBatchCounts();
+            renderCards();
+        }
+
+        let isYtPlayingMode = false;
+
+        function showToast(msg, type = 'info') {
+            let toastBox = document.getElementById('toastContainer');
+            if (!toastBox) {
+                toastBox = document.createElement('div');
+                toastBox.id = 'toastContainer';
+                toastBox.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;';
+                document.body.appendChild(toastBox);
+            }
+            const item = document.createElement('div');
+            item.style.cssText = `background:${type==='error'?'rgba(239,68,68,0.9)':type==='success'?'rgba(16,185,129,0.9)':'rgba(15,23,42,0.9)'};color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);backdrop-filter:blur(10px);transition:all 0.3s ease;transform:translateY(-10px);opacity:0;`;
+            item.textContent = msg;
+            toastBox.appendChild(item);
+            requestAnimationFrame(() => {
+                item.style.transform = 'translateY(0)';
+                item.style.opacity = '1';
+            });
+            setTimeout(() => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(-10px)';
+                setTimeout(() => item.remove(), 300);
+            }, 3500);
+        }
+
+        function playTrackDemo(id) {
+            const t = tracksData.find(x => String(x.id) === String(id));
+            if (!t) return;
+            currentPlayingTrackId = id;
+            document.getElementById('playerTitle').textContent = t.title;
+            document.getElementById('playerSub').textContent = `🎵 ${t.assetId}`;
+            let cover = t.imageUrl;
+            if (!cover && t.yt) cover = `https://img.youtube.com/vi/${t.yt}/mqdefault.jpg`;
+            if (!cover) cover = DEFAULT_FALLBACK_IMG;
+            document.getElementById('playerCoverImg').src = cover;
+            document.getElementById('playerTotalTime').textContent = t.dur || '0:00';
+            document.getElementById('playerPlayBtn').textContent = '⏸';
+
+            // Reset YouTube player container
+            const ytBox = document.getElementById('ytPlayerContainer');
+            if (ytBox) ytBox.innerHTML = '';
+            isYtPlayingMode = false;
+
+            const triggerYtFallback = () => {
+                if (t.yt && !isYtPlayingMode) {
+                    isYtPlayingMode = true;
+                    if (ytBox) {
+                        ytBox.innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/${t.yt}?autoplay=1&enablejsapi=1" frameborder="0" allow="autoplay"></iframe>`;
+                    }
+                    showToast('Roblox 음원 불가 - YouTube 공식 음원으로 전환 재생합니다 🎵', 'info');
+                    document.getElementById('playerPlayBtn').textContent = '⏸';
+                } else if (!isYtPlayingMode) {
+                    document.getElementById('playerPlayBtn').textContent = '▶';
+                    showToast('해당 트랙은 웹 미리듣기가 지원되지 않는 에셋입니다 (Roblox ID: ' + t.assetId + ')', 'error');
+                }
+            };
+
+            playerAudio.onerror = () => {
+                triggerYtFallback();
+            };
+
+            // Try backend audio stream first
+            const previewUrl = `${API_BASE}/api/audio/preview/${t.id}`;
+            playerAudio.src = previewUrl;
+            playerAudio.volume = isMuted ? 0 : currentVolume;
+            playerAudio.play().then(() => {
+                isYtPlayingMode = false;
+            }).catch(e => {
+                triggerYtFallback();
+            });
+        }
+
+        function toggleFav(id) {
+            const t = tracksData.find(x => String(x.id) === String(id));
+            if (t) {
+                t.favorited = !t.favorited;
+                renderCards();
+                updateCounts();
+            }
+        }
+
+        function togglePlayState() {
+            if (isYtPlayingMode) {
+                const ytBox = document.getElementById('ytPlayerContainer');
+                if (ytBox && ytBox.innerHTML) {
+                    ytBox.innerHTML = '';
+                    document.getElementById('playerPlayBtn').textContent = '▶';
+                    isYtPlayingMode = false;
+                }
+                return;
+            }
+
+            if (playerAudio.src && !playerAudio.paused) {
+                playerAudio.pause();
+                document.getElementById('playerPlayBtn').textContent = '▶';
+            } else if (playerAudio.src) {
+                playerAudio.play().then(() => {
+                    document.getElementById('playerPlayBtn').textContent = '⏸';
+                }).catch(() => {
+                    document.getElementById('playerPlayBtn').textContent = '▶';
+                });
+            } else if (tracksData.length > 0) {
+                playTrackDemo(tracksData[0].id);
+            }
+        }
+
+        function playPrevTrack() {
+            const list = getFilteredTracks();
+            if (list.length === 0) return;
+            const idx = list.findIndex(x => String(x.id) === String(currentPlayingTrackId));
+            const prevIdx = (idx > 0) ? idx - 1 : list.length - 1;
+            playTrackDemo(list[prevIdx].id);
+        }
+
+        function playNextTrack() {
+            const list = getFilteredTracks();
+            if (list.length === 0) return;
+            const idx = list.findIndex(x => String(x.id) === String(currentPlayingTrackId));
+            const nextIdx = (idx >= 0 && idx < list.length - 1) ? idx + 1 : 0;
+            playTrackDemo(list[nextIdx].id);
+        }
+
+        function seekTrack(event) {
+            if (!playerAudio.duration || isNaN(playerAudio.duration)) return;
+            const bar = document.getElementById('dockProgressBar');
+            const rect = bar.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+            playerAudio.currentTime = ratio * playerAudio.duration;
+        }
+
+        playerAudio.ontimeupdate = () => {
+            if (playerAudio.duration && !isNaN(playerAudio.duration)) {
+                const percent = (playerAudio.currentTime / playerAudio.duration) * 100;
+                document.getElementById('dockProgressFill').style.width = percent + '%';
+                document.getElementById('playerCurTime').textContent = fmtTime(playerAudio.currentTime);
+            }
+        };
+
+        playerAudio.onended = () => {
+            playNextTrack();
+        };
+
+        /* ─── REALTIME VOLUME CONTROLS ─── */
+        let currentVolume = 0.7;
+        let isMuted = false;
+
+        function initVolume() {
+            try {
+                const savedVol = localStorage.getItem('kadio_audio_volume');
+                if (savedVol !== null && !isNaN(savedVol)) {
+                    currentVolume = parseFloat(savedVol);
+                }
+            } catch(e) {}
+            
+            setPlayerVolume(currentVolume);
+            const slider = document.getElementById('volumeSlider');
+            if (slider) slider.value = currentVolume;
+            updateVolumeIcon(currentVolume);
+        }
+
+        function changeVolume(val) {
+            currentVolume = parseFloat(val);
+            isMuted = (currentVolume === 0);
+            setPlayerVolume(currentVolume);
+            try {
+                localStorage.setItem('kadio_audio_volume', currentVolume);
+                if (currentVolume > 0) {
+                    localStorage.setItem('kadio_last_non_zero_volume', currentVolume);
+                }
+            } catch(e) {}
+            updateVolumeIcon(currentVolume);
+        }
+
+        function toggleMute() {
+            const slider = document.getElementById('volumeSlider');
+            if (isMuted || currentVolume === 0) {
+                isMuted = false;
+                let lastVol = 0.7;
+                try {
+                    const saved = localStorage.getItem('kadio_last_non_zero_volume');
+                    if (saved && !isNaN(saved)) lastVol = parseFloat(saved);
+                } catch(e) {}
+                currentVolume = (lastVol > 0) ? lastVol : 0.7;
+            } else {
+                try {
+                    localStorage.setItem('kadio_last_non_zero_volume', currentVolume);
+                } catch(e) {}
+                isMuted = true;
+                currentVolume = 0;
+            }
+            if (slider) slider.value = currentVolume;
+            setPlayerVolume(currentVolume);
+            try {
+                localStorage.setItem('kadio_audio_volume', currentVolume);
+            } catch(e) {}
+            updateVolumeIcon(currentVolume);
+        }
+
+        function setPlayerVolume(vol) {
+            const safeVol = Math.max(0, Math.min(1, vol));
+            if (playerAudio) {
+                playerAudio.volume = safeVol;
+            }
+            // YouTube iframe volume sync via postMessage
+            const ytBox = document.getElementById('ytPlayerContainer');
+            if (ytBox) {
+                const iframe = ytBox.querySelector('iframe');
+                if (iframe && iframe.contentWindow) {
+                    try {
+                        iframe.contentWindow.postMessage(JSON.stringify({
+                            event: 'command',
+                            func: 'setVolume',
+                            args: [Math.round(safeVol * 100)]
+                        }), '*');
+                    } catch(e) {}
+                }
+            }
+        }
+
+        function updateVolumeIcon(vol) {
+            const btn = document.getElementById('volMuteBtn');
+            if (!btn) return;
+            if (vol === 0 || isMuted) {
+                btn.textContent = '🔇';
+                btn.title = '음소거 해제';
+            } else if (vol < 0.35) {
+                btn.textContent = '🔈';
+                btn.title = '음소거';
+            } else if (vol < 0.7) {
+                btn.textContent = '🔉';
+                btn.title = '음소거';
+            } else {
+                btn.textContent = '🔊';
+                btn.title = '음소거';
+            }
+        }
+
+        function openCurrentTrackDetail() {
+            if (!currentPlayingTrackId) {
+                showToast('현재 재생 중인 트랙이 없습니다.', 'info');
+                return;
+            }
+            const t = tracksData.find(x => String(x.id) === String(currentPlayingTrackId));
+            if (t) {
+                alert(`🎵 트랙 상세 정보\n\n제목: ${t.title}\nRoblox Asset ID: ${t.assetId}\n카테고리: ${getCategoryDisplayName(t.cat)}\n재생 시간: ${t.dur}\n\nRoblox Store에서 확인하려면 우측 상단 링크를 클릭하세요.`);
+            }
+        }
+
+        // 카드 본체 클릭 시 (다중선택 모드가 아니면 자동 재생되지 않음)
+        function onCardClick(id, event) {
+            if (isSelectionMode) {
+                toggleSelectTrack(id);
+            }
+        }
+
+        async function handleBulkApprove() {
+            if (selectedTrackIds.size === 0) return;
+            if (!confirm(`선택한 ${selectedTrackIds.size}개 곡을 일괄 승인하시겠습니까?`)) return;
+            try {
+                for (const id of selectedTrackIds) {
+                    await fetch(`/api/audio/approve-and-update/${id}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({})
+                    });
+                }
+                showToast(`선택한 ${selectedTrackIds.size}개 곡이 승인되었습니다.`, 'success');
+                selectedTrackIds.clear();
+                toggleMultiSelectMode();
+                await loadRealAudios();
+            } catch(e) {
+                showToast('일괄 승인 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        async function handleBulkDelete() {
+            if (selectedTrackIds.size === 0) return;
+            if (!confirm(`선택한 ${selectedTrackIds.size}개 곡을 영구 삭제하시겠습니까?`)) return;
+            try {
+                for (const id of selectedTrackIds) {
+                    await fetch(`/api/audio/${id}`, { method: 'DELETE' });
+                }
+                showToast(`선택한 ${selectedTrackIds.size}개 곡이 삭제되었습니다.`, 'success');
+                selectedTrackIds.clear();
+                toggleMultiSelectMode();
+                await loadRealAudios();
+            } catch(e) {
+                showToast('일괄 삭제 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        async function submitAddAudio() {
+            const assetId = document.getElementById('newAssetId').value.trim();
+            const title = document.getElementById('newTitle').value.trim();
+            const category = document.getElementById('newCategory').value.trim() || 'Music';
+            const ytUrl = document.getElementById('newYtUrl').value.trim();
+
+            if (!assetId) {
+                showToast('Roblox Audio Asset ID를 입력해주세요.', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/audio/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        audioAssetId: assetId,
+                        title: title || `Audio ${assetId}`,
+                        gameName: category,
+                        youtubeUrl: ytUrl
+                    })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast('신규 오디오가 성공적으로 등록되었습니다!', 'success');
+                    closeModal('addAudioModal');
+                    document.getElementById('newAssetId').value = '';
+                    document.getElementById('newTitle').value = '';
+                    document.getElementById('newCategory').value = '';
+                    document.getElementById('newYtUrl').value = '';
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '오디오 등록에 실패했습니다.', 'error');
+                }
+            } catch(e) {
+                showToast('서버 통신 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        async function executeBulkCategory() {
+            const custom = document.getElementById('bulkCustomInput').value.trim();
+            const existing = document.getElementById('bulkSelectExisting').value;
+            const targetCat = custom || existing;
+
+            if (!targetCat) {
+                showToast('변경할 카테고리를 선택하거나 입력해주세요.', 'error');
+                return;
+            }
+            if (selectedTrackIds.size === 0) return;
+
+            try {
+                for (const id of selectedTrackIds) {
+                    await fetch(`/api/audio/${id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ gameName: targetCat })
+                    });
+                }
+                showToast(`선택한 ${selectedTrackIds.size}개 곡의 카테고리가 '${targetCat}'(으)로 변경되었습니다.`, 'success');
+                closeModal('bulkCategoryModal');
+                selectedTrackIds.clear();
+                toggleMultiSelectMode();
+                await loadRealAudios();
+            } catch(e) {
+                showToast('카테고리 변경 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        function onAdminCatSelectChange() {
+            const cat = document.getElementById('adminCatSelect')?.value;
+            if (!cat) return;
+            const imgInput = document.getElementById('adminCatImgUrl');
+            if (imgInput) imgInput.value = categoryMetadataMap[cat] || '';
+
+            const trans = categoryTranslations[cat] || {};
+            ['ko', 'en', 'ja', 'zh', 'ru'].forEach(lang => {
+                const el = document.getElementById(`catTrans_${lang}`);
+                if (el) el.value = trans[lang] || '';
+            });
+        }
+
+        async function saveCategoryImgAndTranslations() {
+            const cat = document.getElementById('adminCatSelect')?.value;
+            const imgUrl = document.getElementById('adminCatImgUrl')?.value.trim();
+            if (!cat) {
+                showToast('카테고리를 선택해주세요.', 'error');
+                return;
+            }
+
+            try {
+                // 1. Save Image Metadata if provided
+                if (imgUrl) {
+                    await apiFetch('/api/audio/categories/metadata', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ category: cat, imageUrl: imgUrl })
+                    });
+                }
+
+                // 2. Save Translations
+                const translations = {};
+                ['ko', 'en', 'ja', 'zh', 'ru'].forEach(lang => {
+                    const val = document.getElementById(`catTrans_${lang}`)?.value.trim();
+                    if (val) translations[lang] = val;
+                });
+
+                await apiFetch('/api/audio/categories/translations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ categoryKey: cat, translations })
+                });
+
+                showToast(`카테고리 '${cat}' 설정 및 다국어 번역이 저장되었습니다.`, 'success');
+                await loadRealAudios();
+            } catch(e) {
+                showToast('설정 저장 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        async function executeCategoryRename() {
+            const oldCat = document.getElementById('adminRenameOldCat')?.value;
+            const newCat = document.getElementById('adminRenameNewCat')?.value.trim();
+
+            if (!oldCat || !newCat) {
+                showToast('기존 카테고리와 새로운 카테고리명을 모두 입력해주세요.', 'error');
+                return;
+            }
+            if (oldCat === newCat) {
+                showToast('기존 카테고리명과 새 카테고리명이 동일합니다.', 'error');
+                return;
+            }
+
+            if (!confirm(`'${oldCat}' 카테고리의 모든 곡을 '${newCat}'(으)로 일괄 변경하시겠습니까?`)) return;
+
+            try {
+                const res = await apiFetch('/api/audio/categories/rename', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ oldCategory: oldCat, newCategory: newCat })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(json.message || '카테고리 이름이 성공적으로 변경되었습니다!', 'success');
+                    document.getElementById('adminRenameNewCat').value = '';
+                    closeModal('unifiedAdminModal');
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '카테고리 변경 실패', 'error');
+                }
+            } catch(e) {
+                showToast('카테고리 이름 변경 중 서버 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        async function loadDeletedAudiosList() {
+            const listEl = document.getElementById('adminDeletedAudiosList');
+            if (!listEl) return;
+            try {
+                const res = await apiFetch('/api/audio/deleted-list');
+                const json = await res.json();
+                if (json.status === 'success' && Array.isArray(json.data)) {
+                    if (json.data.length === 0) {
+                        listEl.innerHTML = `<div style="color:var(--text-muted);text-align:center;padding:16px;">삭제된 에셋이 없습니다.</div>`;
+                        return;
+                    }
+                    listEl.innerHTML = json.data.map(d => `
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <span style="font-family:var(--font-mono);color:var(--accent-cyan);">🎵 ${d.audioAssetId}</span>
+                            <span style="font-size:10px;color:var(--text-muted);">${d.deletedAt ? new Date(d.deletedAt).toLocaleDateString() : ''}</span>
+                            <button class="quick-tool-btn" style="height:26px;padding:0 8px;font-size:11px;" onclick="restoreDeletedAudio('${d.audioAssetId}')">복원</button>
+                        </div>
+                    `).join('');
+                }
+            } catch(e) {
+                listEl.innerHTML = `<div style="color:var(--text-muted);text-align:center;padding:16px;">에셋 목록 로드 실패</div>`;
+            }
+        }
+
+        async function restoreDeletedAudio(assetId) {
+            try {
+                const res = await apiFetch(`/api/audio/restore/${assetId}`, { method: 'POST' });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(`에셋 [${assetId}] 복원 완료!`, 'success');
+                    await loadDeletedAudiosList();
+                } else {
+                    showToast(json.message || '복원 실패', 'error');
+                }
+            } catch(e) {
+                showToast('복원 요청 중 오류 발생', 'error');
+            }
+        }
+
+        async function saveCatBlacklist() {
+            const checkboxes = document.querySelectorAll('#adminCatBlacklistGrid input[type="checkbox"]');
+            const hiddenCats = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+            try {
+                const res = await apiFetch('/api/audio/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value: hiddenCats.join('\n') })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast('카테고리 숨김 설정이 저장되었습니다.', 'success');
+                    closeModal('unifiedAdminModal');
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '저장 실패', 'error');
+                }
+            } catch(e) {
+                showToast('설정 저장 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        async function runVacuum() {
+            try {
+                showToast('DB 최적화(VACUUM) 실행 중...', 'info');
+                const res = await apiFetch('/api/audio/admin/vacuum', { method: 'POST' });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast('⚡ DB VACUUM 최적화가 완료되었습니다!', 'success');
+                    await loadAdminStats();
+                } else {
+                    showToast(json.message || '최적화 실패', 'error');
+                }
+            } catch(e) {
+                showToast('최적화 요청 오류', 'error');
+            }
+        }
+
+        let isLightMode = false;
+        function toggleThemeMode() {
+            isLightMode = !isLightMode;
+            document.getElementById('themeEmoji').textContent = isLightMode ? '☀️' : '🌙';
+            document.body.classList.toggle('light-theme', isLightMode);
+        }
+
+        function openUnifiedAdminModal() { 
+            loadAdminStats();
+            loadDeletedAudiosList();
+
+            // populate admin categories
+            const catSelect = document.getElementById('adminCatSelect');
+            const renameOldCat = document.getElementById('adminRenameOldCat');
+            const blacklistGrid = document.getElementById('adminCatBlacklistGrid');
+            const cats = Array.from(new Set(tracksData.map(t => t.cat).filter(Boolean))).sort();
+            
+            if (catSelect) {
+                catSelect.innerHTML = cats.map(c => `<option value="${c}">${getCategoryDisplayName(c)} (${c})</option>`).join('');
+                onAdminCatSelectChange();
+            }
+            if (renameOldCat) {
+                renameOldCat.innerHTML = cats.map(c => `<option value="${c}">${getCategoryDisplayName(c)} (${c})</option>`).join('');
+            }
+            if (blacklistGrid) {
+                blacklistGrid.innerHTML = cats.map(c => `
+                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                        <input type="checkbox" value="${c}" /> ${getCategoryDisplayName(c)} (${c})
+                    </label>
+                `).join('');
+            }
+            document.getElementById('unifiedAdminModal').classList.add('open'); 
+        }
+
+        function openAddAudioModal() { document.getElementById('addAudioModal').classList.add('open'); }
+        function openBulkCategoryModal() { 
+            const sel = document.getElementById('bulkSelectExisting');
+            const cats = Array.from(new Set(tracksData.map(t => t.cat).filter(Boolean)));
+            sel.innerHTML = cats.map(c => `<option value="${c}">${getCategoryDisplayName(c)} (${c})</option>`).join('');
+            document.getElementById('bulkCategoryModal').classList.add('open'); 
+        }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        function switchAdminTab(tab, btn) {
+            document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            ['stats', 'catImg', 'rename', 'blacklist', 'restore', 'optimize'].forEach(t => {
+                const el = document.getElementById(`adminTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if (el) el.style.display = t === tab ? 'block' : 'none';
+            });
+            if (tab === 'restore') loadDeletedAudiosList();
+        }
+
+        async function loadAdminStats() {
+            try {
+                const res = await apiFetch('/api/audio/admin/db-stats');
+                const json = await res.json();
+                if (json.status === 'success' && json.stats) {
+                    document.getElementById('adminStatTotal').textContent = json.stats.totalAudios || 0;
+                    document.getElementById('adminStatActive').textContent = json.stats.activeCount || 0;
+                    document.getElementById('adminStatPending').textContent = json.stats.pendingCount || 0;
+                }
+            } catch(e) {}
+        }
+
+        async function refreshAudios() {
+            await loadRealAudios();
+            showToast('실시간 DB 오디오 목록이 최신으로 갱신되었습니다!', 'success');
+        }
+
+        document.getElementById('searchInput')?.addEventListener('input', () => {
+            currentPage = 1;
+            renderCards();
+            saveAudioState();
+        });
+
+        // Initialize with real database!
+        loadRealAudios();
+    </script>
+</body>
+
+</html>
