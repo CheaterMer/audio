@@ -1953,6 +1953,16 @@
             if (currentView === 'categories') renderCategoryGallery();
         }
 
+        function openModal(id) {
+            const m = document.getElementById(id);
+            if (m) m.classList.add('active');
+        }
+
+        function closeModal(id) {
+            const m = document.getElementById(id);
+            if (m) m.classList.remove('active');
+        }
+
         function toggleMobileSidebar(force) {
             const sidebar = document.getElementById('appSidebar');
             const backdrop = document.getElementById('sidebarBackdrop');
