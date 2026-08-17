@@ -1112,7 +1112,7 @@
     }
 
     // Sort
-    if (S.activeCategory === PENDING_REVIEW_CATEGORY && S.sortMode === 'default') {
+    if (S.activeCategory === PENDING_REVIEW_CATEGORY && (S.sortMode === 'default' || S.sortMode === 'recommended')) {
       list.sort((a, b) => {
         const scoreA = getPendingPriorityScore(a);
         const scoreB = getPendingPriorityScore(b);
@@ -1121,8 +1121,95 @@
       });
     } else {
       switch (S.sortMode) {
-        case 'title_asc': list.sort((a, b) => a.title.localeCompare(b.title)); break;
-        case 'title_desc': list.sort((a, b) => b.title.localeCompare(a.title)); break;
+        case 'recommended':
+        case 'default': {
+          list.sort((a, b) => {
+            const hasYtA = !!(a.youtubeUrl && String(a.youtubeUrl).trim());
+            const hasYtB = !!(b.youtubeUrl && String(b.youtubeUrl).trim());
+            const activeA = a.serverPlayable === 1 && a.clientPlayable === 1;
+            const activeB = b.serverPlayable === 1 && b.clientPlayable === 1;
+            if (activeA && hasYtA && !(activeB && hasYtB)) return -1;
+            if (activeB && hasYtB && !(activeA && hasYtA)) return 1;
+            if (activeA && !activeB) return -1;
+            if (activeB && !activeA) return 1;
+            if (hasYtA && !hasYtB) return -1;
+            if (hasYtB && !hasYtA) return 1;
+            return (a.title || '').localeCompare(b.title || '');
+          });
+          break;
+        }
+        case 'latest': {
+          list.sort((a, b) => {
+            const idA = parseInt(String(a.id || a.audioAssetId).replace(/\D/g, ''), 10) || 0;
+            const idB = parseInt(String(b.id || b.audioAssetId).replace(/\D/g, ''), 10) || 0;
+            return idB - idA;
+          });
+          break;
+        }
+        case 'oldest': {
+          list.sort((a, b) => {
+            const idA = parseInt(String(a.id || a.audioAssetId).replace(/\D/g, ''), 10) || 0;
+            const idB = parseInt(String(b.id || b.audioAssetId).replace(/\D/g, ''), 10) || 0;
+            return idA - idB;
+          });
+          break;
+        }
+        case 'title_asc': list.sort((a, b) => (a.title || '').localeCompare(b.title || '')); break;
+        case 'title_desc': list.sort((a, b) => (b.title || '').localeCompare(a.title || '')); break;
+        case 'duration_desc': list.sort((a, b) => (b.duration || 0) - (a.duration || 0)); break;
+        case 'duration_asc': list.sort((a, b) => (a.duration || 0) - (b.duration || 0)); break;
+        case 'asset_id_asc': {
+          list.sort((a, b) => {
+            const numA = BigInt(String(a.audioAssetId || a.id || '0').replace(/\D/g, '') || 0);
+            const numB = BigInt(String(b.audioAssetId || b.id || '0').replace(/\D/g, '') || 0);
+            return numA < numB ? -1 : numA > numB ? 1 : 0;
+          });
+          break;
+        }
+        case 'asset_id_desc': {
+          list.sort((a, b) => {
+            const numA = BigInt(String(a.audioAssetId || a.id || '0').replace(/\D/g, '') || 0);
+            const numB = BigInt(String(b.audioAssetId || b.id || '0').replace(/\D/g, '') || 0);
+            return numA > numB ? -1 : numA < numB ? 1 : 0;
+          });
+          break;
+        }
+        case 'yt_first': {
+          list.sort((a, b) => {
+            const hasYtA = !!(a.youtubeUrl && String(a.youtubeUrl).trim());
+            const hasYtB = !!(b.youtubeUrl && String(b.youtubeUrl).trim());
+            if (hasYtA !== hasYtB) return hasYtA ? -1 : 1;
+            return (a.title || '').localeCompare(b.title || '');
+          });
+          break;
+        }
+        case 'yt_none': {
+          list.sort((a, b) => {
+            const hasYtA = !!(a.youtubeUrl && String(a.youtubeUrl).trim());
+            const hasYtB = !!(b.youtubeUrl && String(b.youtubeUrl).trim());
+            if (hasYtA !== hasYtB) return hasYtA ? 1 : -1;
+            return (a.title || '').localeCompare(b.title || '');
+          });
+          break;
+        }
+        case 'active_first': {
+          list.sort((a, b) => {
+            const activeA = a.serverPlayable === 1 && a.clientPlayable === 1 ? 1 : (a.serverPlayable === 1 || a.clientPlayable === 1 ? 2 : 3);
+            const activeB = b.serverPlayable === 1 && b.clientPlayable === 1 ? 1 : (b.serverPlayable === 1 || b.clientPlayable === 1 ? 2 : 3);
+            if (activeA !== activeB) return activeA - activeB;
+            return (a.title || '').localeCompare(b.title || '');
+          });
+          break;
+        }
+        case 'inactive_first': {
+          list.sort((a, b) => {
+            const inA = a.serverPlayable === 0 && a.clientPlayable === 0 ? 1 : 2;
+            const inB = b.serverPlayable === 0 && b.clientPlayable === 0 ? 1 : 2;
+            if (inA !== inB) return inA - inB;
+            return (a.title || '').localeCompare(b.title || '');
+          });
+          break;
+        }
         case 'category_asc': list.sort((a, b) => (a.category || '').localeCompare(b.category || '')); break;
       }
     }

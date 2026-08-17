@@ -110,6 +110,7 @@
             letter-spacing: -0.5px;
             background: linear-gradient(135deg, #fff, #94a3b8);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -443,6 +444,7 @@
         body.light-theme .brand-title {
             background: linear-gradient(135deg, #0f172a, #334155);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         body.light-theme .search-pill-box input {
@@ -667,6 +669,120 @@
             background: rgba(239, 68, 68, 0.15);
             border-color: rgba(239, 68, 68, 0.4);
             color: #fca5a5;
+        }
+
+        /* ─── SORT & FILTER TOOLBAR ─── */
+        .filter-sort-toolbar {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            margin-bottom: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            backdrop-filter: blur(12px);
+        }
+
+        .filter-sort-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-group-left {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-group-right {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-select-box {
+            height: 34px;
+            padding: 0 10px;
+            font-size: 12px;
+            font-weight: 700;
+            background: rgba(22, 27, 34, 0.95);
+            color: #fff;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-select-box:hover,
+        .filter-select-box:focus {
+            border-color: var(--accent-indigo);
+            background: rgba(30, 41, 59, 0.95);
+        }
+
+        .quick-filter-chip {
+            padding: 5px 11px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.18s ease;
+            user-select: none;
+        }
+
+        .quick-filter-chip:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .quick-filter-chip.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(0, 229, 255, 0.25));
+            border-color: var(--accent-cyan);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 229, 255, 0.2);
+        }
+
+        .filter-stats-badge {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        body.light-theme .filter-sort-toolbar {
+            background: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        }
+
+        body.light-theme .filter-select-box {
+            background: #f8fafc !important;
+            color: #0f172a !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        body.light-theme .quick-filter-chip {
+            background: #f1f5f9 !important;
+            color: #475569 !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        body.light-theme .quick-filter-chip.active {
+            background: #e0e7ff !important;
+            border-color: #6366f1 !important;
+            color: #3730a3 !important;
         }
 
         /* ─── TRACK CARDS & CATEGORY GALLERY ─── */
@@ -1137,7 +1253,8 @@
             animation: fadeIn 0.2s ease;
         }
 
-        .modal-overlay.open {
+        .modal-overlay.open,
+        .modal-overlay.active {
             display: flex;
         }
 
@@ -1456,6 +1573,7 @@
                         <option value="ja">🇯🇵 日本語</option>
                         <option value="zh">🇨🇳 简体中文</option>
                         <option value="ru">🇷🇺 Русский</option>
+                        <option value="vi">🇻🇳 Tiếng Việt</option>
                     </select>
                     <button class="quick-tool-btn admin-mode-active" id="adminModeToggleBtn" style="display:none;" onclick="toggleAdminMode()">
                         <span>🛡️</span> <span id="adminModeBtnText" data-i18n="audio_ui.admin_mode_on">관리자 모드 ON</span>
@@ -1465,6 +1583,9 @@
                     </button>
                     <button class="quick-tool-btn primary admin-only-feature" id="addAudioNavBtn" style="display:none;" onclick="openAddAudioModal()">
                         <span>➕</span> <span data-i18n="audio_ui.add_audio">오디오 추가</span>
+                    </button>
+                    <button class="quick-tool-btn admin-only-feature" id="mappingSuggestionsBtn" style="display:none;position:relative;background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.3);color:#fbbf24;" onclick="openMappingReviewModal()">
+                        <span>🔔</span> <span>매핑 제안</span> <span id="mappingSuggestionBadge" style="display:none;background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:4px;">0</span>
                     </button>
                     <button class="quick-tool-btn" id="discordLoginBtn" style="background:#5865F2;color:#fff;border:none;font-weight:600;" onclick="loginWithDiscord()">
                         <span>🎮</span> <span data-i18n="audio_ui.login_discord">Discord 로그인</span>
@@ -1496,10 +1617,12 @@
                 </div>
                 <div class="batch-bar-actions">
                     <button class="batch-action-pill change-cat" onclick="openBulkCategoryModal()">📁 카테고리 일괄 변경</button>
-                    <button class="batch-action-pill approve" id="batchApproveBtn" onclick="handleBulkApprove()">✓ 일괄 승인</button>
-                    <button class="batch-action-pill" style="background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3);color:#f87171;" onclick="handleBulkReject()">✕ 일괄 거절</button>
-                    <button class="batch-action-pill" style="background:rgba(168,85,247,0.15);border-color:rgba(168,85,247,0.3);color:#c084fc;" onclick="openBulkPlayabilityModal()">⚡ 재생 상태 일괄 변경</button>
-                    <button class="batch-action-pill delete" onclick="handleBulkDelete()">🗑️ 선택 삭제</button>
+                    <button class="batch-action-pill approve owner-only-feature" id="batchApproveBtn" onclick="handleBulkApprove()">✓ 일괄 승인</button>
+                    <button class="batch-action-pill owner-only-feature" style="background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3);color:#f87171;" onclick="handleBulkReject()">✕ 일괄 거절</button>
+                    <button class="batch-action-pill owner-only-feature" style="background:rgba(168,85,247,0.15);border-color:rgba(168,85,247,0.3);color:#c084fc;" onclick="openBulkPlayabilityModal()">⚡ 재생 상태 일괄 변경</button>
+                    <button class="batch-action-pill owner-only-feature" style="background:rgba(59,130,246,0.15);border-color:rgba(59,130,246,0.3);color:#60a5fa;" onclick="handleBulkStudioReverify()">🎮 스튜디오 검증 요청</button>
+                    <button class="batch-action-pill owner-only-feature" style="background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3);color:#fca5a5;" onclick="executeBulkAutoMap()">🎬 유튜브 자동 맵핑</button>
+                    <button class="batch-action-pill delete owner-only-feature" onclick="handleBulkDelete()">🗑️ 선택 삭제</button>
                 </div>
             </div>
 
@@ -1509,8 +1632,77 @@
                     <h1 id="viewTitle">전체 오디오 라이브러리</h1>
                     <div class="view-subtitle" id="viewSubTitle">데이터베이스에서 오디오를 로드하는 중...</div>
                 </div>
-                <div style="display:flex;gap:8px;">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="quick-tool-btn admin-only-feature" id="scanUnmappedYtBtn" style="display:none;background:rgba(14,165,233,0.15);border-color:rgba(14,165,233,0.3);color:#38bdf8;" onclick="scanUnmappedAudiosForYoutube()">⚡ 미맵핑곡 유튜브 자동 스캔</button>
                     <button class="quick-tool-btn" onclick="refreshAudios()">🔄 실시간 DB 새로고침</button>
+                </div>
+            </div>
+
+            <!-- SORT & STATUS FILTER TOOLBAR -->
+            <div class="filter-sort-toolbar" id="filterSortToolbar">
+                <!-- 1st Row: Sort Select & Status Filter Selectors -->
+                <div class="filter-sort-row">
+                    <div class="filter-group-left">
+                        <span style="font-size:12px;font-weight:700;color:var(--text-secondary);display:inline-flex;align-items:center;gap:4px;">
+                            <span>🔀</span> <span data-i18n="audio_ui.sort_label">정렬:</span>
+                        </span>
+                        <select class="filter-select-box" id="sortSelect" onchange="onSortChange(this.value)">
+                            <option value="recommended" data-i18n="audio_ui.sort_recommended">🌟 추천순 (스마트 정렬)</option>
+                            <option value="latest" data-i18n="audio_ui.sort_latest">🕒 최신 등록순</option>
+                            <option value="oldest" data-i18n="audio_ui.sort_oldest">⌛ 오래된 등록순</option>
+                            <option value="title_asc" data-i18n="audio_ui.sort_title_asc">🔤 제목 오름차순 (A→Z / 가나다)</option>
+                            <option value="title_desc" data-i18n="audio_ui.sort_title_desc">🔤 제목 내림차순 (Z→A / 하파타)</option>
+                            <option value="duration_desc" data-i18n="audio_ui.sort_duration_desc">⏱️ 재생 시간 긴 순</option>
+                            <option value="duration_asc" data-i18n="audio_ui.sort_duration_asc">⏱️ 재생 시간 짧은 순</option>
+                            <option value="asset_id_asc" data-i18n="audio_ui.sort_asset_id_asc">🔢 Asset ID 오름차순</option>
+                            <option value="asset_id_desc" data-i18n="audio_ui.sort_asset_id_desc">🔢 Asset ID 내림차순</option>
+                            <option value="yt_first" data-i18n="audio_ui.sort_yt_first">🎬 유튜브 맵핑곡 우선</option>
+                            <option value="yt_none" data-i18n="audio_ui.sort_yt_none">🔗 유튜브 미맵핑곡 우선</option>
+                            <option value="active_first" data-i18n="audio_ui.sort_active_first">🟢 재생 활성화 우선</option>
+                            <option value="inactive_first" data-i18n="audio_ui.sort_inactive_first">🔴 재생 비활성화 우선</option>
+                        </select>
+
+                        <!-- YouTube Status Filter Dropdown -->
+                        <select class="filter-select-box" id="filterYoutubeSelect" onchange="onFilterYoutubeChange(this.value)">
+                            <option value="all" data-i18n="audio_ui.filter_yt_all">유튜브 전체</option>
+                            <option value="mapped" data-i18n="audio_ui.filter_yt_mapped">▶ 유튜브 맵핑됨</option>
+                            <option value="unmapped" data-i18n="audio_ui.filter_yt_unmapped">✕ 유튜브 미맵핑</option>
+                        </select>
+
+                        <!-- Playability Status Filter Dropdown -->
+                        <select class="filter-select-box" id="filterPlayabilitySelect" onchange="onFilterPlayabilityChange(this.value)">
+                            <option value="all" data-i18n="audio_ui.filter_play_all">재생 상태 전체</option>
+                            <option value="active" data-i18n="audio_ui.filter_play_active">🟢 완전 활성화 (Server+Client)</option>
+                            <option value="partial" data-i18n="audio_ui.filter_play_partial">🔵 부분 활성화</option>
+                            <option value="inactive" data-i18n="audio_ui.filter_play_inactive">🔴 비활성화/실패</option>
+                            <option value="queued" data-i18n="audio_ui.filter_play_queued">🎯 1순위 검증 대기</option>
+                            <option value="unverified" data-i18n="audio_ui.filter_play_unverified">⚪ 일반 미검증</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group-right">
+                        <button class="quick-filter-chip" id="filterLockedChip" onclick="toggleLockedFilter()">
+                            <span>🔒</span> <span data-i18n="audio_ui.filter_locked_only">고정(Locked) 에셋만</span>
+                        </button>
+                        <button class="quick-filter-chip" onclick="resetAllSortAndFilters()" style="background:rgba(239,68,68,0.1);color:#f87171;border-color:rgba(239,68,68,0.25);" title="필터 초기화">
+                            <span>🔄</span> <span data-i18n="audio_ui.filter_clear">초기화</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2nd Row: Quick Pills & Real-time Matching Summary -->
+                <div class="filter-sort-row" style="padding-top:4px;border-top:1px solid rgba(255,255,255,0.06);">
+                    <div class="filter-group-left" id="quickPillsGroup">
+                        <span style="font-size:11px;font-weight:700;color:var(--text-muted);" data-i18n="audio_ui.filter_label">빠른 필터:</span>
+                        <div class="quick-filter-chip active" id="pillAll" onclick="setQuickPill('all')">전체</div>
+                        <div class="quick-filter-chip" id="pillActive" onclick="setQuickPill('active')">🟢 활성화 오디오</div>
+                        <div class="quick-filter-chip" id="pillYtMapped" onclick="setQuickPill('yt_mapped')">▶ 유튜브 맵핑됨</div>
+                        <div class="quick-filter-chip" id="pillYtUnmapped" onclick="setQuickPill('yt_unmapped')">✕ 유튜브 미맵핑</div>
+                        <div class="quick-filter-chip" id="pillInactive" onclick="setQuickPill('inactive')">🔴 비활성화/실패</div>
+                    </div>
+                    <div class="filter-group-right">
+                        <span class="filter-stats-badge" id="filterResultSummary">조건 일치: 0개</span>
+                    </div>
                 </div>
             </div>
 
@@ -1552,7 +1744,7 @@
         <div class="floating-player-dock" id="floatingPlayerDock">
             <div class="dock-left-track">
                 <img src="./images/icon128.png" class="dock-cover" id="playerCoverImg"
-                    onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'128\' height=\'128\' viewBox=\'0 0 128 128\'%3E%3Crect width=\'128\' height=\'128\' rx=\'16\' fill=\'%2311161d\'/%3E%3Cpath d=\'M76 34v36.3a14 14 0 1 0 8 12.7V46l24-6v-6z\' fill=\'%2300e5ff\' opacity=\'0.8\'/%3E%3C/svg%3E';" />
+                    onerror="handleImgError(this)" />
                 <div class="dock-track-info">
                     <span class="dock-track-title" id="playerTitle">재생 중인 곡 없음</span>
                     <span class="dock-track-sub" id="playerSub">오디오 카드를 클릭하여 재생</span>
@@ -1599,9 +1791,11 @@
                         <button class="modal-tab-btn active" onclick="switchAdminTab('stats', this)">📊 DB 통계 요약</button>
                         <button class="modal-tab-btn" onclick="switchAdminTab('catImg', this)">🖼️ 이미지 & 번역</button>
                         <button class="modal-tab-btn" onclick="switchAdminTab('rename', this)">🏷️ 카테고리 이름 변경</button>
-                        <button class="modal-tab-btn" onclick="switchAdminTab('blacklist', this)">🚫 카테고리 숨김</button>
-                        <button class="modal-tab-btn" onclick="switchAdminTab('restore', this)">🗑️ 에셋 복원</button>
-                        <button class="modal-tab-btn" onclick="switchAdminTab('optimize', this)">⚡ 유지보수/최적화</button>
+                        <button class="modal-tab-btn owner-only-feature" onclick="switchAdminTab('studio', this)">🎮 Studio 검증 설정</button>
+                        <button class="modal-tab-btn owner-only-feature" onclick="switchAdminTab('catWarning', this)">⚠️ 카테고리 경고</button>
+                        <button class="modal-tab-btn owner-only-feature" onclick="switchAdminTab('blacklist', this)">🚫 카테고리 숨김</button>
+                        <button class="modal-tab-btn owner-only-feature" onclick="switchAdminTab('restore', this)">🗑️ 에셋 복원</button>
+                        <button class="modal-tab-btn owner-only-feature" onclick="switchAdminTab('optimize', this)">⚡ 유지보수/최적화</button>
                     </div>
 
                     <!-- 1. DB STATS TAB -->
@@ -1620,6 +1814,41 @@
                                 <div style="font-size:20px;font-weight:800;color:var(--accent-gold);font-family:var(--font-mono)" id="adminStatPending">0</div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- 1.5 STUDIO VERIFICATION SETTINGS TAB -->
+                    <div id="adminTabStudio" style="display:none;">
+                        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Roblox Studio 인게임 검증 워커의 동작 모드 및 자동 검증 정책을 설정합니다.</p>
+                        
+                        <div style="padding:14px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.25);border-radius:8px;margin-bottom:14px;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                                <div>
+                                    <div style="font-size:13px;font-weight:700;color:#93c5fd;margin-bottom:3px;">🤖 스튜디오 백그라운드 전체 자동 검증</div>
+                                    <div style="font-size:11px;color:var(--text-secondary);line-height:1.45;">
+                                        - <strong>ON</strong>: 웹에서 1순위로 요청한 곡을 먼저 검증한 후, 일반 미검증 곡들도 순차적으로 자동 검증합니다.<br>
+                                        - <strong>OFF</strong>: 오직 관리자가 웹에서 <code>[🎮 스튜디오 검증 요청]</code>을 누른 곡만 검증하고 평소엔 Studio가 대기합니다.
+                                    </div>
+                                </div>
+                                <input type="checkbox" id="adminStudioBgVerifyEnabled" style="width:20px;height:20px;cursor:pointer;accent-color:#3b82f6;" onchange="saveStudioAutoVerifySetting(this.checked)" checked />
+                            </div>
+                        </div>
+
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">
+                            <div style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;border:1px solid var(--border-subtle);text-align:center;">
+                                <div style="font-size:10px;color:var(--text-muted);">🎯 1순위 대기열 (queued)</div>
+                                <div style="font-size:18px;font-weight:800;color:var(--accent-cyan);" id="studioQueueCount">0</div>
+                            </div>
+                            <div style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;border:1px solid var(--border-subtle);text-align:center;">
+                                <div style="font-size:10px;color:var(--text-muted);">⚪ 2순위 일반 미검증</div>
+                                <div style="font-size:18px;font-weight:800;color:#cbd5e1;" id="studioUnverifiedCount">0</div>
+                            </div>
+                            <div style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;border:1px solid var(--border-subtle);text-align:center;">
+                                <div style="font-size:10px;color:var(--text-muted);">⚡ 검증 진행 중</div>
+                                <div style="font-size:18px;font-weight:800;color:var(--accent-gold);" id="studioTestingCount">0</div>
+                            </div>
+                        </div>
+
+                        <button class="quick-tool-btn primary" style="width:100%;height:38px;justify-content:center;" onclick="loadStudioConfig()">🔄 Studio 검증 큐 상태 새로고침</button>
                     </div>
 
                     <!-- 2. CATEGORY IMAGE & MULTILINGUAL TRANSLATION TAB -->
@@ -1652,13 +1881,95 @@
                                     <label style="font-size:11px;">🇨🇳 중국어 (ZH)</label>
                                     <input type="text" class="form-input" id="catTrans_zh" placeholder="简体中文" />
                                 </div>
-                                <div class="form-group" style="grid-column:1/-1;margin-bottom:6px;">
+                                <div class="form-group" style="margin-bottom:6px;">
                                     <label style="font-size:11px;">🇷🇺 러시아어 (RU)</label>
                                     <input type="text" class="form-input" id="catTrans_ru" placeholder="Русский" />
+                                </div>
+                                <div class="form-group" style="grid-column:1/-1;margin-bottom:6px;">
+                                    <label style="font-size:11px;">🇻🇳 베트남어 (VI)</label>
+                                    <input type="text" class="form-input" id="catTrans_vi" placeholder="Tiếng Việt" />
                                 </div>
                             </div>
                         </div>
                         <button class="quick-tool-btn primary" style="width:100%;height:40px;justify-content:center;margin-top:14px;" onclick="saveCategoryImgAndTranslations()">이미지 & 다국어 번역 일괄 저장</button>
+                    </div>
+
+                    <!-- 2.5 CATEGORY CONTENT WARNING SETTINGS TAB (NEW) -->
+                    <div id="adminTabCatWarning" style="display:none;">
+                        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">공포, 점프스케어 등 민감한 카테고리 진입 시 사전에 동의를 요구하는 다국어 경고 게이트를 설정합니다.</p>
+                        
+                        <div class="form-group">
+                            <label>경고를 설정할 카테고리 (*필수)</label>
+                            <select class="form-input" id="adminWarnCatSelect" style="background:#161b22;" onchange="onAdminWarnCatSelectChange()"></select>
+                        </div>
+
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;margin-bottom:14px;">
+                            <label for="adminWarnEnabled" style="font-size:13px;font-weight:700;color:#f87171;cursor:pointer;margin:0;">
+                                ⚠️ 이 카테고리 경고 게이트 활성화
+                            </label>
+                            <input type="checkbox" id="adminWarnEnabled" style="width:18px;height:18px;cursor:pointer;accent-color:#ef4444;" checked />
+                        </div>
+
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                            <div class="form-group" style="flex:1;margin-bottom:0;">
+                                <label style="font-size:11px;">경고 테마 프리셋</label>
+                                <select class="form-input" id="adminWarnType" style="background:#161b22;" onchange="applyWarnPreset(this.value)">
+                                    <option value="horror">👻 공포 & 점프스케어 (Horror)</option>
+                                    <option value="mature">🔞 성인 & 자극적 (Mature)</option>
+                                    <option value="spoiler">⚠️ 스포일러 주의 (Spoiler)</option>
+                                    <option value="game_exclusive">🎮 특정 게임 전용 (Game-Exclusive)</option>
+                                    <option value="general">🔔 일반 주의 (General)</option>
+                                </select>
+                            </div>
+                            <button class="quick-tool-btn" type="button" style="margin-top:18px;height:38px;font-size:11px;white-space:nowrap;" onclick="applyWarnPreset(document.getElementById('adminWarnType').value)">
+                                ⚡ 프리셋 문구 자동 채우기
+                            </button>
+                        </div>
+
+                        <!-- 5 Languages Warning Title & Message Form -->
+                        <div style="padding:14px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:12px;">
+                            <div style="font-size:12px;font-weight:700;color:var(--accent-cyan);">🌐 5개국어 경고 제목 및 상세 안내 문구</div>
+                            
+                            <!-- KO -->
+                            <div style="border-left:3px solid #38bdf8;padding-left:10px;">
+                                <label style="font-size:11px;font-weight:700;color:#fff;">🇰🇷 한국어 (KO)</label>
+                                <input type="text" class="form-input" id="warnTitle_ko" placeholder="경고 제목 (한국어)" style="height:32px;margin-bottom:4px;" />
+                                <textarea class="form-input" id="warnMsg_ko" placeholder="상세 안내 문구 (한국어)" style="height:50px;resize:vertical;font-size:12px;"></textarea>
+                            </div>
+
+                            <!-- EN -->
+                            <div style="border-left:3px solid #818cf8;padding-left:10px;">
+                                <label style="font-size:11px;font-weight:700;color:#fff;">🇺🇸 영어 (EN)</label>
+                                <input type="text" class="form-input" id="warnTitle_en" placeholder="Warning Title (English)" style="height:32px;margin-bottom:4px;" />
+                                <textarea class="form-input" id="warnMsg_en" placeholder="Detailed message (English)" style="height:50px;resize:vertical;font-size:12px;"></textarea>
+                            </div>
+
+                            <!-- JA -->
+                            <div style="border-left:3px solid #f472b6;padding-left:10px;">
+                                <label style="font-size:11px;font-weight:700;color:#fff;">🇯🇵 일본어 (JA)</label>
+                                <input type="text" class="form-input" id="warnTitle_ja" placeholder="警告タイトル (日本語)" style="height:32px;margin-bottom:4px;" />
+                                <textarea class="form-input" id="warnMsg_ja" placeholder="詳細メッセージ (日本語)" style="height:50px;resize:vertical;font-size:12px;"></textarea>
+                            </div>
+
+                            <!-- ZH -->
+                            <div style="border-left:3px solid #facc15;padding-left:10px;">
+                                <label style="font-size:11px;font-weight:700;color:#fff;">🇨🇳 중국어 (ZH)</label>
+                                <input type="text" class="form-input" id="warnTitle_zh" placeholder="警示标题 (简体中文)" style="height:32px;margin-bottom:4px;" />
+                                <textarea class="form-input" id="warnMsg_zh" placeholder="详细说明 (简体中文)" style="height:50px;resize:vertical;font-size:12px;"></textarea>
+                            </div>
+
+                            <!-- RU -->
+                            <div style="border-left:3px solid #4ade80;padding-left:10px;">
+                                <label style="font-size:11px;font-weight:700;color:#fff;">🇷🇺 러시아어 (RU)</label>
+                                <input type="text" class="form-input" id="warnTitle_ru" placeholder="Заголовок (Русский)" style="height:32px;margin-bottom:4px;" />
+                                <textarea class="form-input" id="warnMsg_ru" placeholder="Подробное сообщение (Русский)" style="height:50px;resize:vertical;font-size:12px;"></textarea>
+                            </div>
+                        </div>
+
+                        <div style="display:flex;gap:10px;margin-top:14px;">
+                            <button class="quick-tool-btn" style="flex:1;height:42px;justify-content:center;background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3);color:#f87171;" onclick="deleteCategoryWarning()">🗑️ 경고 삭제/초기화</button>
+                            <button class="quick-tool-btn primary" style="flex:2;height:42px;justify-content:center;font-weight:700;" onclick="saveCategoryWarning()">💾 카테고리 경고 설정 저장</button>
+                        </div>
                     </div>
 
                     <!-- 3. CATEGORY RENAME TAB (NEW) -->
@@ -1766,7 +2077,7 @@
                     <div style="display:flex;gap:14px;margin-bottom:14px;align-items:center;">
                         <img id="editImgPreview" src="./images/icon128.png" 
                             style="width:72px;height:72px;border-radius:10px;object-fit:cover;border:1px solid var(--border-subtle);background:#161b22;"
-                            onerror="this.onerror=null;this.src=DEFAULT_FALLBACK_IMG;" />
+                            onerror="handleImgError(this)" />
                         <div style="flex:1;">
                             <div class="form-group" style="margin-bottom:6px;">
                                 <label style="font-size:11px;">Roblox Asset ID</label>
@@ -1799,12 +2110,34 @@
                         <input type="text" class="form-input" id="editYtUrl" placeholder="https://youtube.com/watch?v=..." />
                     </div>
 
-                    <!-- Force Lock Setting (자동 재검증 방지 강제 고정) -->
-                    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(245,158,11,0.09);border:1px solid rgba(245,158,11,0.3);border-radius:8px;margin-top:10px;">
-                        <input type="checkbox" id="editIsVerifiedLocked" style="width:16px;height:16px;cursor:pointer;accent-color:#f59e0b;" />
-                        <label for="editIsVerifiedLocked" style="font-size:12px;font-weight:700;color:#f59e0b;cursor:pointer;margin:0;" title="체크 시 Roblox Studio 자동 재검증 대상에서 영구 제외되고 현재 설정이 강제 고정됩니다.">
-                            🔒 오디오 강제 수동 고정 (자동 재검증/초기화 방지)
-                        </label>
+                    <!-- Audio Playability & Verification Status Controls (Owner only) -->
+                    <div id="editPlayabilitySection" class="owner-only-feature" style="margin-top:10px;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label style="font-size:11px;font-weight:700;">🖥️ 서버 재생 (Server)</label>
+                                <select class="form-input" id="editServerPlayable" style="background:#161b22;">
+                                    <option value="1">✅ 재생 가능 (1)</option>
+                                    <option value="0">❌ 재생 불가 (0)</option>
+                                    <option value="-1">⏳ 미확인 (-1)</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label style="font-size:11px;font-weight:700;">🎮 클라이언트 재생 (Client)</label>
+                                <select class="form-input" id="editClientPlayable" style="background:#161b22;">
+                                    <option value="1">✅ 재생 가능 (1)</option>
+                                    <option value="0">❌ 재생 불가 (0)</option>
+                                    <option value="-1">⏳ 미확인 (-1)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Force Lock Setting (자동 재검증 방지 강제 고정) -->
+                        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(245,158,11,0.09);border:1px solid rgba(245,158,11,0.3);border-radius:8px;margin-top:10px;">
+                            <input type="checkbox" id="editIsVerifiedLocked" style="width:16px;height:16px;cursor:pointer;accent-color:#f59e0b;" />
+                            <label for="editIsVerifiedLocked" style="font-size:12px;font-weight:700;color:#f59e0b;cursor:pointer;margin:0;" title="체크 시 Roblox Studio 자동 재검증 대상에서 영구 제외되고 현재 설정이 강제 고정됩니다.">
+                                🔒 오디오 강제 수동 고정 (자동 재검증/초기화 방지)
+                            </label>
+                        </div>
                     </div>
 
                     <!-- YouTube Search Results Panel -->
@@ -1880,6 +2213,65 @@
             </div>
         </div>
 
+        <!-- ─── YOUTUBE MAPPING SUGGESTIONS REVIEW MODAL ─── -->
+        <div class="modal-overlay" id="mappingReviewModal">
+            <div class="modal-box" style="width:min(1080px, 96vw);max-height:90vh;display:flex;flex-direction:column;position:relative;">
+                <div class="modal-header" style="position:relative;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span class="modal-title" style="font-size:18px;">🔔 유튜브 매핑 검토 및 승인</span>
+                        <span class="card-category-badge" id="reviewPendingCountBadge" style="position:static;background:rgba(245,158,11,0.2);color:#fbbf24;border-color:rgba(245,158,11,0.4);font-size:12px;padding:3px 10px;">0건 대기중</span>
+                    </div>
+                    <button class="modal-close-btn" style="position:relative;z-index:20;cursor:pointer;font-size:26px;line-height:1;padding:4px 12px;background:rgba(255,255,255,0.08);border-radius:8px;border:1px solid rgba(255,255,255,0.15);color:#fff;" 
+                        onclick="document.getElementById('mappingReviewModal').style.display='none';document.getElementById('mappingReviewModal').classList.remove('open','active');closeModal('mappingReviewModal');">&times;</button>
+                </div>
+                <div class="modal-body" style="flex:1;overflow-y:auto;padding:16px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+                        <p style="font-size:12px;color:var(--text-muted);margin:0;">
+                            AI가 제목 유사도를 분석하여 추천한 YouTube 영상들입니다. <strong>오디오 원음</strong>과 <strong>유튜브 영상</strong>을 각각 들어보고 수락 또는 거절할 수 있습니다.
+                        </p>
+                        <div style="display:flex;gap:8px;">
+                            <button class="quick-tool-btn" style="height:30px;padding:0 12px;font-size:11px;" onclick="loadMappingSuggestions()">🔄 목록 새로고침</button>
+                            <button class="quick-tool-btn" style="height:30px;padding:0 12px;font-size:11px;background:rgba(255,255,255,0.06);" onclick="closeModal('mappingReviewModal')">✕ 닫기</button>
+                        </div>
+                    </div>
+                    <div id="mappingSuggestionsList" style="display:flex;flex-direction:column;gap:14px;">
+                        <!-- Dynamically loaded review cards -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── CATEGORY CONTENT WARNING GATE MODAL ─── -->
+        <div class="modal-overlay" id="categoryWarningModal" style="z-index: 250;">
+            <div class="modal-box" style="width:min(520px, 94vw);text-align:center;padding:32px 24px;border:1px solid rgba(239,68,68,0.4);box-shadow:0 20px 60px rgba(0,0,0,0.85);background:radial-gradient(circle at top, rgba(239,68,68,0.12), #0f172a 70%);">
+                <div id="catWarnIcon" style="font-size:52px;margin-bottom:12px;filter:drop-shadow(0 4px 16px rgba(239,68,68,0.6));">⚠️</div>
+                <div style="display:inline-block;background:rgba(239,68,68,0.2);color:#f87171;border:1px solid rgba(239,68,68,0.4);padding:4px 14px;border-radius:20px;font-size:11px;font-weight:800;margin-bottom:12px;" data-i18n="audio_ui.warning_modal_badge">
+                    콘텐츠 주의 / 경고
+                </div>
+                <div style="font-size:12px;color:var(--accent-cyan);font-weight:700;margin-bottom:4px;" id="catWarnTargetName">Category Name</div>
+                <h2 style="font-size:20px;font-weight:800;margin-bottom:12px;color:#fff;line-height:1.4;" id="catWarnTitle" data-i18n="audio_ui.warning_default_title">
+                    민감한 콘텐츠 및 청각 주의
+                </h2>
+                <div style="font-size:13px;color:var(--text-secondary);line-height:1.65;margin-bottom:22px;background:rgba(0,0,0,0.3);padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);word-break:break-word;" id="catWarnMessage" data-i18n="audio_ui.warning_default_message">
+                    이 카테고리에는 공포, 점프스케어, 기괴한 소리 또는 민감한 음원이 포함되어 있을 수 있습니다. 계속 진행하시겠습니까?
+                </div>
+
+                <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px;">
+                    <input type="checkbox" id="catWarnDontAskAgain" style="cursor:pointer;accent-color:var(--accent-cyan);" />
+                    <label for="catWarnDontAskAgain" style="font-size:12px;color:var(--text-muted);cursor:pointer;" data-i18n="audio_ui.warning_dont_ask_again">이 세션 동안 이 카테고리 경고 다시 보지 않기</label>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    <button class="quick-tool-btn primary" style="height:46px;width:100%;justify-content:center;font-size:14px;font-weight:800;background:linear-gradient(135deg, #ef4444, #dc2626);border:none;box-shadow:0 4px 18px rgba(239,68,68,0.4);" onclick="acceptCategoryWarning()">
+                        <span data-i18n="audio_ui.warning_accept_btn">🛡️ 동의하고 콘텐츠 보기</span>
+                    </button>
+                    <button class="quick-tool-btn" style="height:40px;width:100%;justify-content:center;font-size:13px;background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.12);color:var(--text-muted);" onclick="declineCategoryWarning()">
+                        <span data-i18n="audio_ui.warning_decline_btn">↩️ 뒤로 가기 (안전한 목록으로)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- ─── LOGIN REQUIRED MODAL (DISCORD AUTH GATE) ─── -->
         <div class="modal-overlay" id="loginRequiredModal">
             <div class="modal-box" style="width:min(440px, 92vw);text-align:center;padding:34px 26px;border:1px solid rgba(88,101,242,0.3);box-shadow:0 16px 48px rgba(0,0,0,0.7);">
@@ -1933,9 +2325,10 @@
                 options.credentials = 'include';
             }
 
-            // Fast Failover Timeout (2.5s) to avoid long blocking when server is offline
+            // Fast Failover Timeout (6.0s) to avoid long blocking when server is offline
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), options.timeout || 2500);
+            const timeoutMs = options.timeout || 6000;
+            const timeoutId = setTimeout(() => controller.abort(new Error(`Timeout of ${timeoutMs}ms exceeded`)), timeoutMs);
             options.signal = controller.signal;
 
             try {
@@ -1948,12 +2341,86 @@
             }
         }
 
+        function esc(s) {
+            if (!s) return '';
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+        const escapeHtml = esc;
+
         const DEFAULT_FALLBACK_IMG = './images/icon128.png';
+
+        function handleImgError(img) {
+            if (!img) return;
+            const cur = img.src || '';
+            if (cur.includes('mqdefault.jpg')) {
+                img.src = cur.replace('mqdefault.jpg', 'hqdefault.jpg');
+            } else if (cur.includes('hqdefault.jpg')) {
+                img.src = cur.replace('hqdefault.jpg', 'default.jpg');
+            } else {
+                img.onerror = null;
+                img.src = DEFAULT_FALLBACK_IMG;
+            }
+        }
 
         const playerAudio = document.getElementById('globalAudioPlayer');
 
         let categoryTranslations = {}; // { categoryKey: { ko: "...", en: "..." } }
         let categoryMetadataMap = {}; // { category: imageUrl }
+        let currentUserTier = 'guest';
+
+        function updateAuthUI(username = 'Guest', tier = 'guest', isLoggedIn = false, isAdmin = false) {
+            isUserLoggedIn = isLoggedIn;
+            currentLoggedUser = isLoggedIn ? username : null;
+            currentUserTier = tier;
+
+            if (isAdmin) {
+                const savedAdminMode = localStorage.getItem('kadio_admin_mode_enabled');
+                isAdminMode = (savedAdminMode !== null) ? (savedAdminMode === 'true') : true;
+            } else {
+                isAdminMode = false;
+            }
+
+            const loginBtn = document.getElementById('discordLoginBtn');
+            const profileBadge = document.getElementById('userProfileBadge');
+            const profileName = document.getElementById('userProfileName');
+            const profileTierIcon = document.getElementById('userProfileTierIcon');
+            const adminToggleBtn = document.getElementById('adminModeToggleBtn');
+
+            const isOwner = isAdminMode && (tier === 'owner');
+
+            if (isLoggedIn) {
+                if (loginBtn) loginBtn.style.display = 'none';
+                if (profileBadge) {
+                    profileBadge.style.display = 'inline-flex';
+                    if (profileName) profileName.textContent = username;
+                    if (profileTierIcon) {
+                        profileTierIcon.textContent = (tier === 'owner' ? '👑' : tier === 'admin' ? '🛡️' : '👤');
+                    }
+                }
+                if (adminToggleBtn) {
+                    adminToggleBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+                    adminToggleBtn.classList.toggle('admin-mode-active', isAdminMode);
+                }
+                document.querySelectorAll('.admin-only-feature').forEach(el => {
+                    el.style.display = isAdminMode ? '' : 'none';
+                });
+                document.querySelectorAll('.owner-only-feature').forEach(el => {
+                    el.style.display = isOwner ? '' : 'none';
+                });
+                if (isAdmin) updateMappingSuggestionBadge();
+            } else {
+                if (loginBtn) loginBtn.style.display = 'inline-flex';
+                if (profileBadge) profileBadge.style.display = 'none';
+                if (adminToggleBtn) adminToggleBtn.style.display = 'none';
+                document.querySelectorAll('.admin-only-feature').forEach(el => {
+                    el.style.display = 'none';
+                });
+                document.querySelectorAll('.owner-only-feature').forEach(el => {
+                    el.style.display = 'none';
+                });
+            }
+            applyAudioI18n();
+        }
 
         // Local Storage Offline Cache Helpers
         function saveToCache(key, data) {
@@ -1990,6 +2457,11 @@
                 const trans = t(key);
                 if (trans) el.textContent = trans;
             });
+            document.querySelectorAll('option[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                const trans = t(key);
+                if (trans) el.textContent = trans;
+            });
             document.querySelectorAll('[data-i18n-ph]').forEach(el => {
                 const key = el.getAttribute('data-i18n-ph');
                 const trans = t(key);
@@ -2012,14 +2484,47 @@
         }
 
         function openModal(id) {
-            const m = document.getElementById(id);
-            if (m) m.classList.add('active');
+            const m = typeof id === 'string' ? document.getElementById(id) : id;
+            if (m) {
+                m.classList.add('open');
+                m.classList.add('active');
+                m.style.display = 'flex';
+            }
         }
 
         function closeModal(id) {
-            const m = document.getElementById(id);
-            if (m) m.classList.remove('active');
+            if (!id) {
+                document.querySelectorAll('.modal-overlay').forEach(m => {
+                    m.classList.remove('open');
+                    m.classList.remove('active');
+                    m.style.display = 'none';
+                });
+                return;
+            }
+            const m = typeof id === 'string' ? document.getElementById(id) : id;
+            if (m) {
+                m.classList.remove('open');
+                m.classList.remove('active');
+                m.style.display = 'none';
+            }
         }
+
+        // Global Esc key & backdrop click handlers to close modals easily
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        closeModal(overlay.id);
+                    }
+                });
+            });
+        });
 
         function toggleMobileSidebar(force) {
             const sidebar = document.getElementById('appSidebar');
@@ -2028,40 +2533,6 @@
             const isOpen = (typeof force === 'boolean') ? force : !sidebar.classList.contains('mobile-open');
             sidebar.classList.toggle('mobile-open', isOpen);
             if (backdrop) backdrop.classList.toggle('active', isOpen);
-        }
-
-        function updateAuthUI(username = 'Guest', tier = 'guest', isLoggedIn = false, isAdmin = false) {
-            isUserLoggedIn = isLoggedIn;
-            isAdminMode = isAdmin;
-
-            const loginBtn = document.getElementById('discordLoginBtn');
-            const profileBadge = document.getElementById('userProfileBadge');
-            const profileName = document.getElementById('userProfileName');
-            const profileTierIcon = document.getElementById('userProfileTierIcon');
-            const adminToggleBtn = document.getElementById('adminModeToggleBtn');
-
-            if (isLoggedIn) {
-                if (loginBtn) loginBtn.style.display = 'none';
-                if (profileBadge) {
-                    profileBadge.style.display = 'inline-flex';
-                    if (profileName) profileName.textContent = username;
-                    if (profileTierIcon) {
-                        profileTierIcon.textContent = (tier === 'owner' ? '👑' : tier === 'admin' ? '🛡️' : '👤');
-                    }
-                }
-                if (adminToggleBtn) adminToggleBtn.style.display = isAdmin ? 'inline-flex' : 'none';
-                document.querySelectorAll('.admin-only-feature').forEach(el => {
-                    el.style.display = isAdmin ? '' : 'none';
-                });
-            } else {
-                if (loginBtn) loginBtn.style.display = 'inline-flex';
-                if (profileBadge) profileBadge.style.display = 'none';
-                if (adminToggleBtn) adminToggleBtn.style.display = 'none';
-                document.querySelectorAll('.admin-only-feature').forEach(el => {
-                    el.style.display = 'none';
-                });
-            }
-            applyAudioI18n();
         }
 
         function updateAdminUI(username = 'Admin', tier = 'admin') {
@@ -2079,6 +2550,7 @@
         function logoutAdmin() {
             try {
                 localStorage.removeItem('kadio_admin_token');
+                localStorage.removeItem('kadio_admin_mode_enabled');
             } catch(e) {}
             currentAdminToken = null;
             isAdminMode = false;
@@ -2141,11 +2613,18 @@
 
         function toggleAdminMode() {
             isAdminMode = !isAdminMode;
+            try {
+                localStorage.setItem('kadio_admin_mode_enabled', String(isAdminMode));
+            } catch(e) {}
             const btn = document.getElementById('adminModeToggleBtn');
             if (btn) btn.classList.toggle('admin-mode-active', isAdminMode);
             
+            const isOwner = isAdminMode && (currentUserTier === 'owner');
             document.querySelectorAll('.admin-only-feature').forEach(el => {
                 el.style.display = isAdminMode ? '' : 'none';
+            });
+            document.querySelectorAll('.owner-only-feature').forEach(el => {
+                el.style.display = isOwner ? '' : 'none';
             });
             
             applyAudioI18n();
@@ -2211,6 +2690,7 @@
                     yt: ytId,
                     serverPlayable: t.serverPlayable,
                     clientPlayable: t.clientPlayable,
+                    verificationStatus: t.verificationStatus || 'unverified',
                     isVerifiedLocked: (t.isVerifiedLocked === 1 || t.isVerifiedLocked === true) ? 1 : 0,
                     favorited: false
                 };
@@ -2248,6 +2728,7 @@
                 // Run admin check & category translation loads in background
                 checkAdminTokenFromUrl().catch(() => {});
                 loadCategoryTranslations().catch(() => {});
+                loadCategoryWarnings().catch(() => {});
 
                 const res = await apiFetch('/api/audio/list');
                 const json = await res.json();
@@ -2275,6 +2756,12 @@
             applyAudioI18n();
         }
 
+        let currentSortMode = localStorage.getItem('kadio_sort_mode') || 'recommended';
+        let currentFilterYoutube = 'all'; // all | mapped | unmapped
+        let currentFilterPlayability = 'all'; // all | active | partial | inactive | unverified
+        let isLockedFilterOnly = false;
+        let activeQuickPill = 'all';
+
         function saveAudioState() {
             try {
                 const state = {
@@ -2282,9 +2769,15 @@
                     category: currentCategory || null,
                     page: currentPage || 1,
                     pageSize: pageSize || 40,
-                    search: document.getElementById('searchInput')?.value || ''
+                    search: document.getElementById('searchInput')?.value || '',
+                    sortMode: currentSortMode,
+                    filterYoutube: currentFilterYoutube,
+                    filterPlayability: currentFilterPlayability,
+                    filterLocked: isLockedFilterOnly,
+                    quickPill: activeQuickPill
                 };
                 sessionStorage.setItem('kadio_audio_state', JSON.stringify(state));
+                localStorage.setItem('kadio_sort_mode', currentSortMode);
             } catch(e) {}
         }
 
@@ -2304,6 +2797,30 @@
                     if (state.search) {
                         const sInput = document.getElementById('searchInput');
                         if (sInput) sInput.value = state.search;
+                    }
+                    if (state.sortMode) {
+                        currentSortMode = state.sortMode;
+                        const sortSel = document.getElementById('sortSelect');
+                        if (sortSel) sortSel.value = currentSortMode;
+                    }
+                    if (state.filterYoutube) {
+                        currentFilterYoutube = state.filterYoutube;
+                        const ytSel = document.getElementById('filterYoutubeSelect');
+                        if (ytSel) ytSel.value = currentFilterYoutube;
+                    }
+                    if (state.filterPlayability) {
+                        currentFilterPlayability = state.filterPlayability;
+                        const playSel = document.getElementById('filterPlayabilitySelect');
+                        if (playSel) playSel.value = currentFilterPlayability;
+                    }
+                    if (typeof state.filterLocked === 'boolean') {
+                        isLockedFilterOnly = state.filterLocked;
+                        const lockChip = document.getElementById('filterLockedChip');
+                        if (lockChip) lockChip.classList.toggle('active', isLockedFilterOnly);
+                    }
+                    if (state.quickPill) {
+                        activeQuickPill = state.quickPill;
+                        updateQuickPillsUI();
                     }
                     switchMainView(state.view || 'all');
                     return true;
@@ -2329,7 +2846,7 @@
             if (document.getElementById('badgeFavsCount')) document.getElementById('badgeFavsCount').textContent = favCount;
             if (document.getElementById('badgeCatsCount')) document.getElementById('badgeCatsCount').textContent = cats.size;
             if (document.getElementById('badgePendingCount')) document.getElementById('badgePendingCount').textContent = pendingCount;
-            document.getElementById('viewSubTitle').textContent = `총 ${total}개의 오디오 에셋이 준비되어 있습니다.`;
+            document.getElementById('viewSubTitle').textContent = `총 ${total.toLocaleString()}개의 오디오 에셋이 준비되어 있습니다.`;
         }
 
         function renderCategoryChips() {
@@ -2356,7 +2873,7 @@
                     const displayName = getCategoryDisplayName(cat);
                     return `
                         <div class="cat-chip-item ${currentCategory === cat ? 'active' : ''}" onclick="filterByCat('${cat}')">
-                            <img src="${thumb}" class="cat-thumb" onerror="this.onerror=null;this.src=DEFAULT_FALLBACK_IMG;" />
+                            <img src="${thumb}" class="cat-thumb" onerror="handleImgError(this)" />
                             <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${displayName}</span>
                             <span class="cat-count">${counts[cat]}</span>
                         </div>
@@ -2365,29 +2882,283 @@
             }
         }
 
+        /* ─── MULTI-DIMENSIONAL SORT & FILTER PIPELINE ─── */
+        function parseDurationSeconds(dur) {
+            if (typeof dur === 'number') return dur;
+            if (!dur || typeof dur !== 'string') return 0;
+            const parts = dur.trim().split(':');
+            if (parts.length === 2) {
+                return (parseInt(parts[0], 10) || 0) * 60 + (parseFloat(parts[1]) || 0);
+            }
+            return parseFloat(dur) || 0;
+        }
+
+        function getTrackPlayabilityScore(t) {
+            const sp = t.serverPlayable;
+            const cp = t.clientPlayable;
+            // Fully Active: 1 (both playable or at least 1 and not unverified/failed)
+            if (sp === 1 && cp === 1) return 1;
+            if (sp === 1 || cp === 1) return 2; // Partially Active
+            if (sp === -1 && cp === -1) return 4; // Unverified
+            if (sp === 0 && cp === 0) return 5; // Inactive / Failed
+            return 3;
+        }
+
+        function getTrackRecommendedWeight(t) {
+            const hasYt = !!(t.youtubeUrl || t.yt);
+            const playScore = getTrackPlayabilityScore(t);
+            // Tier 1: Fully playable + YouTube mapped
+            if (playScore === 1 && hasYt) return 10;
+            // Tier 2: Fully playable without YouTube
+            if (playScore === 1) return 20;
+            // Tier 3: Partially playable + YouTube mapped
+            if (playScore === 2 && hasYt) return 30;
+            // Tier 4: Partially playable
+            if (playScore === 2) return 40;
+            // Tier 5: YouTube mapped (even if unverified)
+            if (hasYt) return 50;
+            // Tier 6: Unverified
+            if (playScore === 4) return 60;
+            // Tier 7: Inactive
+            return 70;
+        }
+
         function getFilteredTracks() {
-            let list = tracksData;
+            let list = [...tracksData];
+
+            // 1. Base View Filter
             if (currentView === 'favorites') {
                 list = list.filter(t => t.favorited);
             } else if (currentView === 'pending') {
                 list = list.filter(t => t.status === 'pending_review');
             }
 
+            // 2. Category Filter
             if (currentCategory && currentCategory !== 'all') {
                 list = list.filter(t => t.cat && t.cat.toLowerCase() === currentCategory.toLowerCase());
             }
 
+            // 3. Search Query Filter
             const query = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
             if (query) {
                 list = list.filter(t => 
                     (t.title && t.title.toLowerCase().includes(query)) ||
                     (t.cat && t.cat.toLowerCase().includes(query)) ||
                     (getCategoryDisplayName(t.cat).toLowerCase().includes(query)) ||
-                    (t.assetId && String(t.assetId).includes(query))
+                    (t.assetId && String(t.assetId).includes(query)) ||
+                    (t.youtubeUrl && t.youtubeUrl.toLowerCase().includes(query))
                 );
             }
 
+            // 4. Secondary Status Filters (YouTube, Playability, Locked)
+            // YouTube Filter
+            if (currentFilterYoutube === 'mapped') {
+                list = list.filter(t => !!(t.youtubeUrl || t.yt));
+            } else if (currentFilterYoutube === 'unmapped') {
+                list = list.filter(t => !t.youtubeUrl && !t.yt);
+            }
+
+            // Playability Filter
+            if (currentFilterPlayability === 'active') {
+                list = list.filter(t => t.serverPlayable === 1 && t.clientPlayable === 1);
+            } else if (currentFilterPlayability === 'partial') {
+                list = list.filter(t => (t.serverPlayable === 1 || t.clientPlayable === 1) && !(t.serverPlayable === 1 && t.clientPlayable === 1));
+            } else if (currentFilterPlayability === 'inactive') {
+                list = list.filter(t => t.serverPlayable === 0 && t.clientPlayable === 0);
+            } else if (currentFilterPlayability === 'queued') {
+                list = list.filter(t => t.verificationStatus === 'queued');
+            } else if (currentFilterPlayability === 'unverified') {
+                list = list.filter(t => (t.serverPlayable === -1 && t.clientPlayable === -1 && t.verificationStatus !== 'queued') || t.verificationStatus === 'unverified');
+            }
+
+            // Locked Filter
+            if (isLockedFilterOnly) {
+                list = list.filter(t => t.isVerifiedLocked === 1);
+            }
+
+            // 5. Multi-dimensional Sorting
+            list.sort((a, b) => {
+                switch (currentSortMode) {
+                    case 'recommended': {
+                        const wA = getTrackRecommendedWeight(a);
+                        const wB = getTrackRecommendedWeight(b);
+                        if (wA !== wB) return wA - wB;
+                        return (a.title || '').localeCompare(b.title || '');
+                    }
+                    case 'latest': {
+                        const idA = parseInt(String(a.id).replace(/\D/g, ''), 10) || 0;
+                        const idB = parseInt(String(b.id).replace(/\D/g, ''), 10) || 0;
+                        return idB - idA;
+                    }
+                    case 'oldest': {
+                        const idA = parseInt(String(a.id).replace(/\D/g, ''), 10) || 0;
+                        const idB = parseInt(String(b.id).replace(/\D/g, ''), 10) || 0;
+                        return idA - idB;
+                    }
+                    case 'title_asc':
+                        return (a.title || '').localeCompare(b.title || '');
+                    case 'title_desc':
+                        return (b.title || '').localeCompare(a.title || '');
+                    case 'duration_desc':
+                        return parseDurationSeconds(b.dur) - parseDurationSeconds(a.dur);
+                    case 'duration_asc':
+                        return parseDurationSeconds(a.dur) - parseDurationSeconds(b.dur);
+                    case 'asset_id_asc': {
+                        const numA = BigInt(String(a.assetId || '0').replace(/\D/g, '') || 0);
+                        const numB = BigInt(String(b.assetId || '0').replace(/\D/g, '') || 0);
+                        return numA < numB ? -1 : numA > numB ? 1 : 0;
+                    }
+                    case 'asset_id_desc': {
+                        const numA = BigInt(String(a.assetId || '0').replace(/\D/g, '') || 0);
+                        const numB = BigInt(String(b.assetId || '0').replace(/\D/g, '') || 0);
+                        return numA > numB ? -1 : numA < numB ? 1 : 0;
+                    }
+                    case 'yt_first': {
+                        const hasYtA = !!(a.youtubeUrl || a.yt);
+                        const hasYtB = !!(b.youtubeUrl || b.yt);
+                        if (hasYtA !== hasYtB) return hasYtA ? -1 : 1;
+                        return (a.title || '').localeCompare(b.title || '');
+                    }
+                    case 'yt_none': {
+                        const hasYtA = !!(a.youtubeUrl || a.yt);
+                        const hasYtB = !!(b.youtubeUrl || b.yt);
+                        if (hasYtA !== hasYtB) return hasYtA ? 1 : -1;
+                        return (a.title || '').localeCompare(b.title || '');
+                    }
+                    case 'active_first': {
+                        const scoreA = getTrackPlayabilityScore(a);
+                        const scoreB = getTrackPlayabilityScore(b);
+                        if (scoreA !== scoreB) return scoreA - scoreB;
+                        return (a.title || '').localeCompare(b.title || '');
+                    }
+                    case 'inactive_first': {
+                        const scoreA = getTrackPlayabilityScore(a);
+                        const scoreB = getTrackPlayabilityScore(b);
+                        if (scoreA !== scoreB) return scoreB - scoreA;
+                        return (a.title || '').localeCompare(b.title || '');
+                    }
+                    default:
+                        return 0;
+                }
+            });
+
+            // Update Summary Badge
+            const summaryEl = document.getElementById('filterResultSummary');
+            if (summaryEl) {
+                summaryEl.textContent = `조건 일치: ${list.length.toLocaleString()}개 / 전체 ${tracksData.length.toLocaleString()}개`;
+            }
+
             return list;
+        }
+
+        /* ─── SORT & FILTER EVENT HANDLERS ─── */
+        function onSortChange(val) {
+            currentSortMode = val || 'recommended';
+            currentPage = 1;
+            renderCards();
+            saveAudioState();
+        }
+
+        function onFilterYoutubeChange(val) {
+            currentFilterYoutube = val || 'all';
+            currentPage = 1;
+            updateQuickPillsUI();
+            renderCards();
+            saveAudioState();
+        }
+
+        function onFilterPlayabilityChange(val) {
+            currentFilterPlayability = val || 'all';
+            currentPage = 1;
+            updateQuickPillsUI();
+            renderCards();
+            saveAudioState();
+        }
+
+        function toggleLockedFilter() {
+            isLockedFilterOnly = !isLockedFilterOnly;
+            const chip = document.getElementById('filterLockedChip');
+            if (chip) chip.classList.toggle('active', isLockedFilterOnly);
+            currentPage = 1;
+            renderCards();
+            saveAudioState();
+        }
+
+        function updateQuickPillsUI() {
+            const pills = ['pillAll', 'pillActive', 'pillYtMapped', 'pillYtUnmapped', 'pillInactive'];
+            pills.forEach(p => {
+                const el = document.getElementById(p);
+                if (el) el.classList.remove('active');
+            });
+
+            if (currentFilterPlayability === 'active') {
+                document.getElementById('pillActive')?.classList.add('active');
+            } else if (currentFilterPlayability === 'inactive') {
+                document.getElementById('pillInactive')?.classList.add('active');
+            } else if (currentFilterYoutube === 'mapped') {
+                document.getElementById('pillYtMapped')?.classList.add('active');
+            } else if (currentFilterYoutube === 'unmapped') {
+                document.getElementById('pillYtUnmapped')?.classList.add('active');
+            } else {
+                document.getElementById('pillAll')?.classList.add('active');
+            }
+        }
+
+        function setQuickPill(type) {
+            activeQuickPill = type;
+            const ytSel = document.getElementById('filterYoutubeSelect');
+            const playSel = document.getElementById('filterPlayabilitySelect');
+
+            if (type === 'all') {
+                currentFilterYoutube = 'all';
+                currentFilterPlayability = 'all';
+            } else if (type === 'active') {
+                currentFilterYoutube = 'all';
+                currentFilterPlayability = 'active';
+            } else if (type === 'yt_mapped') {
+                currentFilterYoutube = 'mapped';
+                currentFilterPlayability = 'all';
+            } else if (type === 'yt_unmapped') {
+                currentFilterYoutube = 'unmapped';
+                currentFilterPlayability = 'all';
+            } else if (type === 'inactive') {
+                currentFilterYoutube = 'all';
+                currentFilterPlayability = 'inactive';
+            }
+
+            if (ytSel) ytSel.value = currentFilterYoutube;
+            if (playSel) playSel.value = currentFilterPlayability;
+
+            updateQuickPillsUI();
+            currentPage = 1;
+            renderCards();
+            saveAudioState();
+        }
+
+        function resetAllSortAndFilters() {
+            currentSortMode = 'recommended';
+            currentFilterYoutube = 'all';
+            currentFilterPlayability = 'all';
+            isLockedFilterOnly = false;
+            activeQuickPill = 'all';
+
+            const sortSel = document.getElementById('sortSelect');
+            const ytSel = document.getElementById('filterYoutubeSelect');
+            const playSel = document.getElementById('filterPlayabilitySelect');
+            const lockChip = document.getElementById('filterLockedChip');
+            const searchInput = document.getElementById('searchInput');
+
+            if (sortSel) sortSel.value = 'recommended';
+            if (ytSel) ytSel.value = 'all';
+            if (playSel) playSel.value = 'all';
+            if (lockChip) lockChip.classList.remove('active');
+            if (searchInput) searchInput.value = '';
+
+            updateQuickPillsUI();
+            currentPage = 1;
+            renderCards();
+            saveAudioState();
+            showToast('모든 정렬 및 필터가 기본값으로 초기화되었습니다 🔄', 'info');
         }
 
         function onPageSizeChange(val) {
@@ -2485,21 +3256,23 @@
                 if (!cover) cover = categoryMetadataMap[t.cat] || DEFAULT_FALLBACK_IMG;
 
                 const displayName = getCategoryDisplayName(t.cat);
+                const safeTitle = esc(t.title);
+                const safeAssetId = esc(t.assetId);
 
                 return `
-                <div class="track-card ${isSelected ? 'selected' : ''}" onclick="onCardClick('${t.id}', event)">
+                <div class="track-card ${isSelected ? 'selected' : ''}" onclick="onCardClick('${esc(t.id)}', event)">
                     <div class="card-cover-wrap">
-                        ${isSelectionMode ? `<label class="card-checkbox" onclick="event.stopPropagation()"><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelectTrack('${t.id}')" /></label>` : ''}
-                        <img src="${cover}" class="card-cover-img" onerror="this.onerror=null;this.src=DEFAULT_FALLBACK_IMG;" />
-                        <span class="card-category-badge">${displayName}</span>
-                        <button class="card-fav-btn ${t.favorited ? 'active' : ''}" onclick="event.stopPropagation();toggleFav('${t.id}')">★</button>
+                        ${isSelectionMode ? `<label class="card-checkbox" onclick="event.stopPropagation()"><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelectTrack('${esc(t.id)}')" /></label>` : ''}
+                        <img src="${esc(cover)}" class="card-cover-img" onerror="handleImgError(this)" />
+                        <span class="card-category-badge">${esc(displayName)}</span>
+                        <button class="card-fav-btn ${t.favorited ? 'active' : ''}" onclick="event.stopPropagation();toggleFav('${esc(t.id)}')">★</button>
                         <!-- 오직 이 재생 버튼을 누를 때만 재생 실행! -->
-                        <div class="play-overlay-btn" title="재생" onclick="event.stopPropagation();playTrackDemo('${t.id}')">▶</div>
+                        <div class="play-overlay-btn" title="재생" onclick="event.stopPropagation();playTrackDemo('${esc(t.id)}')">▶</div>
                     </div>
                     <div class="card-body">
-                        <div class="track-name" title="${t.title}">${t.title}</div>
+                        <div class="track-name" title="${safeTitle}">${safeTitle}</div>
                         <div class="track-meta-row">
-                            <span class="roblox-id-badge">🎵 ${t.assetId}</span>
+                            <span class="roblox-id-badge">🎵 ${safeAssetId}</span>
                             <div class="status-indicators">
                                 ${t.isVerifiedLocked === 1 ? '<span style="font-size:11px;color:#f59e0b;font-weight:700;" title="관리자 수동 고정 (자동 재검증 방지)">🔒</span>' : ''}
                                 <span class="dot-indicator ${t.serverPlayable === 1 ? 'dot-green' : 'dot-gold'}" title="Server 검증: ${t.serverPlayable}"></span>
@@ -2508,12 +3281,12 @@
                             </div>
                         </div>
                         <div class="card-footer-actions">
-                            <span style="font-size:11px;color:var(--text-muted);">${t.dur}</span>
+                            <span style="font-size:11px;color:var(--text-muted);">${esc(t.dur)}</span>
                             <div class="mini-btn-group">
-                                ${(isAdminMode && t.status === 'pending_review') ? `<button class="card-action-icon-btn" title="승인" style="color:#10b981;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleApprove('${t.id}')">✓</button><button class="card-action-icon-btn" title="거절" style="color:#f87171;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleReject('${t.id}')">✕</button>` : ''}
-                                ${isAdminMode ? `<button class="card-action-icon-btn" title="정보 수정" style="color:var(--accent-gold);" onclick="event.stopPropagation();openEditTrackModal('${t.id}')">✏️</button>` : ''}
-                                <button class="card-action-icon-btn" title="Asset ID 복사" onclick="event.stopPropagation();navigator.clipboard.writeText('${t.assetId}');showToast('Asset ID 복사 완료: ' + '${t.assetId}', 'success')">📋</button>
-                                <a class="card-action-icon-btn" href="https://create.roblox.com/store/asset/${t.assetId}" target="_blank" onclick="event.stopPropagation()" title="Roblox Store 링크">↗</a>
+                                ${(isAdminMode && currentUserTier === 'owner' && t.status === 'pending_review') ? `<button class="card-action-icon-btn" title="승인" style="color:#10b981;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleApprove('${esc(t.id)}')">✓</button><button class="card-action-icon-btn" title="거절" style="color:#f87171;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleReject('${esc(t.id)}')">✕</button>` : ''}
+                                ${isAdminMode ? `<button class="card-action-icon-btn" title="정보 수정" style="color:var(--accent-gold);" onclick="event.stopPropagation();openEditTrackModal('${esc(t.id)}')">✏️</button>` : ''}
+                                <button class="card-action-icon-btn" title="Asset ID 복사" onclick="event.stopPropagation();navigator.clipboard.writeText('${safeAssetId}');showToast('Asset ID 복사 완료: ' + '${safeAssetId}', 'success')">📋</button>
+                                <a class="card-action-icon-btn" href="https://create.roblox.com/store/asset/${safeAssetId}" target="_blank" onclick="event.stopPropagation()" title="Roblox Store 링크">↗</a>
                             </div>
                         </div>
                     </div>
@@ -2532,6 +3305,17 @@
             document.getElementById('editYtUrl').value = t.youtubeUrl || '';
             document.getElementById('editImageUrl').value = t.imageUrl || '';
             document.getElementById('editIsVerifiedLocked').checked = (t.isVerifiedLocked === 1);
+
+            const isOwner = (currentUserTier === 'owner');
+            const playabilitySection = document.getElementById('editPlayabilitySection');
+            if (playabilitySection) {
+                playabilitySection.style.display = isOwner ? 'block' : 'none';
+            }
+
+            const sPlay = document.getElementById('editServerPlayable');
+            const cPlay = document.getElementById('editClientPlayable');
+            if (sPlay) sPlay.value = (t.serverPlayable !== undefined && t.serverPlayable !== null) ? String(t.serverPlayable) : '-1';
+            if (cPlay) cPlay.value = (t.clientPlayable !== undefined && t.clientPlayable !== null) ? String(t.clientPlayable) : '-1';
             
             let cover = t.imageUrl;
             if (!cover && t.yt) cover = `https://img.youtube.com/vi/${t.yt}/mqdefault.jpg`;
@@ -2540,7 +3324,7 @@
             
             document.getElementById('editYtResultsBox').style.display = 'none';
             document.getElementById('editYtResultsList').innerHTML = '';
-            document.getElementById('editTrackModal').classList.add('open');
+            openModal('editTrackModal');
         }
 
         async function searchYoutubeForEdit() {
@@ -2559,19 +3343,26 @@
                 const res = await apiFetch(`/api/audio/youtube-search?q=${encodeURIComponent(title)}`);
                 const json = await res.json();
                 if (json.status === 'success' && Array.isArray(json.data) && json.data.length > 0) {
-                    list.innerHTML = json.data.map(r => `
-                        <div style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:6px;background:rgba(255,255,255,0.04);cursor:pointer;transition:all 0.2s;"
+                    list.innerHTML = json.data.map((r, idx) => `
+                        <div class="yt-search-result-item" data-idx="${idx}" style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:6px;background:rgba(255,255,255,0.04);cursor:pointer;transition:all 0.2s;"
                             onmouseover="this.style.background='rgba(255,255,255,0.12)'" 
-                            onmouseout="this.style.background='rgba(255,255,255,0.04)'"
-                            onclick="selectYtResult('${r.videoUrl}', '${r.thumbnail}', '${r.title.replace(/'/g, "\\'")}')">
+                            onmouseout="this.style.background='rgba(255,255,255,0.04)'">
                             <img src="${r.thumbnail}" style="width:70px;height:42px;border-radius:4px;object-fit:cover;flex-shrink:0;" />
                             <div style="flex:1;min-width:0;">
-                                <div style="font-size:12px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.title}</div>
-                                <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">${r.author || 'YouTube'} · ${r.duration || ''}</div>
+                                <div style="font-size:12px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(r.title)}</div>
+                                <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">${esc(r.author || 'YouTube')} · ${esc(r.duration || '')}</div>
                             </div>
                             <span style="font-size:11px;color:var(--accent-cyan);font-weight:700;flex-shrink:0;">맵핑 ➔</span>
                         </div>
                     `).join('');
+
+                    list.querySelectorAll('.yt-search-result-item').forEach(el => {
+                        el.onclick = () => {
+                            const idx = parseInt(el.getAttribute('data-idx'), 10);
+                            const item = json.data[idx];
+                            if (item) selectYtResult(item.videoUrl, item.thumbnail, item.title);
+                        };
+                    });
                 } else {
                     list.innerHTML = `<div style="text-align:center;padding:14px;color:var(--text-muted);font-size:12px;">일치하는 유튜브 영상 검색 결과가 없습니다.</div>`;
                 }
@@ -2594,24 +3385,31 @@
             const ytUrl = document.getElementById('editYtUrl').value.trim();
             const imgUrl = document.getElementById('editImageUrl').value.trim();
             const isLocked = document.getElementById('editIsVerifiedLocked').checked ? 1 : 0;
+            const sPlay = document.getElementById('editServerPlayable')?.value;
+            const cPlay = document.getElementById('editClientPlayable')?.value;
 
             if (!id) return;
 
             try {
+                const payload = {
+                    title: title,
+                    gameName: cat,
+                    youtubeUrl: ytUrl,
+                    imageUrl: imgUrl,
+                    isVerifiedLocked: isLocked
+                };
+                if (sPlay !== undefined && sPlay !== '') payload.serverPlayable = parseInt(sPlay, 10);
+                if (cPlay !== undefined && cPlay !== '') payload.clientPlayable = parseInt(cPlay, 10);
+
                 const res = await apiFetch(`/api/audio/${id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title: title,
-                        gameName: cat,
-                        youtubeUrl: ytUrl,
-                        imageUrl: imgUrl,
-                        isVerifiedLocked: isLocked
-                    })
+                    body: JSON.stringify(payload)
                 });
                 const json = await res.json();
                 if (json.status === 'success') {
-                    showToast('오디오 정보 및 고정 설정이 성공적으로 저장되었습니다!', 'success');
+                    showToast('오디오 정보, 재생 상태 및 고정 설정이 성공적으로 저장되었습니다!', 'success');
+                    try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
                     closeModal('editTrackModal');
                     await loadRealAudios();
                 } else {
@@ -2619,6 +3417,298 @@
                 }
             } catch(e) {
                 showToast('수정 중 서버 통신 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        function openBulkPlayabilityModal() {
+            if (selectedTrackIds.size === 0) {
+                showToast('상태를 변경할 오디오를 1개 이상 선택해 주세요 (다중 선택 모드 활용)', 'warning');
+                return;
+            }
+            const countText = document.getElementById('bulkPlayCountText');
+            if (countText) countText.textContent = selectedTrackIds.size;
+            
+            // Reset dropdowns to "No Change" default
+            const sPlay = document.getElementById('bulkServerPlayable');
+            const cPlay = document.getElementById('bulkClientPlayable');
+            const vStat = document.getElementById('bulkVerificationStatus');
+            const lLock = document.getElementById('bulkIsVerifiedLocked');
+            if (sPlay) sPlay.value = '';
+            if (cPlay) cPlay.value = '';
+            if (vStat) vStat.value = '';
+            if (lLock) lLock.value = '';
+
+            openModal('bulkPlayabilityModal');
+        }
+
+        async function executeBulkPlayability() {
+            if (selectedTrackIds.size === 0) {
+                showToast('선택된 곡이 없습니다.', 'warning');
+                return;
+            }
+
+            const sPlay = document.getElementById('bulkServerPlayable')?.value;
+            const cPlay = document.getElementById('bulkClientPlayable')?.value;
+            const vStat = document.getElementById('bulkVerificationStatus')?.value;
+            const lLock = document.getElementById('bulkIsVerifiedLocked')?.value;
+
+            if (!sPlay && !cPlay && !vStat && !lLock) {
+                showToast('변경할 항목을 최소 1개 이상 선택해주세요.', 'error');
+                return;
+            }
+
+            const payload = {
+                audioIds: Array.from(selectedTrackIds)
+            };
+            if (sPlay !== '') payload.serverPlayable = parseInt(sPlay, 10);
+            if (cPlay !== '') payload.clientPlayable = parseInt(cPlay, 10);
+            if (vStat !== '') payload.verificationStatus = vStat;
+            if (lLock !== '') payload.isVerifiedLocked = parseInt(lLock, 10);
+
+            try {
+                const res = await apiFetch('/api/audio/bulk/playability', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(json.message || '⚡ 재생 및 고정 상태가 일괄 변경되었습니다!', 'success');
+                    try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
+                    closeModal('bulkPlayabilityModal');
+                    selectedTrackIds.clear();
+                    toggleMultiSelectMode();
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '일괄 변경 실패', 'error');
+                }
+            } catch(e) {
+                showToast('일괄 변경 요청 중 통신 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        function openMappingReviewModal() {
+            openModal('mappingReviewModal');
+            loadMappingSuggestions();
+        }
+
+        async function updateMappingSuggestionBadge() {
+            if (!isAdminMode) return;
+            try {
+                const res = await apiFetch('/api/audio/auto-map/suggestions');
+                const json = await res.json();
+                if (json.status === 'success' && Array.isArray(json.data)) {
+                    const badge = document.getElementById('mappingSuggestionBadge');
+                    const reviewBadge = document.getElementById('reviewPendingCountBadge');
+                    const count = json.data.length;
+                    if (badge) {
+                        badge.textContent = count;
+                        badge.style.display = count > 0 ? 'inline-block' : 'none';
+                    }
+                    if (reviewBadge) {
+                        reviewBadge.textContent = `${count}건 대기중`;
+                    }
+                }
+            } catch(e) {}
+        }
+
+        async function loadMappingSuggestions() {
+            const listEl = document.getElementById('mappingSuggestionsList');
+            if (!listEl) return;
+            listEl.innerHTML = `<div style="text-align:center;padding:30px;color:var(--text-muted);font-size:13px;">🔍 매핑 제안 목록을 불러오는 중...</div>`;
+
+            try {
+                const res = await apiFetch('/api/audio/auto-map/suggestions');
+                const json = await res.json();
+                if (json.status === 'success' && Array.isArray(json.data)) {
+                    updateMappingSuggestionBadge();
+                    if (json.data.length === 0) {
+                        listEl.innerHTML = `
+                            <div style="text-align:center;padding:40px 20px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px dashed var(--border-subtle);">
+                                <div style="font-size:32px;margin-bottom:8px;">🎉</div>
+                                <div style="font-size:14px;font-weight:700;color:#fff;">대기 중인 유튜브 매핑 제안이 없습니다.</div>
+                                <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">모든 오디오가 매핑되었거나 스캔 대기 중입니다.</div>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    listEl.innerHTML = json.data.map(s => {
+                        const scoreColor = s.similarityScore >= 85 ? '#10b981' : s.similarityScore >= 70 ? '#f59e0b' : '#38bdf8';
+                        const safeOrigTitle = esc(s.originalTitle);
+                        const safeVidTitle = esc(s.videoTitle);
+                        const safeAssetId = esc(s.audioAssetId || s.audioId);
+                        const safeCat = esc(getCategoryDisplayName(s.category));
+                        const safeThumb = esc(s.thumbnail || DEFAULT_FALLBACK_IMG);
+
+                        return `
+                        <div class="mapping-suggestion-card" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;transition:all 0.2s;box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                            <!-- Header: Similarity Badge & Date -->
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,0.05);">
+                                <span style="background:${scoreColor}22;color:${scoreColor};border:1px solid ${scoreColor}55;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;gap:4px;">
+                                    <span>✨</span> <span>제목 유사도: ${s.similarityScore}%</span>
+                                </span>
+                                <span style="font-size:12px;color:var(--text-muted);">${s.createdAt ? new Date(s.createdAt).toLocaleString() : ''}</span>
+                            </div>
+
+                            <!-- Body: 2 Columns (Roblox Audio vs Suggested YouTube) -->
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;background:rgba(0,0,0,0.3);padding:14px;border-radius:10px;align-items:stretch;">
+                                <!-- Left: Roblox Audio -->
+                                <div style="display:flex;flex-direction:column;justify-content:space-between;gap:8px;border-right:1px solid rgba(255,255,255,0.08);padding-right:14px;">
+                                    <div>
+                                        <div style="font-size:11px;font-weight:800;color:var(--accent-cyan);display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+                                            <span>🎵</span> <span>Roblox 등록 오디오</span>
+                                        </div>
+                                        <div style="font-size:14px;font-weight:700;color:#fff;line-height:1.45;word-break:break-word;white-space:normal;margin-bottom:6px;">${safeOrigTitle}</div>
+                                        <div style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                            <span class="roblox-id-badge" style="font-size:11px;">ID: ${safeAssetId}</span>
+                                            <span>📁 ${safeCat}</span>
+                                        </div>
+                                    </div>
+                                    <button class="quick-tool-btn" style="margin-top:8px;height:34px;font-size:12px;font-weight:600;background:rgba(0,229,255,0.12);border-color:rgba(0,229,255,0.3);color:var(--accent-cyan);justify-content:center;"
+                                        onclick="playTrackDemo('${esc(s.audioId)}')">
+                                        ▶ Roblox 원음 들어보기
+                                    </button>
+                                </div>
+
+                                <!-- Right: YouTube Candidate -->
+                                <div style="display:flex;flex-direction:column;justify-content:space-between;gap:8px;">
+                                    <div>
+                                        <div style="font-size:11px;font-weight:800;color:#ef4444;display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+                                            <span>🎬</span> <span>추천 YouTube 영상</span>
+                                        </div>
+                                        <div style="display:flex;align-items:flex-start;gap:12px;">
+                                            <img src="${safeThumb}" style="width:84px;height:50px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.1);" onerror="handleImgError(this)" />
+                                            <div style="flex:1;min-width:0;">
+                                                <div style="font-size:13px;font-weight:700;color:#fff;line-height:1.45;word-break:break-word;white-space:normal;margin-bottom:4px;">${safeVidTitle}</div>
+                                                <a href="${esc(s.videoUrl)}" target="_blank" style="font-size:11px;color:var(--accent-cyan);text-decoration:none;display:inline-flex;align-items:center;gap:3px;" onclick="event.stopPropagation()">새 창에서 열기 ↗</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="quick-tool-btn" style="margin-top:8px;height:34px;font-size:12px;font-weight:600;background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.3);color:#fca5a5;justify-content:center;"
+                                        onclick="playYoutubeDirect('${esc(s.videoUrl)}')">
+                                        ▶ 유튜브 영상 들어보기
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Footer Actions -->
+                            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:2px;">
+                                <button class="quick-tool-btn" style="height:36px;padding:0 16px;font-size:12px;font-weight:600;background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3);color:#f87171;"
+                                    onclick="rejectSuggestion('${esc(s.id)}')">
+                                    ✕ 거절 및 건너뛰기
+                                </button>
+                                <button class="quick-tool-btn primary" style="height:36px;padding:0 20px;font-size:13px;font-weight:800;"
+                                    onclick="acceptSuggestion('${esc(s.id)}')">
+                                    ✓ 맵핑 수락 및 확정
+                                </button>
+                            </div>
+                        </div>
+                        `;
+                    }).join('');
+                }
+            } catch(e) {
+                listEl.innerHTML = `<div style="text-align:center;padding:30px;color:#ef4444;font-size:13px;">제안 목록 로드 중 오류 발생</div>`;
+            }
+        }
+
+        async function acceptSuggestion(sugId) {
+            try {
+                const res = await apiFetch(`/api/audio/auto-map/suggestions/${sugId}/accept`, { method: 'POST' });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast('🎉 유튜브 매핑이 성공적으로 승인 및 확정되었습니다!', 'success');
+                    await loadMappingSuggestions();
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '승인 실패', 'error');
+                }
+            } catch(e) {
+                showToast('승인 요청 중 통신 오류', 'error');
+            }
+        }
+
+        async function rejectSuggestion(sugId) {
+            try {
+                const res = await apiFetch(`/api/audio/auto-map/suggestions/${sugId}/reject`, { method: 'POST' });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast('매핑 제안이 거절되었습니다.', 'info');
+                    await loadMappingSuggestions();
+                } else {
+                    showToast(json.message || '거절 실패', 'error');
+                }
+            } catch(e) {
+                showToast('거절 요청 중 통신 오류', 'error');
+            }
+        }
+
+        function playYoutubeDirect(videoUrl) {
+            const m = String(videoUrl).match(/(?:v=|\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            if (m && m[1]) {
+                startYoutubePlayback(m[1]);
+                showToast('🎬 YouTube 영상 미리듣기를 재생합니다.', 'info');
+            } else {
+                window.open(videoUrl, '_blank');
+            }
+        }
+
+        async function executeBulkAutoMap() {
+            if (selectedTrackIds.size === 0) {
+                showToast('유튜브를 자동 맵핑할 곡을 1개 이상 선택해주세요.', 'warning');
+                return;
+            }
+
+            if (!confirm(`선택한 ${selectedTrackIds.size}개 곡에 대해 AI 유튜브 자동 검색 및 맵핑을 실행하시겠습니까?\n(100% 일치 시 자동 확정, 유사 시 알림 등록)`)) return;
+
+            showToast('AI 유튜브 자동 맵핑 스캔 실행 중...', 'info');
+            try {
+                const res = await apiFetch('/api/audio/auto-map/scan-bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ audioIds: Array.from(selectedTrackIds) }),
+                    timeout: 180000 // 3 minutes timeout for bulk scraping
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(json.message, 'success');
+                    selectedTrackIds.clear();
+                    toggleMultiSelectMode();
+                    await loadRealAudios();
+                    updateMappingSuggestionBadge();
+                    if (json.suggestionCount > 0) {
+                        openMappingReviewModal();
+                    }
+                } else {
+                    showToast(json.message || '스캔 실패', 'error');
+                }
+            } catch(e) {
+                showToast('자동 맵핑 요청 중 오류가 발생했습니다: ' + (e.message || ''), 'error');
+            }
+        }
+
+        async function scanUnmappedAudiosForYoutube() {
+            if (!confirm('미맵핑된 오디오 최대 30곡에 대해 AI 유튜브 자동 매핑 스캔을 실행하시겠습니까?')) return;
+
+            showToast('미맵핑 오디오 유튜브 자동 스캔 중...', 'info');
+            try {
+                const res = await apiFetch('/api/audio/auto-map/scan-bulk', { 
+                    method: 'POST',
+                    timeout: 180000 // 3 minutes timeout
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(json.message, 'success');
+                    await loadRealAudios();
+                    updateMappingSuggestionBadge();
+                    if (json.suggestionCount > 0) {
+                        openMappingReviewModal();
+                    }
+                } else {
+                    showToast(json.message || '스캔 실패', 'error');
+                }
+            } catch(e) {
+                showToast('스캔 요청 중 통신 오류가 발생했습니다: ' + (e.message || ''), 'error');
             }
         }
 
@@ -2637,7 +3727,7 @@
                 const displayName = getCategoryDisplayName(cat);
                 return `
                 <div class="category-gallery-card" onclick="filterByCat('${cat}')">
-                    <img src="${thumb}" class="cat-card-bg-img" onerror="this.onerror=null;this.src=DEFAULT_FALLBACK_IMG;" />
+                    <img src="${thumb}" class="cat-card-bg-img" onerror="handleImgError(this)" />
                     <div class="cat-card-title">${displayName}</div>
                     <div class="cat-card-count">${counts[cat]} Tracks</div>
                 </div>
@@ -2690,7 +3780,10 @@
             toggleMobileSidebar(false);
         }
 
-        function filterByCat(cat) {
+        function filterByCat(cat, forcePass = false) {
+            if (!forcePass && !checkCategoryWarningGate(cat)) {
+                return;
+            }
             currentCategory = (cat === 'all') ? null : cat;
             switchMainView('all');
             renderCategoryChips();
@@ -3226,55 +4319,36 @@
             }
         }
 
-        function openBulkPlayabilityModal() {
-            if (selectedTrackIds.size === 0) { showToast('선택된 곡이 없습니다.', 'info'); return; }
-            document.getElementById('bulkPlayCountText').textContent = selectedTrackIds.size;
-            // Reset selects
-            document.getElementById('bulkServerPlayable').value = '';
-            document.getElementById('bulkClientPlayable').value = '';
-            document.getElementById('bulkVerificationStatus').value = '';
-            document.getElementById('bulkIsVerifiedLocked').value = '';
-            openModal('bulkPlayabilityModal');
-        }
-
-        async function executeBulkPlayability() {
-            if (selectedTrackIds.size === 0) return;
-            const srvPlay = document.getElementById('bulkServerPlayable').value;
-            const cliPlay = document.getElementById('bulkClientPlayable').value;
-            const verifSt = document.getElementById('bulkVerificationStatus').value;
-            const verifLk = document.getElementById('bulkIsVerifiedLocked').value;
-
-            if (!srvPlay && !cliPlay && !verifSt && !verifLk) {
-                showToast('변경할 항목을 1개 이상 선택해주세요.', 'error');
+        async function handleBulkStudioReverify() {
+            if (selectedTrackIds.size === 0) {
+                showToast('선택된 곡이 없습니다.', 'warning');
                 return;
             }
-
-            const payload = { audioIds: Array.from(selectedTrackIds) };
-            if (srvPlay !== '') payload.serverPlayable = Number(srvPlay);
-            if (cliPlay !== '') payload.clientPlayable = Number(cliPlay);
-            if (verifSt !== '') payload.verificationStatus = verifSt;
-            if (verifLk !== '') payload.isVerifiedLocked = Number(verifLk);
-
+            if (!confirm(`선택한 ${selectedTrackIds.size}개 곡을 Roblox Studio 인게임 검증 대기열에 추가하시겠습니까?`)) {
+                return;
+            }
             try {
-                const res = await apiFetch('/api/audio/bulk/playability', {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json', ...(currentAdminToken ? { 'x-admin-token': currentAdminToken } : {}) },
-                    body: JSON.stringify(payload)
+                const res = await apiFetch('/api/audio/studio/reverify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ audioIds: Array.from(selectedTrackIds) })
                 });
                 const json = await res.json();
                 if (json.status === 'success') {
-                    showToast(`⚡ ${json.count || selectedTrackIds.size}개 곡의 재생 상태가 일괄 변경되었습니다.`, 'success');
-                    closeModal('bulkPlayabilityModal');
+                    showToast(json.message || `🎮 ${selectedTrackIds.size}개 오디오가 Studio 검증 대기열에 추가되었습니다!`, 'success');
+                    try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
                     selectedTrackIds.clear();
                     toggleMultiSelectMode();
                     await loadRealAudios();
                 } else {
-                    showToast(json.message || '재생 상태 변경에 실패했습니다.', 'error');
+                    showToast(json.message || '스튜디오 검증 요청 실패', 'error');
                 }
             } catch(e) {
-                showToast('재생 상태 일괄 변경 중 오류가 발생했습니다.', 'error');
+                showToast('스튜디오 검증 요청 중 오류가 발생했습니다: ' + (e.message || ''), 'error');
             }
         }
+
+
 
         async function submitAddAudio() {
             const assetId = document.getElementById('newAssetId').value.trim();
@@ -3288,19 +4362,21 @@
             }
 
             try {
-                const res = await fetch('/api/audio/add', {
+                const res = await apiFetch('/api/audio/add', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         audioAssetId: assetId,
                         title: title || `Audio ${assetId}`,
                         gameName: category,
+                        type: 'global',
                         youtubeUrl: ytUrl
                     })
                 });
                 const json = await res.json();
                 if (json.status === 'success') {
                     showToast('신규 오디오가 성공적으로 등록되었습니다!', 'success');
+                    try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
                     closeModal('addAudioModal');
                     document.getElementById('newAssetId').value = '';
                     document.getElementById('newTitle').value = '';
@@ -3311,7 +4387,7 @@
                     showToast(json.message || '오디오 등록에 실패했습니다.', 'error');
                 }
             } catch(e) {
-                showToast('서버 통신 오류가 발생했습니다.', 'error');
+                showToast('서버 통신 오류가 발생했습니다: ' + (e.message || ''), 'error');
             }
         }
 
@@ -3351,7 +4427,7 @@
             if (imgInput) imgInput.value = categoryMetadataMap[cat] || '';
 
             const trans = categoryTranslations[cat] || {};
-            ['ko', 'en', 'ja', 'zh', 'ru'].forEach(lang => {
+            ['ko', 'en', 'ja', 'zh', 'ru', 'vi'].forEach(lang => {
                 const el = document.getElementById(`catTrans_${lang}`);
                 if (el) el.value = trans[lang] || '';
             });
@@ -3377,7 +4453,7 @@
 
                 // 2. Save Translations
                 const translations = {};
-                ['ko', 'en', 'ja', 'zh', 'ru'].forEach(lang => {
+                ['ko', 'en', 'ja', 'zh', 'ru', 'vi'].forEach(lang => {
                     const val = document.getElementById(`catTrans_${lang}`)?.value.trim();
                     if (val) translations[lang] = val;
                 });
@@ -3507,6 +4583,229 @@
             }
         }
 
+        /* ─── CATEGORY CONTENT WARNING GATE SYSTEM ─── */
+        let categoryWarningsMap = {};
+        let pendingWarningCategory = null;
+
+        async function loadCategoryWarnings() {
+            try {
+                const res = await apiFetch('/api/audio/categories/warnings');
+                if (!res || !res.ok) return;
+                const json = await res.json();
+                if (json.status === 'success' && Array.isArray(json.data)) {
+                    categoryWarningsMap = {};
+                    json.data.forEach(item => {
+                        if (item && item.category) {
+                            categoryWarningsMap[item.category] = item;
+                        }
+                    });
+                }
+            } catch(e) {}
+        }
+
+        function checkCategoryWarningGate(cat) {
+            if (!cat || cat === 'all') return true;
+            const warn = categoryWarningsMap[cat];
+            if (!warn || warn.isEnabled !== 1) return true;
+
+            // Check session consent
+            let isAccepted = false;
+            try {
+                isAccepted = sessionStorage.getItem('cat_warn_accepted_' + cat) === 'true';
+            } catch(e) {}
+            if (isAccepted) return true;
+
+            // Intercept and display Category Warning Modal
+            pendingWarningCategory = cat;
+            
+            const iconEl = document.getElementById('catWarnIcon');
+            if (iconEl) {
+                const icons = { horror: '👻', mature: '🔞', spoiler: '⚠️', game_exclusive: '🎮', general: '🔔' };
+                iconEl.textContent = icons[warn.warningType] || '⚠️';
+            }
+
+            const targetNameEl = document.getElementById('catWarnTargetName');
+            if (targetNameEl) {
+                targetNameEl.textContent = getCategoryDisplayName(cat) + (cat !== getCategoryDisplayName(cat) ? ` (${cat})` : '');
+            }
+
+            const curLang = (window.i18n && typeof window.i18n.getLang === 'function' ? window.i18n.getLang() : 'ko') || 'ko';
+            const title = warn['title_' + curLang] || warn['title_en'] || warn['title_ko'] || t('audio_ui.warning_default_title', '민감한 콘텐츠 및 청각 주의');
+            const msg = warn['message_' + curLang] || warn['message_en'] || warn['message_ko'] || t('audio_ui.warning_default_message', '이 카테고리에는 공포, 점프스케어, 기괴한 소리 또는 민감한 음원이 포함되어 있을 수 있습니다. 계속 진행하시겠습니까?');
+
+            const titleEl = document.getElementById('catWarnTitle');
+            const msgEl = document.getElementById('catWarnMessage');
+            if (titleEl) titleEl.textContent = title;
+            if (msgEl) msgEl.textContent = msg;
+
+            const chk = document.getElementById('catWarnDontAskAgain');
+            if (chk) chk.checked = true;
+
+            openModal('categoryWarningModal');
+            return false;
+        }
+
+        function acceptCategoryWarning() {
+            if (pendingWarningCategory) {
+                const cat = pendingWarningCategory;
+                const chk = document.getElementById('catWarnDontAskAgain');
+                if (!chk || chk.checked) {
+                    try {
+                        sessionStorage.setItem('cat_warn_accepted_' + cat, 'true');
+                    } catch(e) {}
+                }
+                closeModal('categoryWarningModal');
+                const targetCat = pendingWarningCategory;
+                pendingWarningCategory = null;
+                filterByCat(targetCat, true);
+            } else {
+                closeModal('categoryWarningModal');
+            }
+        }
+
+        function declineCategoryWarning() {
+            closeModal('categoryWarningModal');
+            pendingWarningCategory = null;
+            if (currentCategory) {
+                filterByCat('all', true);
+            }
+        }
+
+        /* ─── ADMIN CATEGORY WARNING MANAGEMENT ─── */
+        const WARN_PRESETS = {
+            horror: {
+                ko: { title: '👻 공포 & 점프스케어 주의', msg: '이 카테고리에는 갑작스러운 굉음, 기괴한 음향 효과 또는 깜짝 놀랄 수 있는 공포 음원이 포함되어 있습니다. 심약자나 어린이는 청취 시 주의해 주세요.' },
+                en: { title: '👻 Horror & Jumpscare Warning', msg: 'This category contains sudden loud noises, eerie audio effects, or spooky sounds. Listener discretion is advised.' },
+                ja: { title: '👻 ホラー＆ジャンプスケア注意', msg: 'このカテゴリーには突然の大音量、不気味な音響効果、または驚かせるようなホラー音源が含まれています。視聴の際はご注意ください。' },
+                zh: { title: '👻 恐怖与惊吓音效警示', msg: '此分类包含突发高分贝声响、诡异音效或惊悚音频内容。请注意音量并谨慎收听。' },
+                ru: { title: '👻 Предупреждение о страшных звуках и скримерах', msg: 'В этой категории могут содержаться резкие громкие звуки, скримеры и пугающие аудиоэффекты. Рекомендуется соблюдать осторожность.' }
+            },
+            mature: {
+                ko: { title: '🔞 성인 & 자극적 테마 주의', msg: '이 카테고리에는 다소 자극적이거나 성인 지향적인 테마의 음원이 포함되어 있을 수 있습니다. 동의 후 입장해 주세요. (해당 오디오 사용으로 인한 인게임 처벌 및 제재는 책임지지 않습니다.)' },
+                en: { title: '🔞 Mature & Sensitive Audio Warning', msg: 'This category may contain sensitive, provocative, or mature themed audio tracks. Viewer consent is required to proceed. (We are not responsible for any in-game penalties or moderation actions resulting from using these audios.)' },
+                ja: { title: '🔞 成人・刺激的なコンテンツ注意', msg: 'このカテゴリーには刺激的なテーマや成人向けの音源が含まれている可能性があります。同意の上でご入場ください。（本オーディオの使用により発生したいかなるインゲーム処罰・制裁についても責任を负いかねます。）' },
+                zh: { title: '🔞 成人与敏感题材警示', msg: '此分类可能包含较为敏感或成人向题材的音频内容。请确认后继续。（对于因在游戏中使用此类音频而导致的任何处罚或封禁，本站概不负责。）' },
+                ru: { title: '🔞 Предупреждение о взрослом и чувствительном контенте', msg: 'Эта категория может содержать материалы деликатного или взрослого характера. Вход только с вашего согласия. (Администрация не несет ответственности за любые внутриигровые блокировки и наказания, вызванные использованием данных аудио.)' }
+            },
+            game_exclusive: {
+                ko: { title: '🎮 특정 게임 전용 오디오 안내', msg: '이 카테고리의 오디오들은 Roblox의 Universe 권한 설정으로 인해 특정 게임 내에서만 정상 재생되며, 다른 게임에서는 재생이 제한될 수 있습니다.' },
+                en: { title: '🎮 Game-Exclusive Audio Notice', msg: 'Tracks in this category can only be played within specific Roblox games/experiences due to Universe sharing permissions and may be restricted elsewhere.' },
+                ja: { title: '🎮 特定ゲーム専用オーディオのご案内', msg: 'このカテゴリーのオーディオはRobloxのユニバース権限設定により、特定のゲーム内でのみ再生可能であり、他のゲームでは再生が制限される場合があります。' },
+                zh: { title: '🎮 特定游戏专属音频提示', msg: '此分类中的音频由于Roblox的Universe权限限制，仅可在特定游戏/体验中使用，在其他游戏中可能无法正常播放。' },
+                ru: { title: '🎮 Аудио только для определенных плейсов', msg: 'Аудиозаписи из этой категории могут воспроизводиться только внутри определенных плейсов Roblox из-за настроек Universe и могут быть недоступны в других местах.' }
+            },
+            spoiler: {
+                ko: { title: '⚠️ 게임 스토리 스포일러 주의', msg: '이 카테고리의 음원 제목 및 커버에는 게임의 핵심 스토리 또는 보스전 스포일러가 포함되어 있습니다.' },
+                en: { title: '⚠️ Story & Boss Spoiler Warning', msg: 'Audio titles and cover art in this category may contain major story, plot, or boss spoilers.' },
+                ja: { title: '⚠️ ストーリー・ネタバレ注意', msg: 'このカテゴリーのタイトルやカバーには、ゲームの重要ストーリーやボスのネタバレが含まれています。' },
+                zh: { title: '⚠️ 剧透与剧情警示', msg: '此分类中的音频标题和封面可能包含重要的游戏剧情或Boss剧透内容。' },
+                ru: { title: '⚠️ Предупреждение о сюжетных спойлерах', msg: 'Названия треков и обложки в этой категории могут содержать спойлеры к сюжету или финальным боссам.' }
+            },
+            general: {
+                ko: { title: '🔔 청각 및 음량 주의 안내', msg: '이 카테고리에는 고주파 음향이나 특수한 효과음이 포함되어 있습니다. 이어폰 볼륨을 적정 수준으로 조절해 주세요.' },
+                en: { title: '🔔 Audio Volume & Sensitivity Notice', msg: 'This category contains high-frequency sounds or special effects. Please adjust your playback volume safely.' },
+                ja: { title: '🔔 音量・聴覚注意のご案内', msg: 'このカテゴリーには高周波音や特殊な効果音が含まれています。適切な音量に調節してご視聴ください。' },
+                zh: { title: '🔔 播放音量与听觉提醒', msg: '此分类包含高频音效或特殊声音。请将播放音量调节至适中水平。' },
+                ru: { title: '🔔 Предупреждение об уровне громкости', msg: 'В этой категории могут встречаться высокочастотные звуки или спецэффекты. Отрегулируйте громкость.' }
+            }
+        };
+
+        function applyWarnPreset(type) {
+            const preset = WARN_PRESETS[type] || WARN_PRESETS.general;
+            ['ko', 'en', 'ja', 'zh', 'ru'].forEach(lang => {
+                const p = preset[lang] || preset.ko;
+                const tEl = document.getElementById(`warnTitle_${lang}`);
+                const mEl = document.getElementById(`warnMsg_${lang}`);
+                if (tEl) tEl.value = p.title || '';
+                if (mEl) mEl.value = p.msg || '';
+            });
+        }
+
+        function onAdminWarnCatSelectChange() {
+            const cat = document.getElementById('adminWarnCatSelect')?.value;
+            if (!cat) return;
+            const warn = categoryWarningsMap[cat];
+            if (warn) {
+                document.getElementById('adminWarnEnabled').checked = (warn.isEnabled === 1);
+                document.getElementById('adminWarnType').value = warn.warningType || 'general';
+                ['ko', 'en', 'ja', 'zh', 'ru'].forEach(lang => {
+                    const tEl = document.getElementById(`warnTitle_${lang}`);
+                    const mEl = document.getElementById(`warnMsg_${lang}`);
+                    if (tEl) tEl.value = warn[`title_${lang}`] || '';
+                    if (mEl) mEl.value = warn[`message_${lang}`] || '';
+                });
+            } else {
+                document.getElementById('adminWarnEnabled').checked = true;
+                document.getElementById('adminWarnType').value = 'horror';
+                applyWarnPreset('horror');
+            }
+        }
+
+        async function saveCategoryWarning() {
+            const cat = document.getElementById('adminWarnCatSelect')?.value;
+            if (!cat) {
+                showToast('카테고리를 선택해주세요.', 'error');
+                return;
+            }
+            const isEnabled = document.getElementById('adminWarnEnabled').checked ? 1 : 0;
+            const warningType = document.getElementById('adminWarnType').value;
+
+            const payload = {
+                category: cat,
+                isEnabled,
+                warningType,
+                title_ko: document.getElementById('warnTitle_ko')?.value || '',
+                title_en: document.getElementById('warnTitle_en')?.value || '',
+                title_ja: document.getElementById('warnTitle_ja')?.value || '',
+                title_zh: document.getElementById('warnTitle_zh')?.value || '',
+                title_ru: document.getElementById('warnTitle_ru')?.value || '',
+                message_ko: document.getElementById('warnMsg_ko')?.value || '',
+                message_en: document.getElementById('warnMsg_en')?.value || '',
+                message_ja: document.getElementById('warnMsg_ja')?.value || '',
+                message_zh: document.getElementById('warnMsg_zh')?.value || '',
+                message_ru: document.getElementById('warnMsg_ru')?.value || ''
+            };
+
+            try {
+                const res = await apiFetch('/api/audio/categories/warnings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(`카테고리 '${cat}' 경고 게이트 설정이 성공적으로 저장되었습니다!`, 'success');
+                    await loadCategoryWarnings();
+                } else {
+                    showToast(json.message || '저장 실패', 'error');
+                }
+            } catch(e) {
+                showToast('경고 설정 저장 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        async function deleteCategoryWarning() {
+            const cat = document.getElementById('adminWarnCatSelect')?.value;
+            if (!cat) return;
+            if (!confirm(`'${cat}' 카테고리의 경고 설정을 완전히 삭제하시겠습니까?`)) return;
+
+            try {
+                const res = await apiFetch(`/api/audio/categories/warnings/${encodeURIComponent(cat)}`, {
+                    method: 'DELETE'
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(`카테고리 '${cat}' 경고가 삭제되었습니다.`, 'info');
+                    delete categoryWarningsMap[cat];
+                    onAdminWarnCatSelectChange();
+                } else {
+                    showToast(json.message || '삭제 실패', 'error');
+                }
+            } catch(e) {
+                showToast('삭제 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
         let isLightMode = false;
         function toggleThemeMode() {
             isLightMode = !isLightMode;
@@ -3516,10 +4815,21 @@
 
         function openUnifiedAdminModal() { 
             loadAdminStats();
-            loadDeletedAudiosList();
+            if (currentUserTier === 'owner') {
+                loadStudioConfig();
+                loadDeletedAudiosList();
+                loadCategoryWarnings();
+            }
+
+            // Reset active tab to first available
+            const firstTabBtn = document.querySelector('#unifiedAdminModal .modal-tab-btn:not([style*="display: none"])');
+            if (firstTabBtn) {
+                firstTabBtn.click();
+            }
 
             // populate admin categories
             const catSelect = document.getElementById('adminCatSelect');
+            const warnCatSelect = document.getElementById('adminWarnCatSelect');
             const renameOldCat = document.getElementById('adminRenameOldCat');
             const blacklistGrid = document.getElementById('adminCatBlacklistGrid');
             const cats = Array.from(new Set(tracksData.map(t => t.cat).filter(Boolean))).sort();
@@ -3527,6 +4837,10 @@
             if (catSelect) {
                 catSelect.innerHTML = cats.map(c => `<option value="${c}">${getCategoryDisplayName(c)} (${c})</option>`).join('');
                 onAdminCatSelectChange();
+            }
+            if (warnCatSelect) {
+                warnCatSelect.innerHTML = cats.map(c => `<option value="${c}">${getCategoryDisplayName(c)} (${c})</option>`).join('');
+                onAdminWarnCatSelectChange();
             }
             if (renameOldCat) {
                 renameOldCat.innerHTML = cats.map(c => `<option value="${c}">${getCategoryDisplayName(c)} (${c})</option>`).join('');
@@ -3538,26 +4852,63 @@
                     </label>
                 `).join('');
             }
-            document.getElementById('unifiedAdminModal').classList.add('open'); 
+            openModal('unifiedAdminModal');
         }
 
-        function openAddAudioModal() { document.getElementById('addAudioModal').classList.add('open'); }
+        function openAddAudioModal() { openModal('addAudioModal'); }
         function openBulkCategoryModal() { 
             const sel = document.getElementById('bulkSelectExisting');
             const cats = Array.from(new Set(tracksData.map(t => t.cat).filter(Boolean)));
             sel.innerHTML = cats.map(c => `<option value="${c}">${getCategoryDisplayName(c)} (${c})</option>`).join('');
-            document.getElementById('bulkCategoryModal').classList.add('open'); 
+            openModal('bulkCategoryModal');
         }
-        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
         function switchAdminTab(tab, btn) {
             document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            ['stats', 'catImg', 'rename', 'blacklist', 'restore', 'optimize'].forEach(t => {
+            ['stats', 'studio', 'catImg', 'catWarning', 'rename', 'blacklist', 'restore', 'optimize'].forEach(t => {
                 const el = document.getElementById(`adminTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 if (el) el.style.display = t === tab ? 'block' : 'none';
             });
+            if (tab === 'studio') loadStudioConfig();
             if (tab === 'restore') loadDeletedAudiosList();
+            if (tab === 'catWarning') onAdminWarnCatSelectChange();
+        }
+
+        async function loadStudioConfig() {
+            try {
+                const res = await apiFetch('/api/audio/studio/config');
+                const json = await res.json();
+                if (json.status === 'success' && json.data) {
+                    const toggle = document.getElementById('adminStudioBgVerifyEnabled');
+                    if (toggle) toggle.checked = !!json.data.enableStudioAutoVerifyBg;
+
+                    const qEl = document.getElementById('studioQueueCount');
+                    const uEl = document.getElementById('studioUnverifiedCount');
+                    const tEl = document.getElementById('studioTestingCount');
+                    if (qEl) qEl.textContent = (json.data.priorityQueueCount || 0).toLocaleString();
+                    if (uEl) uEl.textContent = (json.data.unverifiedCount || 0).toLocaleString();
+                    if (tEl) tEl.textContent = (json.data.testingCount || 0).toLocaleString();
+                }
+            } catch(e) {}
+        }
+
+        async function saveStudioAutoVerifySetting(enabled) {
+            try {
+                const res = await apiFetch('/api/audio/studio/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enableStudioAutoVerifyBg: enabled })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(json.message || '스튜디오 자동 검증 설정이 저장되었습니다.', 'success');
+                } else {
+                    showToast(json.message || '설정 저장 실패', 'error');
+                }
+            } catch(e) {
+                showToast('설정 저장 중 오류가 발생했습니다.', 'error');
+            }
         }
 
         async function loadAdminStats() {

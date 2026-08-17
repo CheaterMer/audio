@@ -1,5 +1,5 @@
 (function () {
-    const SUPPORTED_LANGUAGES = ['ko', 'en', 'zh', 'ja', 'ru'];
+    const SUPPORTED_LANGUAGES = ['ko', 'en', 'zh', 'ja', 'ru', 'vi'];
     let currentLang = 'ko';
     let translations = {};
     let koSourceDict = {};
