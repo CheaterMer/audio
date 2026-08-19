@@ -5,6 +5,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>AudioVault - Next-Gen Audio Dashboard</title>
+    
+    <!-- Open Graph & Discord Rich Embed Metadata -->
+    <meta name="theme-color" content="#6366f1" />
+    <meta property="og:site_name" content="BloxFinder Audio Vault" />
+    <meta property="og:type" content="music.song" />
+    <meta property="og:title" content="AudioVault - Next-Gen Roblox Audio Dashboard" />
+    <meta property="og:description" content="Discover, search, and manage Roblox audio assets with real-time verification and YouTube integration." />
+    <meta property="og:image" content="https://mer.r-e.kr/images/icon128.png" />
+    <meta property="og:url" content="https://mer.r-e.kr/audio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AudioVault - Next-Gen Roblox Audio Dashboard" />
+    <meta name="twitter:description" content="Discover, search, and manage Roblox audio assets with real-time verification and YouTube integration." />
+    <meta name="twitter:image" content="https://mer.r-e.kr/images/icon128.png" />
+
     <link rel="icon" type="image/png" href="./images/icon128.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -3427,11 +3441,13 @@
             const tTrack = tracksData.find(x => String(x.id) === String(trackId) || String(x.assetId) === String(trackId));
             if (!tTrack) return;
 
-            const currentOrigin = window.location.origin;
-            const currentPath = window.location.pathname;
             const shareParam = tTrack.assetId || tTrack.id;
-            const shareUrl = `${currentOrigin}${currentPath}?trackId=${encodeURIComponent(shareParam)}`;
-            const toastMsg = t('audio_ui.detail_share_copied_toast', '🔗 오디오 공유 링크가 복사되었습니다! (친구에게 전달해보세요)');
+            // Prefer mer.r-e.kr for Discord Open Graph Rich Embed support
+            const baseOrigin = (window.location.hostname.includes('github.io') || window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1'))
+                ? 'https://mer.r-e.kr'
+                : window.location.origin;
+            const shareUrl = `${baseOrigin}/audio?trackId=${encodeURIComponent(shareParam)}`;
+            const toastMsg = t('audio_ui.detail_share_copied_toast', '🔗 오디오 공유 링크가 복사되었습니다! (디스코드에 붙여넣으면 리치 임베드가 표시됩니다)');
 
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(shareUrl).then(() => {
