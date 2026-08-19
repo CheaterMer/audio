@@ -432,6 +432,7 @@
     "detail_share_copied_toast": "🔗 Audio share link copied to clipboard!",
     "detail_copy_id_toast": "Asset ID copied: ",
     "detail_btn_tooltip_detail": "Track Details",
-    "detail_btn_tooltip_share": "Copy Share Link"
+    "detail_btn_tooltip_share": "Copy Share Link",
+    "ban_cat_login_required": "🔒 This category is only accessible to authenticated Discord members."
   }
 }

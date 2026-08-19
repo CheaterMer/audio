@@ -293,6 +293,7 @@
     "detail_share_copied_toast": "🔗 オーディオ共有リンクがコピーされました！",
     "detail_copy_id_toast": "Asset IDをコピーしました: ",
     "detail_btn_tooltip_detail": "詳細情報",
-    "detail_btn_tooltip_share": "共有リンクをコピー"
+    "detail_btn_tooltip_share": "共有リンクをコピー",
+    "ban_cat_login_required": "🔒 このカテゴリーはDiscord認証が完了したメンバーのみ閲覧できます。"
   }
 }

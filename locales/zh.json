@@ -293,6 +293,7 @@
     "detail_share_copied_toast": "🔗 音频分享链接已复制到剪贴板！",
     "detail_copy_id_toast": "Asset ID 已复制: ",
     "detail_btn_tooltip_detail": "详细信息",
-    "detail_btn_tooltip_share": "复制分享链接"
+    "detail_btn_tooltip_share": "复制分享链接",
+    "ban_cat_login_required": "🔒 此分类仅对已完成Discord登录认证的成员开放。"
   }
 }

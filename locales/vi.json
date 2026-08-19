@@ -431,6 +431,7 @@
     "detail_share_copied_toast": "🔗 Đã sao chép liên kết chia sẻ âm thanh!",
     "detail_copy_id_toast": "Đã sao chép Asset ID: ",
     "detail_btn_tooltip_detail": "Chi tiết",
-    "detail_btn_tooltip_share": "Sao chép liên kết"
+    "detail_btn_tooltip_share": "Sao chép liên kết",
+    "ban_cat_login_required": "🔒 Danh mục này chỉ dành cho thành viên đã đăng nhập Discord."
   }
 }

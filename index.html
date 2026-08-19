@@ -2002,6 +2002,24 @@
 
                     <!-- 4. CATEGORY BLACKLIST TAB -->
                     <div id="adminTabBlacklist" style="display:none;">
+                        <!-- Special Ban Category Visibility Gate -->
+                        <div style="padding:14px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);border-radius:10px;margin-bottom:16px;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                                <div>
+                                    <div style="font-size:13px;font-weight:700;color:#fca5a5;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+                                        <span>⚠️ 밴 위험 카테고리 공개 제어</span>
+                                        <span style="font-size:10px;background:rgba(99,102,241,0.25);border:1px solid rgba(99,102,241,0.4);color:#a5b4fc;padding:2px 6px;border-radius:9999px;">디스코드 인증 회원 전용</span>
+                                    </div>
+                                    <div style="font-size:11px;color:#cbd5e1;line-height:1.45;">
+                                        <code>이거 사용해서 밴 먹어도 내 책임 아님 ㅅㄱ  you can get ban</code> 카테고리의 공개 여부를 설정합니다.<br>
+                                        - <strong>ON</strong>: <strong>디스코드 로그인 회원</strong>에게만 해당 카테고리가 노출 및 이용 가능합니다.<br>
+                                        - <strong>OFF</strong>: 모든 일반 사용자 및 게스트에게서 해당 카테고리가 완전히 숨겨집니다.
+                                    </div>
+                                </div>
+                                <input type="checkbox" id="adminBanCatVisibilityToggle" style="width:22px;height:22px;cursor:pointer;accent-color:#ef4444;" onchange="saveBanCategoryVisibility(this.checked)" />
+                            </div>
+                        </div>
+
                         <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">체크된 카테고리는 일반 사용자에게 숨김 처리됩니다.</p>
                         <div id="adminCatBlacklistGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:240px;overflow-y:auto;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;"></div>
                         <button class="quick-tool-btn primary" style="margin-top:12px;" onclick="saveCatBlacklist()">숨김 설정 저장</button>
@@ -4087,6 +4105,15 @@
         }
 
         function filterByCat(cat, forcePass = false) {
+            const BAN_WARNING_CATEGORY = '이거 사용해서 밴 먹어도 내 책임 아님 ㅅㄱ  you can get ban';
+            if (cat === BAN_WARNING_CATEGORY) {
+                if (!isUserLoggedIn && !isAdminMode) {
+                    openModal('loginRequiredModal');
+                    showToast(t('audio_ui.ban_cat_login_required', '🔒 이 카테고리는 Discord 로그인이 완료된 회원만 열람할 수 있습니다.'), 'warning');
+                    return;
+                }
+            }
+
             if (!forcePass && !checkCategoryWarningGate(cat)) {
                 return;
             }
@@ -4873,6 +4900,39 @@
             }
         }
 
+        async function loadBanCategoryVisibility() {
+            try {
+                const res = await apiFetch('/api/audio/settings/ban-category-visibility');
+                const json = await res.json();
+                if (json.status === 'success') {
+                    const toggle = document.getElementById('adminBanCatVisibilityToggle');
+                    if (toggle) toggle.checked = !!json.enabled;
+                }
+            } catch(e) {}
+        }
+
+        async function saveBanCategoryVisibility(enabled) {
+            try {
+                const res = await apiFetch('/api/audio/settings/ban-category-visibility', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled: !!enabled })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(json.enabled 
+                        ? '⚠️ 밴 위험 카테고리가 활성화되었습니다. (디스코드 인증 회원 전용 노출)' 
+                        : '🚫 밴 위험 카테고리가 비활성화(숨김)되었습니다.', 'success');
+                    try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '설정 저장 실패', 'error');
+                }
+            } catch(e) {
+                showToast('밴 카테고리 설정 저장 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
         async function runVacuum() {
             try {
                 showToast('DB 최적화(VACUUM) 실행 중...', 'info');
@@ -5121,6 +5181,7 @@
 
         function openUnifiedAdminModal() { 
             loadAdminStats();
+            loadBanCategoryVisibility();
             if (currentUserTier === 'owner') {
                 loadStudioConfig();
                 loadDeletedAudiosList();
@@ -5179,6 +5240,7 @@
             if (tab === 'studio') loadStudioConfig();
             if (tab === 'restore') loadDeletedAudiosList();
             if (tab === 'catWarning') onAdminWarnCatSelectChange();
+            if (tab === 'blacklist') loadBanCategoryVisibility();
         }
 
         async function loadStudioConfig() {

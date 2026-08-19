@@ -302,6 +302,7 @@
     "detail_share_copied_toast": "🔗 Ссылка на аудио скопирована в буфер обмена!",
     "detail_copy_id_toast": "Asset ID скопирован: ",
     "detail_btn_tooltip_detail": "Подробнее",
-    "detail_btn_tooltip_share": "Копировать ссылку"
+    "detail_btn_tooltip_share": "Копировать ссылку",
+    "ban_cat_login_required": "🔒 Эта категория доступна только авторизованным участникам Discord."
   }
 }
