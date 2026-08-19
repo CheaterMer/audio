@@ -2213,6 +2213,121 @@
             </div>
         </div>
 
+        <!-- ─── TRACK DETAIL MODAL (SHARE & METADATA OVERVIEW) ─── -->
+        <div class="modal-overlay" id="trackDetailModal">
+            <div class="modal-box" style="width:min(620px, 95vw);max-height:90vh;display:flex;flex-direction:column;">
+                <div class="modal-header">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span class="modal-title" data-i18n="audio_ui.detail_modal_title">🎧 오디오 상세 정보</span>
+                        <span class="card-category-badge" id="detailCategoryBadge" style="position:static;">Music</span>
+                    </div>
+                    <button class="modal-close-btn" onclick="closeModal('trackDetailModal')">&times;</button>
+                </div>
+                <div class="modal-body" style="overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:16px;">
+                    
+                    <!-- Cover + Title Banner -->
+                    <div style="display:flex;gap:16px;align-items:center;background:rgba(255,255,255,0.03);padding:14px;border-radius:12px;border:1px solid var(--border-subtle);">
+                        <div style="position:relative;width:80px;height:80px;flex-shrink:0;">
+                            <img id="detailCoverImg" src="./images/icon128.png" 
+                                style="width:80px;height:80px;border-radius:10px;object-fit:cover;border:1px solid var(--border-subtle);background:#161b22;"
+                                onerror="handleImgError(this)" />
+                            <div class="play-overlay-btn" id="detailPlayDemoBtn" title="재생" style="position:absolute;inset:0;margin:auto;width:38px;height:38px;font-size:16px;">▶</div>
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <div id="detailTitle" style="font-size:16px;font-weight:700;color:#fff;word-break:break-all;margin-bottom:6px;line-height:1.3;">-</div>
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <span class="roblox-id-badge" style="font-size:12px;">🎵 <span id="detailAssetIdText">-</span></span>
+                                <span style="font-size:12px;color:var(--text-muted);">⏱️ <span id="detailDurationText">0:00</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metadata Grid -->
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:12px;">
+                        
+                        <!-- 1. 등록 및 수정 이력 카드 -->
+                        <div style="background:rgba(0,0,0,0.25);border:1px solid var(--border-subtle);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                            <div style="font-size:12px;font-weight:700;color:var(--accent-cyan);display:flex;align-items:center;gap:6px;" data-i18n="audio_ui.detail_history_title">
+                                👤 등록 및 수정 이력
+                            </div>
+                            <div style="font-size:12px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:4px;">
+                                <span style="color:var(--text-muted);" data-i18n="audio_ui.detail_created_by">최초 등록자:</span>
+                                <strong id="detailCreatedBy" style="color:#e2e8f0;">-</strong>
+                            </div>
+                            <div style="font-size:12px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:4px;">
+                                <span style="color:var(--text-muted);" data-i18n="audio_ui.detail_created_at">최초 등록일시:</span>
+                                <span id="detailCreatedAt" style="color:var(--text-secondary);font-size:11px;">-</span>
+                            </div>
+                            <div style="font-size:12px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:4px;">
+                                <span style="color:var(--text-muted);" data-i18n="audio_ui.detail_updated_by">최종 수정자:</span>
+                                <strong id="detailUpdatedBy" style="color:var(--accent-gold,#f59e0b);">-</strong>
+                            </div>
+                            <div style="font-size:12px;display:flex;justify-content:space-between;">
+                                <span style="color:var(--text-muted);" data-i18n="audio_ui.detail_updated_at">최종 수정일시:</span>
+                                <span id="detailUpdatedAt" style="color:var(--text-secondary);font-size:11px;">-</span>
+                            </div>
+                        </div>
+
+                        <!-- 2. Studio 인게임 검증 현황 카드 -->
+                        <div style="background:rgba(0,0,0,0.25);border:1px solid var(--border-subtle);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                            <div style="font-size:12px;font-weight:700;color:var(--accent-cyan);display:flex;align-items:center;gap:6px;" data-i18n="audio_ui.detail_verification_title">
+                                🛡️ Roblox Studio 검증 현황
+                            </div>
+                            <div style="font-size:12px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:4px;">
+                                <span style="color:var(--text-muted);" data-i18n="audio_ui.detail_last_verified">마지막 검토일:</span>
+                                <span id="detailLastVerified" style="color:var(--text-secondary);font-size:11px;">미검증</span>
+                            </div>
+                            <div style="font-size:12px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:4px;">
+                                <span style="color:var(--text-muted);" data-i18n="audio_ui.detail_server_playable">서버 재생 검증:</span>
+                                <span id="detailServerPlayable">-</span>
+                            </div>
+                            <div style="font-size:12px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:4px;">
+                                <span style="color:var(--text-muted);" data-i18n="audio_ui.detail_client_playable">클라이언트 검증:</span>
+                                <span id="detailClientPlayable">-</span>
+                            </div>
+                            <div style="font-size:12px;display:flex;justify-content:space-between;">
+                                <span style="color:var(--text-muted);" data-i18n="audio_ui.detail_lock_status">검증 고정 여부:</span>
+                                <span id="detailLockStatus">-</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- 3. 카테고리 & 미디어 연동 정보 -->
+                    <div style="background:rgba(0,0,0,0.25);border:1px solid var(--border-subtle);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                        <div style="font-size:12px;font-weight:700;color:var(--accent-cyan);display:flex;align-items:center;gap:6px;" data-i18n="audio_ui.detail_media_title">
+                            📁 카테고리 및 미디어 정보
+                        </div>
+                        <div style="font-size:12px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:4px;">
+                            <span style="color:var(--text-muted);" data-i18n="audio_ui.detail_category_label">카테고리:</span>
+                            <span id="detailCategoryText" style="color:#fff;">-</span>
+                        </div>
+                        <div style="font-size:12px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:4px;">
+                            <span style="color:var(--text-muted);" data-i18n="audio_ui.detail_type_label">타입(Type):</span>
+                            <span id="detailTypeText" style="color:var(--text-secondary);">-</span>
+                        </div>
+                        <div style="font-size:12px;display:flex;justify-content:space-between;align-items:center;">
+                            <span style="color:var(--text-muted);" data-i18n="audio_ui.detail_youtube_label">YouTube 연동:</span>
+                            <div id="detailYtBox">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Actions Buttons -->
+                    <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;">
+                        <button class="quick-tool-btn primary" id="detailShareBtn" style="flex:2;height:42px;justify-content:center;font-size:13px;font-weight:700;" data-i18n="audio_ui.detail_share_btn">
+                            🔗 이 오디오 공유하기 (링크 복사)
+                        </button>
+                        <button class="quick-tool-btn" id="detailCopyAssetBtn" style="flex:1;height:42px;justify-content:center;font-size:12px;" data-i18n="audio_ui.detail_copy_id_btn">
+                            📋 ID 복사
+                        </button>
+                        <a class="quick-tool-btn" id="detailRobloxStoreLink" href="#" target="_blank" style="flex:1;height:42px;justify-content:center;font-size:12px;text-decoration:none;" data-i18n="audio_ui.detail_roblox_store_btn">
+                            ↗ Roblox Store
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ─── YOUTUBE MAPPING SUGGESTIONS REVIEW MODAL ─── -->
         <div class="modal-overlay" id="mappingReviewModal">
             <div class="modal-box" style="width:min(1080px, 96vw);max-height:90vh;display:flex;flex-direction:column;position:relative;">
@@ -2471,6 +2586,10 @@
             if (adminBtnText) {
                 adminBtnText.textContent = isAdminMode ? t('audio_ui.admin_mode_on', '관리자 모드 ON') : t('audio_ui.admin_mode_off', '관리자 모드 OFF');
             }
+            const detailModal = document.getElementById('trackDetailModal');
+            if (detailModal && (detailModal.classList.contains('open') || detailModal.classList.contains('active')) && typeof currentDetailTrackId !== 'undefined' && currentDetailTrackId) {
+                openTrackDetailModal(currentDetailTrackId);
+            }
         }
 
         async function onAudioLangChange(lang) {
@@ -2540,9 +2659,8 @@
         }
 
         function loginWithDiscord() {
-            const currentOrigin = window.location.origin;
-            const currentPath = window.location.pathname;
-            const returnUrl = `${currentOrigin}${currentPath}`;
+            const isExternalHost = window.location.hostname.includes('github.io') || (API_BASE && !API_BASE.includes(window.location.hostname));
+            const returnUrl = isExternalHost ? (window.location.origin + window.location.pathname) : (window.location.pathname || '/audio');
             const targetEndpoint = API_BASE ? `${API_BASE}/auth/discord/login` : `/auth/discord/login`;
             window.location.href = `${targetEndpoint}?from=${encodeURIComponent(returnUrl)}`;
         }
@@ -2681,6 +2799,7 @@
                     title: t.title || 'Untitled Track',
                     cat: t.category || t.gameName || 'Music',
                     assetId: t.audioAssetId || t.id,
+                    type: t.type || 'global',
                     dur: fmtTime(t.duration),
                     durationSec: t.duration || 0,
                     status: t.status || 'active',
@@ -2692,7 +2811,12 @@
                     clientPlayable: t.clientPlayable,
                     verificationStatus: t.verificationStatus || 'unverified',
                     isVerifiedLocked: (t.isVerifiedLocked === 1 || t.isVerifiedLocked === true) ? 1 : 0,
-                    favorited: false
+                    lastVerifiedAt: t.lastVerifiedAt || '',
+                    createdBy: t.createdBy || '',
+                    createdAt: t.createdAt || '',
+                    updatedBy: t.updatedBy || '',
+                    updatedAt: t.updatedAt || '',
+                    favorited: !!t.favorited
                 };
             });
         }
@@ -2712,6 +2836,7 @@
                     switchMainView('all');
                 }
                 applyAudioI18n();
+                checkUrlShareParam();
                 return true;
             }
             return false;
@@ -2740,6 +2865,7 @@
                     if (!restoreAudioState()) {
                         switchMainView('all');
                     }
+                    checkUrlShareParam();
                 }
             } catch (e) {
                 console.warn('[Main] Backend unreachable, offline cache active:', e.message);
@@ -3249,50 +3375,206 @@
 
             renderPagination(list.length);
 
-            grid.innerHTML = paged.map(t => {
-                const isSelected = selectedTrackIds.has(t.id);
-                let cover = t.imageUrl;
-                if (!cover && t.yt) cover = `https://img.youtube.com/vi/${t.yt}/mqdefault.jpg`;
-                if (!cover) cover = categoryMetadataMap[t.cat] || DEFAULT_FALLBACK_IMG;
+            grid.innerHTML = paged.map(trackItem => {
+                const isSelected = selectedTrackIds.has(trackItem.id);
+                let cover = trackItem.imageUrl;
+                if (!cover && trackItem.yt) cover = `https://img.youtube.com/vi/${trackItem.yt}/mqdefault.jpg`;
+                if (!cover) cover = categoryMetadataMap[trackItem.cat] || DEFAULT_FALLBACK_IMG;
 
-                const displayName = getCategoryDisplayName(t.cat);
-                const safeTitle = esc(t.title);
-                const safeAssetId = esc(t.assetId);
+                const displayName = getCategoryDisplayName(trackItem.cat);
+                const safeTitle = esc(trackItem.title);
+                const safeAssetId = esc(trackItem.assetId);
 
                 return `
-                <div class="track-card ${isSelected ? 'selected' : ''}" onclick="onCardClick('${esc(t.id)}', event)">
+                <div class="track-card ${isSelected ? 'selected' : ''}" onclick="onCardClick('${esc(trackItem.id)}', event)">
                     <div class="card-cover-wrap">
-                        ${isSelectionMode ? `<label class="card-checkbox" onclick="event.stopPropagation()"><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelectTrack('${esc(t.id)}')" /></label>` : ''}
+                        ${isSelectionMode ? `<label class="card-checkbox" onclick="event.stopPropagation()"><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelectTrack('${esc(trackItem.id)}')" /></label>` : ''}
                         <img src="${esc(cover)}" class="card-cover-img" onerror="handleImgError(this)" />
                         <span class="card-category-badge">${esc(displayName)}</span>
-                        <button class="card-fav-btn ${t.favorited ? 'active' : ''}" onclick="event.stopPropagation();toggleFav('${esc(t.id)}')">★</button>
+                        <button class="card-fav-btn ${trackItem.favorited ? 'active' : ''}" onclick="event.stopPropagation();toggleFav('${esc(trackItem.id)}')">★</button>
                         <!-- 오직 이 재생 버튼을 누를 때만 재생 실행! -->
-                        <div class="play-overlay-btn" title="재생" onclick="event.stopPropagation();playTrackDemo('${esc(t.id)}')">▶</div>
+                        <div class="play-overlay-btn" title="재생" onclick="event.stopPropagation();playTrackDemo('${esc(trackItem.id)}')">▶</div>
                     </div>
                     <div class="card-body">
                         <div class="track-name" title="${safeTitle}">${safeTitle}</div>
                         <div class="track-meta-row">
                             <span class="roblox-id-badge">🎵 ${safeAssetId}</span>
                             <div class="status-indicators">
-                                ${t.isVerifiedLocked === 1 ? '<span style="font-size:11px;color:#f59e0b;font-weight:700;" title="관리자 수동 고정 (자동 재검증 방지)">🔒</span>' : ''}
-                                <span class="dot-indicator ${t.serverPlayable === 1 ? 'dot-green' : 'dot-gold'}" title="Server 검증: ${t.serverPlayable}"></span>
-                                <span class="dot-indicator ${t.clientPlayable === 1 ? 'dot-blue' : 'dot-gold'}" title="Client 검증: ${t.clientPlayable}"></span>
-                                ${t.status === 'pending_review' ? '<span class="dot-indicator dot-gold" title="검토 대기중"></span>' : ''}
+                                ${trackItem.isVerifiedLocked === 1 ? '<span style="font-size:11px;color:#f59e0b;font-weight:700;" title="관리자 수동 고정 (자동 재검증 방지)">🔒</span>' : ''}
+                                <span class="dot-indicator ${trackItem.serverPlayable === 1 ? 'dot-green' : 'dot-gold'}" title="Server 검증: ${trackItem.serverPlayable}"></span>
+                                <span class="dot-indicator ${trackItem.clientPlayable === 1 ? 'dot-blue' : 'dot-gold'}" title="Client 검증: ${trackItem.clientPlayable}"></span>
+                                ${trackItem.status === 'pending_review' ? '<span class="dot-indicator dot-gold" title="검토 대기중"></span>' : ''}
                             </div>
                         </div>
                         <div class="card-footer-actions">
-                            <span style="font-size:11px;color:var(--text-muted);">${esc(t.dur)}</span>
+                            <span style="font-size:11px;color:var(--text-muted);">${esc(trackItem.dur)}</span>
                             <div class="mini-btn-group">
-                                ${(isAdminMode && currentUserTier === 'owner' && t.status === 'pending_review') ? `<button class="card-action-icon-btn" title="승인" style="color:#10b981;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleApprove('${esc(t.id)}')">✓</button><button class="card-action-icon-btn" title="거절" style="color:#f87171;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleReject('${esc(t.id)}')">✕</button>` : ''}
-                                ${isAdminMode ? `<button class="card-action-icon-btn" title="정보 수정" style="color:var(--accent-gold);" onclick="event.stopPropagation();openEditTrackModal('${esc(t.id)}')">✏️</button>` : ''}
-                                <button class="card-action-icon-btn" title="Asset ID 복사" onclick="event.stopPropagation();navigator.clipboard.writeText('${safeAssetId}');showToast('Asset ID 복사 완료: ' + '${safeAssetId}', 'success')">📋</button>
-                                <a class="card-action-icon-btn" href="https://create.roblox.com/store/asset/${safeAssetId}" target="_blank" onclick="event.stopPropagation()" title="Roblox Store 링크">↗</a>
+                                ${(isAdminMode && currentUserTier === 'owner' && trackItem.status === 'pending_review') ? `<button class="card-action-icon-btn" title="승인" style="color:#10b981;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleApprove('${esc(trackItem.id)}')">✓</button><button class="card-action-icon-btn" title="거절" style="color:#f87171;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleReject('${esc(trackItem.id)}')">✕</button>` : ''}
+                                ${isAdminMode ? `<button class="card-action-icon-btn" title="정보 수정" style="color:var(--accent-gold);" onclick="event.stopPropagation();openEditTrackModal('${esc(trackItem.id)}')">✏️</button>` : ''}
+                                <button class="card-action-icon-btn" title="${esc(t('audio_ui.detail_btn_tooltip_detail', '상세 정보'))}" style="color:var(--accent-cyan, #06b6d4);" onclick="event.stopPropagation();openTrackDetailModal('${esc(trackItem.id)}')">ℹ️</button>
+                                <button class="card-action-icon-btn" title="${esc(t('audio_ui.detail_btn_tooltip_share', '공유 링크 복사'))}" style="color:#818cf8;" onclick="event.stopPropagation();copyShareLink('${esc(trackItem.id)}')">🔗</button>
+                                <button class="card-action-icon-btn" title="${esc(t('audio_ui.copy_id', 'Asset ID 복사'))}" onclick="event.stopPropagation();navigator.clipboard.writeText('${safeAssetId}');showToast(t('audio_ui.detail_copy_id_toast', 'Asset ID 복사 완료: ') + '${safeAssetId}', 'success')">📋</button>
+                                <a class="card-action-icon-btn" href="https://create.roblox.com/store/asset/${safeAssetId}" target="_blank" onclick="event.stopPropagation()" title="${esc(t('audio_ui.roblox_link', 'Roblox Store 링크'))}">↗</a>
                             </div>
                         </div>
                     </div>
                 </div>
                 `;
             }).join('');
+        }
+
+        function copyShareLink(trackId) {
+            const tTrack = tracksData.find(x => String(x.id) === String(trackId) || String(x.assetId) === String(trackId));
+            if (!tTrack) return;
+
+            const currentOrigin = window.location.origin;
+            const currentPath = window.location.pathname;
+            const shareParam = tTrack.assetId || tTrack.id;
+            const shareUrl = `${currentOrigin}${currentPath}?trackId=${encodeURIComponent(shareParam)}`;
+            const toastMsg = t('audio_ui.detail_share_copied_toast', '🔗 오디오 공유 링크가 복사되었습니다! (친구에게 전달해보세요)');
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showToast(toastMsg, 'success');
+                }).catch(() => {
+                    prompt(toastMsg, shareUrl);
+                });
+            } else {
+                prompt(toastMsg, shareUrl);
+            }
+        }
+
+        let currentDetailTrackId = null;
+        function openTrackDetailModal(trackId) {
+            const track = tracksData.find(x => String(x.id) === String(trackId) || String(x.assetId) === String(trackId));
+            if (!track) return;
+            currentDetailTrackId = track.id;
+
+            let cover = track.imageUrl;
+            if (!cover && track.yt) cover = `https://img.youtube.com/vi/${track.yt}/mqdefault.jpg`;
+            if (!cover) cover = categoryMetadataMap[track.cat] || DEFAULT_FALLBACK_IMG;
+
+            const coverEl = document.getElementById('detailCoverImg');
+            if (coverEl) coverEl.src = cover;
+            const titleEl = document.getElementById('detailTitle');
+            if (titleEl) titleEl.textContent = track.title || 'Untitled Track';
+            const catBadgeEl = document.getElementById('detailCategoryBadge');
+            if (catBadgeEl) catBadgeEl.textContent = getCategoryDisplayName(track.cat);
+            const assetIdEl = document.getElementById('detailAssetIdText');
+            if (assetIdEl) assetIdEl.textContent = track.assetId;
+            const durEl = document.getElementById('detailDurationText');
+            if (durEl) durEl.textContent = track.dur || '0:00';
+            const catTextEl = document.getElementById('detailCategoryText');
+            if (catTextEl) catTextEl.textContent = getCategoryDisplayName(track.cat);
+            const typeTextEl = document.getElementById('detailTypeText');
+            if (typeTextEl) typeTextEl.textContent = track.type === 'game' ? t('audio_ui.detail_type_game', '🎮 게임 전용 (Game)') : t('audio_ui.detail_type_global', '🌐 전용/공용 (Global)');
+
+            // Created / Updated info
+            const unrecordedText = t('audio_ui.detail_unrecorded', '시스템 / 미기록');
+            const createdByEl = document.getElementById('detailCreatedBy');
+            if (createdByEl) createdByEl.textContent = track.createdBy || unrecordedText;
+            const createdAtEl = document.getElementById('detailCreatedAt');
+            if (createdAtEl) createdAtEl.textContent = track.createdAt ? new Date(track.createdAt).toLocaleString() : unrecordedText;
+            const updatedByEl = document.getElementById('detailUpdatedBy');
+            if (updatedByEl) updatedByEl.textContent = track.updatedBy || unrecordedText;
+            const updatedAtEl = document.getElementById('detailUpdatedAt');
+            if (updatedAtEl) updatedAtEl.textContent = track.updatedAt ? new Date(track.updatedAt).toLocaleString() : unrecordedText;
+
+            // Studio Verification info
+            const unverifiedText = t('audio_ui.detail_unverified', '미검증');
+            const lastVerifiedEl = document.getElementById('detailLastVerified');
+            if (lastVerifiedEl) lastVerifiedEl.textContent = track.lastVerifiedAt ? new Date(track.lastVerifiedAt).toLocaleString() : unverifiedText;
+            
+            const sPlayBadge = document.getElementById('detailServerPlayable');
+            if (sPlayBadge) {
+                if (track.serverPlayable === 1) {
+                    sPlayBadge.innerHTML = `<span style="color:#10b981;font-weight:700;">${esc(t('audio_ui.detail_server_ok', '✅ 서버 재생 가능 (1)'))}</span>`;
+                } else if (track.serverPlayable === 0) {
+                    sPlayBadge.innerHTML = `<span style="color:#ef4444;font-weight:700;">${esc(t('audio_ui.detail_server_fail', '❌ 서버 재생 불가 (0)'))}</span>`;
+                } else {
+                    sPlayBadge.innerHTML = `<span style="color:var(--text-muted);">${esc(t('audio_ui.detail_unconfirmed', '⏳ 미확인 (-1)'))}</span>`;
+                }
+            }
+
+            const cPlayBadge = document.getElementById('detailClientPlayable');
+            if (cPlayBadge) {
+                if (track.clientPlayable === 1) {
+                    cPlayBadge.innerHTML = `<span style="color:#38bdf8;font-weight:700;">${esc(t('audio_ui.detail_client_ok', '✅ 클라이언트 재생 가능 (1)'))}</span>`;
+                } else if (track.clientPlayable === 0) {
+                    cPlayBadge.innerHTML = `<span style="color:#ef4444;font-weight:700;">${esc(t('audio_ui.detail_client_fail', '❌ 클라이언트 재생 불가 (0)'))}</span>`;
+                } else {
+                    cPlayBadge.innerHTML = `<span style="color:var(--text-muted);">${esc(t('audio_ui.detail_unconfirmed', '⏳ 미확인 (-1)'))}</span>`;
+                }
+            }
+
+            const lockBadge = document.getElementById('detailLockStatus');
+            if (lockBadge) {
+                if (track.isVerifiedLocked === 1) {
+                    lockBadge.innerHTML = `<span style="color:#f59e0b;font-weight:700;">${esc(t('audio_ui.detail_locked_manual', '🔒 관리자 수동 고정됨'))}</span>`;
+                } else {
+                    lockBadge.innerHTML = `<span style="color:var(--text-muted);">${esc(t('audio_ui.detail_locked_auto', '🔓 자동 재검증 대상'))}</span>`;
+                }
+            }
+
+            // YouTube Mapping
+            const ytBox = document.getElementById('detailYtBox');
+            if (ytBox) {
+                if (track.youtubeUrl) {
+                    ytBox.innerHTML = `<a href="${esc(track.youtubeUrl)}" target="_blank" style="color:var(--accent-red,#ef4444);font-weight:700;display:inline-flex;align-items:center;gap:4px;word-break:break-all;">${esc(t('audio_ui.detail_youtube_view', '🎬 YouTube 영상 바로보기 ↗'))}</a>`;
+                } else {
+                    ytBox.innerHTML = `<span style="color:var(--text-muted);font-size:12px;">${esc(t('audio_ui.detail_youtube_none', '매핑된 유튜브 영상이 없습니다.'))}</span>`;
+                }
+            }
+
+            // Bind actions
+            const shareBtn = document.getElementById('detailShareBtn');
+            if (shareBtn) shareBtn.onclick = () => copyShareLink(track.id);
+            const copyAssetBtn = document.getElementById('detailCopyAssetBtn');
+            if (copyAssetBtn) {
+                copyAssetBtn.onclick = () => {
+                    navigator.clipboard.writeText(track.assetId);
+                    showToast(t('audio_ui.detail_copy_id_toast', 'Asset ID 복사 완료: ') + track.assetId, 'success');
+                };
+            }
+            const robloxStoreLink = document.getElementById('detailRobloxStoreLink');
+            if (robloxStoreLink) robloxStoreLink.href = `https://create.roblox.com/store/asset/${track.assetId}`;
+            const playDemoBtn = document.getElementById('detailPlayDemoBtn');
+            if (playDemoBtn) playDemoBtn.onclick = () => playTrackDemo(track.id);
+
+            openModal('trackDetailModal');
+        }
+
+        let isUrlParamHandled = false;
+        function checkUrlShareParam() {
+            if (isUrlParamHandled) return;
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetTrackId = urlParams.get('trackId') || urlParams.get('audioId') || urlParams.get('id') || urlParams.get('assetId');
+            if (!targetTrackId || !Array.isArray(tracksData) || tracksData.length === 0) return;
+
+            const cleanId = String(targetTrackId).trim();
+            const cleanAssetId = cleanId.replace(/^r_/, '').replace(/^a_/, '');
+
+            const track = tracksData.find(t => 
+                String(t.id) === cleanId || 
+                String(t.assetId) === cleanAssetId || 
+                String(t.assetId) === cleanId ||
+                String(t.id) === `r_${cleanAssetId}` ||
+                String(t.id) === `a_${cleanAssetId}`
+            );
+
+            if (track) {
+                isUrlParamHandled = true;
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.value = track.assetId || track.title;
+                    if (typeof renderCards === 'function') {
+                        renderCards();
+                    }
+                }
+                setTimeout(() => {
+                    openTrackDetailModal(track.id);
+                }, 120);
+            }
         }
 
         function openEditTrackModal(trackId) {
