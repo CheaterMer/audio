@@ -3441,12 +3441,20 @@
             const tTrack = tracksData.find(x => String(x.id) === String(trackId) || String(x.assetId) === String(trackId));
             if (!tTrack) return;
 
-            const shareParam = tTrack.assetId || tTrack.id;
-            // Prefer mer.r-e.kr for Discord Open Graph Rich Embed support
-            const baseOrigin = (window.location.hostname.includes('github.io') || window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1'))
-                ? 'https://mer.r-e.kr'
-                : window.location.origin;
-            const shareUrl = `${baseOrigin}/audio?trackId=${encodeURIComponent(shareParam)}`;
+            const shareParam = String(tTrack.assetId || tTrack.id).replace(/^r_/, '');
+            let shareUrl = '';
+
+            if (window.location.hostname.includes('github.io')) {
+                // GitHub Pages environment: use dedicated SSG track URL for perfect Discord Rich Embeds
+                shareUrl = `https://cheatermer.github.io/my-audio-web/track/${encodeURIComponent(shareParam)}`;
+            } else if (window.location.hostname.includes('mer.r-e.kr')) {
+                // Production backend domain
+                shareUrl = `https://mer.r-e.kr/audio?trackId=${encodeURIComponent(shareParam)}`;
+            } else {
+                // Local dev or fallback: default to github pages track URL or current origin
+                shareUrl = `https://cheatermer.github.io/my-audio-web/track/${encodeURIComponent(shareParam)}`;
+            }
+
             const toastMsg = t('audio_ui.detail_share_copied_toast', '🔗 오디오 공유 링크가 복사되었습니다! (디스코드에 붙여넣으면 리치 임베드가 표시됩니다)');
 
             if (navigator.clipboard && navigator.clipboard.writeText) {
