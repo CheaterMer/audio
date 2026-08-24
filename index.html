@@ -2229,6 +2229,9 @@
                         <label>곡 제목 (Title)</label>
                         <div style="display:flex;gap:6px;flex-wrap:wrap;">
                             <input type="text" class="form-input" id="editTitle" placeholder="곡 제목" style="flex:1;min-width:160px;" />
+                            <button class="quick-tool-btn" type="button" onclick="fetchDiscordTitleForEdit()" style="white-space:nowrap;background:rgba(168,85,247,0.2);color:#d8b4fe;border-color:rgba(168,85,247,0.4);font-weight:700;" title="디스코드 원본 메시지 본문에서 당시 작성된 실제 곡명을 자동으로 추출해옵니다.">
+                                💬 Discord 등록명
+                            </button>
                             <button class="quick-tool-btn" type="button" onclick="fetchRobloxTitleForEdit()" style="white-space:nowrap;background:rgba(56,189,248,0.15);color:var(--accent-cyan,#38bdf8);border-color:rgba(56,189,248,0.3);font-weight:700;" title="Roblox Marketplace에 등록된 원본 에셋명을 가져옵니다.">
                                 🔄 Roblox 원본명
                             </button>
@@ -2238,8 +2241,8 @@
                             <button class="quick-tool-btn" type="button" onclick="searchYoutubeForEdit()" style="white-space:nowrap;background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);">
                                 🔍 유튜브
                             </button>
-                            <a class="quick-tool-btn" id="editDiscordSourceBtn" href="#" target="_blank" style="display:none;white-space:nowrap;background:rgba(168,85,247,0.2);color:#d8b4fe;border-color:rgba(168,85,247,0.4);font-weight:700;text-decoration:none;" title="해당 곡이 공유된 디스코드 메시지로 이동합니다.">
-                                💬 Discord 출처
+                            <a class="quick-tool-btn" id="editDiscordSourceBtn" href="#" target="_blank" style="display:none;white-space:nowrap;background:rgba(255,255,255,0.06);color:#cbd5e1;border-color:rgba(255,255,255,0.15);font-weight:700;text-decoration:none;" title="해당 곡이 공유된 디스코드 메시지로 이동합니다.">
+                                ↗ 메시지 이동
                             </a>
                         </div>
                     </div>
@@ -3804,6 +3807,67 @@
             }
 
             openModal('editTrackModal');
+        }
+
+        // Listen for real-time Chrome Tampermonkey targeted scrape events
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'DISCORD_AUDIO_SCRAPED' && event.data.item) {
+                const item = event.data.item;
+                const titleInput = document.getElementById('editTitle');
+                const ytInput = document.getElementById('editYtUrl');
+                if (titleInput && item.title) {
+                    titleInput.value = item.title;
+                    if (ytInput && item.youtubeUrl && !ytInput.value) {
+                        ytInput.value = item.youtubeUrl;
+                    }
+                    showToast(`💬 크롬 자동화: "${item.title}" 실시간 추출 완료!`, 'success');
+                }
+            }
+        });
+
+        async function fetchDiscordTitleForEdit() {
+            const assetId = document.getElementById('editAssetId').value.trim();
+            if (!assetId) {
+                showToast('Roblox Asset ID가 없습니다.', 'error');
+                return;
+            }
+
+            const titleInput = document.getElementById('editTitle');
+            const ytInput = document.getElementById('editYtUrl');
+            const discordBtn = document.getElementById('editDiscordSourceBtn');
+            const currentSourceUrl = discordBtn?.href || '';
+
+            titleInput.placeholder = '💬 Discord 원본 메시지 분석 중...';
+
+            try {
+                const res = await apiFetch(`/api/audio/discord-refetch/${encodeURIComponent(assetId)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ apply: false })
+                });
+                const json = await res.json();
+                if (json.status === 'success' && json.data?.identifiedTitle) {
+                    titleInput.value = json.data.identifiedTitle;
+                    if (json.data.youtubeUrl && !ytInput.value) {
+                        ytInput.value = json.data.youtubeUrl;
+                    }
+                    showToast(`💬 Discord 등록명 가져오기 완료: "${json.data.identifiedTitle}"`, 'success');
+                } else if (json.status === 'queued_to_chrome' || currentSourceUrl.startsWith('http')) {
+                    // Fallback to targeted Chrome popup (only fetches requested ID, rate limit protected)
+                    const targetSource = json.task?.sourceUrl || currentSourceUrl;
+                    if (targetSource && targetSource.startsWith('http')) {
+                        const popupUrl = `${targetSource.split('#')[0]}#auto-import&targetId=${encodeURIComponent(assetId)}`;
+                        window.open(popupUrl, '_blank', 'width=900,height=750');
+                        showToast(`⚡ 크롬 템퍼몽키 자동화 창을 열었습니다. (타겟 ID: ${assetId})`, 'info');
+                    } else {
+                        showToast(`⚡ ${json.message}`, 'info');
+                    }
+                } else {
+                    showToast(json.message || 'Discord 메시지에서 곡명을 추출하지 못했습니다.', 'warning');
+                }
+            } catch (e) {
+                showToast('Discord 통신 중 오류가 발생했습니다.', 'error');
+            }
         }
 
         async function fetchRobloxTitleForEdit() {
