@@ -3852,6 +3852,31 @@
                         ytInput.value = json.data.youtubeUrl;
                     }
                     showToast(`💬 Discord 등록명 가져오기 완료: "${json.data.identifiedTitle}"`, 'success');
+                } else if (json.status === 'no_source_url' || json.code === 'NO_SOURCE_URL') {
+                    const userLink = prompt('이 곡은 디스코드 출처 링크가 저장되어 있지 않은 기존 오디오입니다.\n공유된 디스코드 메시지 링크가 있다면 붙여넣어 주세요:\n(취소 시 [🤖 AI+OCR 역추적]으로 자동 분석합니다)');
+                    if (userLink && userLink.trim() && userLink.includes('discord.com/channels/')) {
+                        const retryRes = await apiFetch(`/api/audio/discord-refetch/${encodeURIComponent(assetId)}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ sourceUrl: userLink.trim(), apply: false })
+                        });
+                        const retryJson = await retryRes.json();
+                        if (retryJson.status === 'success' && retryJson.data?.identifiedTitle) {
+                            titleInput.value = retryJson.data.identifiedTitle;
+                            if (retryJson.data.youtubeUrl && !ytInput.value) ytInput.value = retryJson.data.youtubeUrl;
+                            showToast(`💬 Discord 등록명 가져오기 완료: "${retryJson.data.identifiedTitle}"`, 'success');
+                            if (discordBtn) { discordBtn.style.display = 'inline-flex'; discordBtn.href = userLink.trim(); }
+                        } else {
+                            const popupUrl = `${userLink.trim().split('#')[0]}#auto-import&targetId=${encodeURIComponent(assetId)}`;
+                            window.open(popupUrl, '_blank', 'width=900,height=750');
+                            showToast(`⚡ 크롬 자동화 팝업을 열었습니다. (타겟 ID: ${assetId})`, 'info');
+                        }
+                    } else if (userLink === null) {
+                        identifyAiForEdit();
+                    } else {
+                        showToast('디스코드 링크가 입력되지 않아 [🤖 AI 역추적]을 실행합니다.', 'info');
+                        identifyAiForEdit();
+                    }
                 } else if (json.status === 'queued_to_chrome' || currentSourceUrl.startsWith('http')) {
                     // Fallback to targeted Chrome popup (only fetches requested ID, rate limit protected)
                     const targetSource = json.task?.sourceUrl || currentSourceUrl;
