@@ -2227,14 +2227,20 @@
 
                     <div class="form-group">
                         <label>곡 제목 (Title)</label>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                            <input type="text" class="form-input" id="editTitle" placeholder="곡 제목" style="flex:1;min-width:180px;" />
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            <input type="text" class="form-input" id="editTitle" placeholder="곡 제목" style="flex:1;min-width:160px;" />
+                            <button class="quick-tool-btn" type="button" onclick="fetchRobloxTitleForEdit()" style="white-space:nowrap;background:rgba(56,189,248,0.15);color:var(--accent-cyan,#38bdf8);border-color:rgba(56,189,248,0.3);font-weight:700;" title="Roblox Marketplace에 등록된 원본 에셋명을 가져옵니다.">
+                                🔄 Roblox 원본명
+                            </button>
                             <button class="quick-tool-btn" type="button" onclick="identifyAiForEdit()" style="white-space:nowrap;background:linear-gradient(135deg, rgba(99,102,241,0.25), rgba(168,85,247,0.25));color:#c084fc;border-color:rgba(168,85,247,0.4);font-weight:700;">
                                 🤖 AI+OCR 역추적
                             </button>
                             <button class="quick-tool-btn" type="button" onclick="searchYoutubeForEdit()" style="white-space:nowrap;background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);">
-                                🔍 유튜브 검색
+                                🔍 유튜브
                             </button>
+                            <a class="quick-tool-btn" id="editDiscordSourceBtn" href="#" target="_blank" style="display:none;white-space:nowrap;background:rgba(168,85,247,0.2);color:#d8b4fe;border-color:rgba(168,85,247,0.4);font-weight:700;text-decoration:none;" title="해당 곡이 공유된 디스코드 메시지로 이동합니다.">
+                                💬 Discord 출처
+                            </a>
                         </div>
                     </div>
 
@@ -2969,6 +2975,7 @@
                     createdAt: t.createdAt || '',
                     updatedBy: t.updatedBy || '',
                     updatedAt: t.updatedAt || '',
+                    sourceUrl: t.sourceUrl || '',
                     favorited: !!t.favorited
                 };
             });
@@ -3564,6 +3571,7 @@
                             <div class="mini-btn-group">
                                 ${(isAdminMode && currentUserTier === 'owner' && trackItem.status === 'pending_review') ? `<button class="card-action-icon-btn" title="승인" style="color:#10b981;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleApprove('${esc(trackItem.id)}')">✓</button><button class="card-action-icon-btn" title="거절" style="color:#f87171;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleReject('${esc(trackItem.id)}')">✕</button>` : ''}
                                 ${isAdminMode ? `<button class="card-action-icon-btn" title="정보 수정" style="color:var(--accent-gold);" onclick="event.stopPropagation();openEditTrackModal('${esc(trackItem.id)}')">✏️</button>` : ''}
+                                ${trackItem.sourceUrl ? `<a class="card-action-icon-btn" href="${esc(trackItem.sourceUrl)}" target="_blank" onclick="event.stopPropagation()" title="💬 디스코드 원본 메시지로 이동" style="color:#c084fc;font-size:13px;text-decoration:none;">💬</a>` : ''}
                                 <button class="card-action-icon-btn" title="${esc(t('audio_ui.detail_btn_tooltip_detail', '상세 정보'))}" style="color:var(--accent-cyan, #06b6d4);" onclick="event.stopPropagation();openTrackDetailModal('${esc(trackItem.id)}')">ℹ️</button>
                                 <button class="card-action-icon-btn" title="${esc(t('audio_ui.detail_btn_tooltip_share', '공유 링크 복사'))}" style="color:#818cf8;" onclick="event.stopPropagation();copyShareLink('${esc(trackItem.id)}')">🔗</button>
                                 <button class="card-action-icon-btn" title="${esc(t('audio_ui.copy_id', 'Asset ID 복사'))}" onclick="event.stopPropagation();navigator.clipboard.writeText('${safeAssetId}');showToast(t('audio_ui.detail_copy_id_toast', 'Asset ID 복사 완료: ') + '${safeAssetId}', 'success')">📋</button>
@@ -3784,7 +3792,43 @@
             document.getElementById('editYtResultsList').innerHTML = '';
             const aiBox = document.getElementById('editAiResultsBox');
             if (aiBox) aiBox.style.display = 'none';
+
+            const discordBtn = document.getElementById('editDiscordSourceBtn');
+            if (discordBtn) {
+                if (t.sourceUrl) {
+                    discordBtn.style.display = 'inline-flex';
+                    discordBtn.href = t.sourceUrl;
+                } else {
+                    discordBtn.style.display = 'none';
+                }
+            }
+
             openModal('editTrackModal');
+        }
+
+        async function fetchRobloxTitleForEdit() {
+            const assetId = document.getElementById('editAssetId').value.trim();
+            if (!assetId) {
+                showToast('Roblox Asset ID가 없습니다.', 'error');
+                return;
+            }
+
+            const titleInput = document.getElementById('editTitle');
+            const originalVal = titleInput.value;
+            titleInput.placeholder = 'Roblox 원본 에셋명 조회 중...';
+
+            try {
+                const res = await apiFetch(`/api/audio/roblox-title/${encodeURIComponent(assetId)}`);
+                const json = await res.json();
+                if (json.status === 'success' && json.originalRobloxTitle) {
+                    titleInput.value = json.originalRobloxTitle;
+                    showToast(`Roblox 등록 원본명 적용: "${json.originalRobloxTitle}"`, 'success');
+                } else {
+                    showToast(json.message || 'Roblox 원본 이름을 가져오지 못했습니다.', 'warning');
+                }
+            } catch (e) {
+                showToast('Roblox 통신 중 오류가 발생했습니다.', 'error');
+            }
         }
 
         async function identifyAiForEdit() {
@@ -3816,14 +3860,32 @@
                     const confPercent = Math.round((d.confidence || 0) * 100);
                     const confColor = confPercent >= 70 ? 'var(--accent-green, #10b981)' : (confPercent >= 50 ? 'var(--accent-gold, #f59e0b)' : '#ef4444');
 
+                    let sourcesHtml = '';
+                    if (Array.isArray(d.sources) && d.sources.length > 0) {
+                        sourcesHtml = `
+                            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;">
+                                ${d.sources.map(s => `<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.3);color:#d8b4fe;">🌐 ${esc(s)}</span>`).join('')}
+                            </div>
+                        `;
+                    }
+
                     let ocrBadgesHtml = '';
                     if (Array.isArray(d.ocrTextFound) && d.ocrTextFound.length > 0) {
                         ocrBadgesHtml = `
                             <div style="margin-top:8px;">
-                                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">🖼️ 썸네일에서 감지된 텍스트 (OCR):</div>
-                                <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">🖼️ 썸네일/이미지 감지 텍스트 (OCR):</div>
+                                <div style="display:flex;flex-wrap:wrap;gap:4px;max-height:80px;overflow-y:auto;">
                                     ${d.ocrTextFound.map(t => `<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#cbd5e1;">${esc(t)}</span>`).join('')}
                                 </div>
+                            </div>
+                        `;
+                    }
+
+                    let snippetHtml = '';
+                    if (d.matchedSnippet) {
+                        snippetHtml = `
+                            <div style="font-size:11px;color:var(--accent-gold);margin-top:6px;background:rgba(245,158,11,0.08);padding:6px;border-radius:4px;border:1px solid rgba(245,158,11,0.2);">
+                                📜 감지된 트랙리스트: <strong>${esc(d.matchedSnippet)}</strong>
                             </div>
                         `;
                     }
@@ -3834,8 +3896,10 @@
                                 <span style="font-size:11px;color:var(--text-muted);">추천 정규 곡명</span>
                                 <span style="font-size:11px;font-weight:700;color:${confColor};background:rgba(0,0,0,0.4);padding:2px 8px;border-radius:10px;">정확도 ${confPercent}%</span>
                             </div>
+                            ${sourcesHtml}
                             <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;">${esc(d.identifiedTitle)}</div>
                             ${d.suggestedYoutubeUrl ? `<div style="font-size:11px;color:var(--accent-cyan);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:8px;">🔗 ${esc(d.suggestedYoutubeUrl)}</div>` : ''}
+                            ${snippetHtml}
                             ${ocrBadgesHtml}
                             <button class="quick-tool-btn primary" type="button" style="width:100%;height:34px;justify-content:center;margin-top:10px;font-size:12px;font-weight:700;"
                                 id="applyAiIdentifyBtn">
