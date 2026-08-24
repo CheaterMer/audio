@@ -787,7 +787,7 @@
           return `
             <div class="inflow-card" id="inflowCard_${t.id}">
               <div class="inflow-card-row">
-                <img src="${esc(coverSrc || '/images/icon128.png')}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;background:#161b22;" onerror="this.src='/images/icon128.png'" />
+                <img src="${esc(coverSrc || '/images/default-audio-cover.svg')}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;background:#161b22;" onerror="this.src='/images/default-audio-cover.svg'" />
                 <div style="flex:1;overflow:hidden;">
                   <div style="font-size:11px;color:var(--c-accent);font-family:'DM Mono',monospace;margin-bottom:2px;">
                     🎵 ${esc(t.audioAssetId || t.id)}

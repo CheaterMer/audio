@@ -1757,7 +1757,7 @@
         <!-- FLOATING DOCK MINI PLAYER -->
         <div class="floating-player-dock" id="floatingPlayerDock">
             <div class="dock-left-track">
-                <img src="./images/icon128.png" class="dock-cover" id="playerCoverImg"
+                <img src="./images/default-audio-cover.svg" class="dock-cover" id="playerCoverImg"
                     onerror="handleImgError(this)" />
                 <div class="dock-track-info">
                     <span class="dock-track-title" id="playerTitle">재생 중인 곡 없음</span>
@@ -1803,6 +1803,8 @@
                 <div class="modal-body">
                     <div class="modal-tabs">
                         <button class="modal-tab-btn active" onclick="switchAdminTab('stats', this)">📊 DB 통계 요약</button>
+                        <button class="modal-tab-btn" onclick="switchAdminTab('aiRestore', this)">🤖 AI 곡명 복원</button>
+                        <button class="modal-tab-btn" onclick="switchAdminTab('creatorImport', this)">👥 크리에이터 수집</button>
                         <button class="modal-tab-btn" onclick="switchAdminTab('catImg', this)">🖼️ 이미지 & 번역</button>
                         <button class="modal-tab-btn" onclick="switchAdminTab('rename', this)">🏷️ 카테고리 이름 변경</button>
                         <button class="modal-tab-btn owner-only-feature" onclick="switchAdminTab('studio', this)">🎮 Studio 검증 설정</button>
@@ -2033,6 +2035,107 @@
                         </div>
                     </div>
 
+                    <!-- AI RESTORE TAB (BATCH AI + OCR IDENTIFICATION) -->
+                    <div id="adminTabAiRestore" style="display:none;">
+                        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">
+                            제목이 왜곡되었거나 (<code>Audio 123...</code>) 유튜브 매핑이 없는 곡들을 <strong>웹 검색 + 썸네일 OCR 교차 분석</strong>으로 일괄 정규화합니다.
+                        </p>
+                        
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label style="font-size:11px;font-weight:700;">대상 카테고리</label>
+                                <select class="form-input" id="aiRestoreCategory" style="background:#161b22;height:34px;">
+                                    <option value="">전체 카테고리</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label style="font-size:11px;font-weight:700;">1회 실행 배치 수 (10~50)</label>
+                                <input type="number" class="form-input" id="aiRestoreLimit" value="20" min="1" max="50" style="height:34px;" />
+                            </div>
+                        </div>
+
+                        <div style="display:flex;flex-direction:column;gap:8px;padding:12px;background:rgba(255,255,255,0.04);border-radius:8px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.08);">
+                            <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;color:#fff;">
+                                <input type="checkbox" id="aiRestoreOnlyGeneric" checked style="accent-color:var(--accent-cyan);" />
+                                <span>왜곡된 제목만 대상 (<code>Audio %</code>, <code>Unknown</code> 등)</span>
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;color:#fff;">
+                                <input type="checkbox" id="aiRestoreOnlyUnmapped" checked style="accent-color:var(--accent-cyan);" />
+                                <span>유튜브 미매핑 곡만 대상</span>
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;color:#a855f7;font-weight:700;">
+                                <input type="checkbox" id="aiRestoreAutoApply" checked style="accent-color:#a855f7;" />
+                                <span>신뢰도 50% 이상 시 DB 자동 즉시 반영</span>
+                            </label>
+                        </div>
+
+                        <button class="quick-tool-btn primary" id="startBatchAiRestoreBtn" style="width:100%;height:40px;justify-content:center;font-weight:700;" onclick="executeBatchAiRestore()">
+                            🤖 AI 웹 검색 + 썸네일 OCR 일괄 복원 시작
+                        </button>
+
+                        <!-- Batch AI Restore Progress & Results -->
+                        <div id="aiRestoreProgressBox" style="display:none;margin-top:14px;padding:12px;background:rgba(0,0,0,0.35);border-radius:8px;border:1px solid var(--border-subtle);">
+                            <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:6px;">
+                                <span id="aiRestoreStatusText" style="color:var(--accent-cyan);">진행 중...</span>
+                                <span id="aiRestoreCountText" style="color:#fff;">0 / 0</span>
+                            </div>
+                            <div style="width:100%;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;margin-bottom:10px;">
+                                <div id="aiRestoreProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg, #6366f1, #a855f7);transition:width 0.3s;"></div>
+                            </div>
+                            <div id="aiRestoreResultsList" style="max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;font-size:11px;">
+                                <!-- Item logs dynamically populated -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CREATOR IMPORT TAB -->
+                    <div id="adminTabCreatorImport" style="display:none;">
+                        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">
+                            Roblox 크리에이터(유저 또는 그룹)가 공개 등록한 <strong>오디오 에셋을 Toolbox API를 통해 전수 수집</strong>합니다.
+                        </p>
+
+                        <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label style="font-size:11px;font-weight:700;">크리에이터 ID 또는 유저명 (*)</label>
+                                <input type="text" class="form-input" id="creatorImportId" placeholder="예: 175038 또는 Roblox유저명" style="height:34px;" />
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label style="font-size:11px;font-weight:700;">구분 (Type)</label>
+                                <select class="form-input" id="creatorImportType" style="background:#161b22;height:34px;">
+                                    <option value="User">👤 일반 유저 (User)</option>
+                                    <option value="Group">🏢 그룹 (Group)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label style="font-size:11px;font-weight:700;">수집 페이지 수 (1페이지=30곡)</label>
+                                <input type="number" class="form-input" id="creatorImportMaxPages" value="3" min="1" max="20" style="height:34px;" />
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label style="font-size:11px;font-weight:700;">저장할 카테고리명 (선택)</label>
+                                <input type="text" class="form-input" id="creatorImportCategory" placeholder="미입력 시 크리에이터명 자동 지정" style="height:34px;" />
+                            </div>
+                        </div>
+
+                        <div style="padding:12px;background:rgba(255,255,255,0.04);border-radius:8px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.08);">
+                            <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;color:#a855f7;font-weight:700;">
+                                <input type="checkbox" id="creatorImportAutoAi" checked style="accent-color:#a855f7;" />
+                                <span>수집과 동시에 AI OCR + 웹 검색으로 정식 곡명 자동 정제</span>
+                            </label>
+                        </div>
+
+                        <button class="quick-tool-btn primary" id="startCreatorImportBtn" style="width:100%;height:40px;justify-content:center;font-weight:700;" onclick="executeCreatorImport()">
+                            📥 크리에이터 오디오 전수 수집 시작
+                        </button>
+
+                        <div id="creatorImportResultBox" style="display:none;margin-top:14px;padding:12px;background:rgba(0,0,0,0.35);border-radius:8px;border:1px solid var(--border-subtle);font-size:12px;">
+                            <div id="creatorImportStatusText" style="font-weight:700;color:var(--accent-cyan);margin-bottom:6px;"></div>
+                            <div id="creatorImportSummary" style="color:var(--text-secondary);line-height:1.5;"></div>
+                        </div>
+                    </div>
+
                     <!-- 6. OPTIMIZE TAB -->
                     <div id="adminTabOptimize" style="display:none;">
                         <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">데이터베이스 단편화를 정리하고 파일 용량을 최적화합니다.</p>
@@ -2107,7 +2210,7 @@
                     <input type="hidden" id="editTrackId" />
                     
                     <div style="display:flex;gap:14px;margin-bottom:14px;align-items:center;">
-                        <img id="editImgPreview" src="./images/icon128.png" 
+                        <img id="editImgPreview" src="./images/default-audio-cover.svg" 
                             style="width:72px;height:72px;border-radius:10px;object-fit:cover;border:1px solid var(--border-subtle);background:#161b22;"
                             onerror="handleImgError(this)" />
                         <div style="flex:1;">
@@ -2124,11 +2227,25 @@
 
                     <div class="form-group">
                         <label>곡 제목 (Title)</label>
-                        <div style="display:flex;gap:8px;">
-                            <input type="text" class="form-input" id="editTitle" placeholder="곡 제목" />
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <input type="text" class="form-input" id="editTitle" placeholder="곡 제목" style="flex:1;min-width:180px;" />
+                            <button class="quick-tool-btn" type="button" onclick="identifyAiForEdit()" style="white-space:nowrap;background:linear-gradient(135deg, rgba(99,102,241,0.25), rgba(168,85,247,0.25));color:#c084fc;border-color:rgba(168,85,247,0.4);font-weight:700;">
+                                🤖 AI+OCR 역추적
+                            </button>
                             <button class="quick-tool-btn" type="button" onclick="searchYoutubeForEdit()" style="white-space:nowrap;background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);">
                                 🔍 유튜브 검색
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- AI Identify Results Panel -->
+                    <div id="editAiResultsBox" style="display:none;margin-top:10px;padding:12px;background:rgba(99,102,241,0.08);border-radius:8px;border:1px solid rgba(99,102,241,0.3);">
+                        <div style="font-size:12px;font-weight:700;color:#c084fc;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+                            <span>🤖 AI 웹 검색 & 썸네일 OCR 분석 결과</span>
+                            <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:11px;" onclick="document.getElementById('editAiResultsBox').style.display='none'">&times; 닫기</button>
+                        </div>
+                        <div id="editAiResultsContent">
+                            <!-- Dynamically populated AI result -->
                         </div>
                     </div>
 
@@ -2260,7 +2377,7 @@
                     <!-- Cover + Title Banner -->
                     <div style="display:flex;gap:16px;align-items:center;background:rgba(255,255,255,0.03);padding:14px;border-radius:12px;border:1px solid var(--border-subtle);">
                         <div style="position:relative;width:80px;height:80px;flex-shrink:0;">
-                            <img id="detailCoverImg" src="./images/icon128.png" 
+                            <img id="detailCoverImg" src="./images/default-audio-cover.svg" 
                                 style="width:80px;height:80px;border-radius:10px;object-fit:cover;border:1px solid var(--border-subtle);background:#161b22;"
                                 onerror="handleImgError(this)" />
                             <div class="play-overlay-btn" id="detailPlayDemoBtn" title="재생" style="position:absolute;inset:0;margin:auto;width:38px;height:38px;font-size:16px;">▶</div>
@@ -2337,6 +2454,10 @@
                         <div style="font-size:12px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:4px;">
                             <span style="color:var(--text-muted);" data-i18n="audio_ui.detail_type_label">타입(Type):</span>
                             <span id="detailTypeText" style="color:var(--text-secondary);">-</span>
+                        </div>
+                        <div style="font-size:12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:4px;" id="detailSourceRow">
+                            <span style="color:var(--text-muted);">💬 디스코드 원본 출처:</span>
+                            <div id="detailSourceBox">-</div>
                         </div>
                         <div style="font-size:12px;display:flex;justify-content:space-between;align-items:center;">
                             <span style="color:var(--text-muted);" data-i18n="audio_ui.detail_youtube_label">YouTube 연동:</span>
@@ -2494,7 +2615,7 @@
         }
         const escapeHtml = esc;
 
-        const DEFAULT_FALLBACK_IMG = './images/icon128.png';
+        const DEFAULT_FALLBACK_IMG = './images/default-audio-cover.svg';
 
         function handleImgError(img) {
             if (!img) return;
@@ -3558,6 +3679,19 @@
                 }
             }
 
+            // Discord Source Link
+            const sourceBox = document.getElementById('detailSourceBox');
+            const sourceRow = document.getElementById('detailSourceRow');
+            if (sourceBox) {
+                if (track.sourceUrl) {
+                    if (sourceRow) sourceRow.style.display = 'flex';
+                    sourceBox.innerHTML = `<a href="${esc(track.sourceUrl)}" target="_blank" style="color:#c084fc;font-weight:700;display:inline-flex;align-items:center;gap:4px;word-break:break-all;">💬 메시지 바로보기 ↗</a>`;
+                } else {
+                    if (sourceRow) sourceRow.style.display = 'none';
+                    sourceBox.innerHTML = `<span style="color:var(--text-muted);font-size:12px;">-</span>`;
+                }
+            }
+
             // YouTube Mapping
             const ytBox = document.getElementById('detailYtBox');
             if (ytBox) {
@@ -3648,7 +3782,92 @@
             
             document.getElementById('editYtResultsBox').style.display = 'none';
             document.getElementById('editYtResultsList').innerHTML = '';
+            const aiBox = document.getElementById('editAiResultsBox');
+            if (aiBox) aiBox.style.display = 'none';
             openModal('editTrackModal');
+        }
+
+        async function identifyAiForEdit() {
+            const assetId = document.getElementById('editAssetId').value.trim();
+            if (!assetId) {
+                showToast('Roblox Asset ID가 없습니다.', 'error');
+                return;
+            }
+
+            const box = document.getElementById('editAiResultsBox');
+            const content = document.getElementById('editAiResultsContent');
+            box.style.display = 'block';
+            content.innerHTML = `
+                <div style="text-align:center;padding:16px;color:var(--text-muted);font-size:12px;">
+                    <div style="display:inline-block;animation:spin 1s linear infinite;font-size:18px;margin-bottom:6px;">⚡</div>
+                    <div>AI가 웹 검색 스니펫 및 썸네일 OCR 문자를 교차 분석하는 중입니다...</div>
+                </div>
+            `;
+
+            try {
+                const res = await apiFetch(`/api/audio/ai-identify/${encodeURIComponent(assetId)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ skipOcr: false })
+                });
+                const json = await res.json();
+                if (json.status === 'success' && json.data) {
+                    const d = json.data;
+                    const confPercent = Math.round((d.confidence || 0) * 100);
+                    const confColor = confPercent >= 70 ? 'var(--accent-green, #10b981)' : (confPercent >= 50 ? 'var(--accent-gold, #f59e0b)' : '#ef4444');
+
+                    let ocrBadgesHtml = '';
+                    if (Array.isArray(d.ocrTextFound) && d.ocrTextFound.length > 0) {
+                        ocrBadgesHtml = `
+                            <div style="margin-top:8px;">
+                                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">🖼️ 썸네일에서 감지된 텍스트 (OCR):</div>
+                                <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                                    ${d.ocrTextFound.map(t => `<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#cbd5e1;">${esc(t)}</span>`).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    content.innerHTML = `
+                        <div style="background:rgba(0,0,0,0.3);padding:10px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                                <span style="font-size:11px;color:var(--text-muted);">추천 정규 곡명</span>
+                                <span style="font-size:11px;font-weight:700;color:${confColor};background:rgba(0,0,0,0.4);padding:2px 8px;border-radius:10px;">정확도 ${confPercent}%</span>
+                            </div>
+                            <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;">${esc(d.identifiedTitle)}</div>
+                            ${d.suggestedYoutubeUrl ? `<div style="font-size:11px;color:var(--accent-cyan);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:8px;">🔗 ${esc(d.suggestedYoutubeUrl)}</div>` : ''}
+                            ${ocrBadgesHtml}
+                            <button class="quick-tool-btn primary" type="button" style="width:100%;height:34px;justify-content:center;margin-top:10px;font-size:12px;font-weight:700;"
+                                id="applyAiIdentifyBtn">
+                                ⚡ 이 AI 추천 정보 원클릭 적용
+                            </button>
+                        </div>
+                    `;
+
+                    const applyBtn = document.getElementById('applyAiIdentifyBtn');
+                    if (applyBtn) {
+                        applyBtn.onclick = () => {
+                            applyAiIdentification(d.identifiedTitle, d.suggestedYoutubeUrl, d.suggestedThumbnail);
+                        };
+                    }
+                } else {
+                    content.innerHTML = `<div style="text-align:center;padding:14px;color:#ef4444;font-size:12px;">${esc(json.message || 'AI 역추적 분석 결과가 없습니다.')}</div>`;
+                }
+            } catch (e) {
+                content.innerHTML = `<div style="text-align:center;padding:14px;color:#ef4444;font-size:12px;">AI 역추적 중 오류 발생: ${esc(e.message)}</div>`;
+            }
+        }
+
+        function applyAiIdentification(title, ytUrl, thumbUrl) {
+            if (title) document.getElementById('editTitle').value = title;
+            if (ytUrl) document.getElementById('editYtUrl').value = ytUrl;
+            if (thumbUrl) {
+                document.getElementById('editImageUrl').value = thumbUrl;
+                document.getElementById('editImgPreview').src = thumbUrl;
+            }
+            const aiBox = document.getElementById('editAiResultsBox');
+            if (aiBox) aiBox.style.display = 'none';
+            showToast('🤖 AI 분석 곡명 및 링크가 적용되었습니다! [저장 완료] 버튼을 눌러 확정하세요.', 'success');
         }
 
         async function searchYoutubeForEdit() {
@@ -5233,14 +5452,169 @@
         function switchAdminTab(tab, btn) {
             document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            ['stats', 'studio', 'catImg', 'catWarning', 'rename', 'blacklist', 'restore', 'optimize'].forEach(t => {
+            ['stats', 'aiRestore', 'creatorImport', 'studio', 'catImg', 'catWarning', 'rename', 'blacklist', 'restore', 'optimize'].forEach(t => {
                 const el = document.getElementById(`adminTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 if (el) el.style.display = t === tab ? 'block' : 'none';
             });
+            if (tab === 'aiRestore') populateAiRestoreCategories();
             if (tab === 'studio') loadStudioConfig();
             if (tab === 'restore') loadDeletedAudiosList();
             if (tab === 'catWarning') onAdminWarnCatSelectChange();
             if (tab === 'blacklist') loadBanCategoryVisibility();
+        }
+
+        function populateAiRestoreCategories() {
+            const sel = document.getElementById('aiRestoreCategory');
+            if (!sel) return;
+            const cats = Array.from(new Set(tracksData.map(t => t.cat).filter(Boolean)));
+            sel.innerHTML = '<option value="">전체 카테고리</option>' + cats.map(c => `<option value="${esc(c)}">${esc(getCategoryDisplayName(c))} (${esc(c)})</option>`).join('');
+        }
+
+        async function executeBatchAiRestore() {
+            const cat = document.getElementById('aiRestoreCategory')?.value || null;
+            const limit = parseInt(document.getElementById('aiRestoreLimit')?.value, 10) || 20;
+            const onlyGeneric = document.getElementById('aiRestoreOnlyGeneric')?.checked || false;
+            const onlyUnmapped = document.getElementById('aiRestoreOnlyUnmapped')?.checked || false;
+            const autoApply = document.getElementById('aiRestoreAutoApply')?.checked || false;
+
+            const btn = document.getElementById('startBatchAiRestoreBtn');
+            const progressBox = document.getElementById('aiRestoreProgressBox');
+            const statusText = document.getElementById('aiRestoreStatusText');
+            const countText = document.getElementById('aiRestoreCountText');
+            const progressBar = document.getElementById('aiRestoreProgressBar');
+            const resultsList = document.getElementById('aiRestoreResultsList');
+
+            btn.disabled = true;
+            btn.textContent = '⚡ AI 일괄 복원 진행 중...';
+            progressBox.style.display = 'block';
+            statusText.textContent = '웹 검색 및 썸네일 OCR 교차 분석 중...';
+            countText.textContent = '진행 중';
+            progressBar.style.width = '30%';
+            resultsList.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:10px;">대상 오디오를 선정하고 분석을 시작합니다...</div>';
+
+            try {
+                const res = await apiFetch('/api/audio/admin/batch-ai-identify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        limit,
+                        onlyGenericTitles: onlyGeneric,
+                        onlyUnmapped,
+                        category: cat,
+                        autoApply,
+                        minConfidence: 0.5
+                    })
+                });
+                const json = await res.json();
+                progressBar.style.width = '100%';
+
+                if (json.status === 'success') {
+                    statusText.textContent = `완료! (${json.updatedCount || 0}곡 DB 반영됨)`;
+                    countText.textContent = `${json.processedCount || 0}곡 분석`;
+
+                    if (Array.isArray(json.results) && json.results.length > 0) {
+                        resultsList.innerHTML = json.results.map(r => {
+                            const confPercent = Math.round((r.confidence || 0) * 100);
+                            const confColor = confPercent >= 70 ? 'var(--accent-green)' : (confPercent >= 50 ? 'var(--accent-gold)' : '#ef4444');
+                            return `
+                                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:4px;">
+                                    <div style="flex:1;min-width:0;">
+                                        <div style="color:#cbd5e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                            <span style="color:var(--text-muted);font-family:var(--font-mono);">${esc(r.assetId)}</span>
+                                            ${r.applied ? '<strong style="color:var(--accent-green);">[적용됨]</strong>' : ''}
+                                            <strong>${esc(r.identifiedTitle || r.originalTitle)}</strong>
+                                        </div>
+                                    </div>
+                                    <span style="font-size:10px;font-weight:700;color:${confColor};flex-shrink:0;">${confPercent}%</span>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        resultsList.innerHTML = `<div style="color:var(--text-muted);text-align:center;padding:10px;">${esc(json.message || '처리된 결과가 없습니다.')}</div>`;
+                    }
+
+                    if (json.updatedCount > 0) {
+                        showToast(`총 ${json.updatedCount}곡의 곡명이 AI와 OCR로 복원/적용되었습니다!`, 'success');
+                        try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
+                        await loadRealAudios();
+                    } else {
+                        showToast('AI 일괄 복원 완료 (분석 결과 확인 가능)', 'info');
+                    }
+                } else {
+                    statusText.textContent = '실패';
+                    resultsList.innerHTML = `<div style="color:#ef4444;text-align:center;padding:10px;">${esc(json.message || '오류 발생')}</div>`;
+                }
+            } catch(e) {
+                statusText.textContent = '오류 발생';
+                resultsList.innerHTML = `<div style="color:#ef4444;text-align:center;padding:10px;">${esc(e.message)}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🤖 AI 웹 검색 + 썸네일 OCR 일괄 복원 시작';
+            }
+        }
+
+        async function executeCreatorImport() {
+            const creatorId = document.getElementById('creatorImportId')?.value.trim();
+            const creatorType = document.getElementById('creatorImportType')?.value || 'User';
+            const maxPages = parseInt(document.getElementById('creatorImportMaxPages')?.value, 10) || 3;
+            const categoryName = document.getElementById('creatorImportCategory')?.value.trim() || null;
+            const autoIdentify = document.getElementById('creatorImportAutoAi')?.checked || false;
+
+            if (!creatorId) {
+                showToast('크리에이터 ID 또는 유저명을 입력해 주세요.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('startCreatorImportBtn');
+            const resultBox = document.getElementById('creatorImportResultBox');
+            const statusText = document.getElementById('creatorImportStatusText');
+            const summary = document.getElementById('creatorImportSummary');
+
+            btn.disabled = true;
+            btn.textContent = '📥 크리에이터 오디오 수집 중...';
+            resultBox.style.display = 'block';
+            statusText.textContent = '⚡ Roblox Toolbox API로 공개 오디오를 탐색하고 있습니다...';
+            summary.innerHTML = autoIdentify 
+                ? '<div style="color:#a855f7;">AI OCR + 웹 검색 곡명 정제가 함께 실행 중입니다 (다소 시간이 소요될 수 있습니다)...</div>' 
+                : '<div style="color:var(--text-muted);">오디오 에셋 목록 및 재생성 검사를 진행 중입니다...</div>';
+
+            try {
+                const res = await apiFetch('/api/audio/import-creator', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        creatorId,
+                        creatorType,
+                        maxPages,
+                        categoryName,
+                        autoIdentify
+                    })
+                });
+                const json = await res.json();
+                if (json.status === 'success' && json.data) {
+                    const d = json.data;
+                    statusText.textContent = `✅ 수집 완료: 총 ${d.totalFetched || 0}개 탐색`;
+                    summary.innerHTML = `
+                        <div style="margin-top:4px;">
+                            • 신규 등록: <strong style="color:var(--accent-green);">${d.addedCount || 0}곡</strong><br>
+                            • 정보 갱신: <strong style="color:var(--accent-cyan);">${d.updatedCount || 0}곡</strong><br>
+                            • 삭제목록 제외: <strong style="color:var(--text-muted);">${d.skippedDeletedCount || 0}곡</strong>
+                        </div>
+                    `;
+                    showToast(json.message || '크리에이터 오디오 수집이 완료되었습니다!', 'success');
+                    try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
+                    await loadRealAudios();
+                } else {
+                    statusText.textContent = '❌ 수집 실패';
+                    summary.innerHTML = `<div style="color:#ef4444;">${esc(json.message || '크리에이터 오디오를 불러오지 못했습니다.')}</div>`;
+                }
+            } catch(e) {
+                statusText.textContent = '❌ 네트워크 오류';
+                summary.innerHTML = `<div style="color:#ef4444;">${esc(e.message)}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📥 크리에이터 오디오 전수 수집 시작';
+            }
         }
 
         async function loadStudioConfig() {
