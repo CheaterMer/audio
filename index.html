@@ -3369,7 +3369,7 @@
             });
         }
 
-        function renderCachedDataImmediately() {
+        function renderCachedDataImmediately(preservePosition = false, savedPage = 1, savedScrollY = 0) {
             const cachedTrans = getFromCache('category_translations');
             if (cachedTrans) categoryTranslations = cachedTrans;
             const cachedMeta = getFromCache('category_metadata');
@@ -3381,8 +3381,14 @@
                 updateCounts();
                 renderCategoryChips();
                 populateAuthorFilterDropdown();
-                if (!restoreAudioState()) {
-                    switchMainView('all');
+                if (!preservePosition) {
+                    if (!restoreAudioState()) {
+                        switchMainView('all', true);
+                    }
+                } else {
+                    currentPage = savedPage;
+                    renderCards();
+                    if (savedScrollY > 0) window.scrollTo({ top: savedScrollY, behavior: 'instant' });
                 }
                 applyAudioI18n();
                 checkUrlShareParam();
@@ -3391,11 +3397,13 @@
             return false;
         }
 
-        async function loadRealAudios() {
+        async function loadRealAudios(preservePosition = false) {
+            const savedPage = currentPage;
+            const savedScrollY = window.scrollY;
             initVolume();
 
-            // 1. STEP 1: ZERO-DELAY INSTANT CACHE RENDER (0ms latency, works offline immediately)
-            const hasCache = renderCachedDataImmediately();
+            // 1. STEP 1: ZERO-DELAY INSTANT CACHE RENDER
+            const hasCache = renderCachedDataImmediately(preservePosition, savedPage, savedScrollY);
 
             // 2. STEP 2: Non-blocking background sync with backend
             try {
@@ -3412,8 +3420,14 @@
                     updateCounts();
                     renderCategoryChips();
                     populateAuthorFilterDropdown();
-                    if (!restoreAudioState()) {
-                        switchMainView('all');
+                    if (!preservePosition) {
+                        if (!restoreAudioState()) {
+                            switchMainView('all', true);
+                        }
+                    } else {
+                        currentPage = savedPage;
+                        renderCards();
+                        if (savedScrollY > 0) window.scrollTo({ top: savedScrollY, behavior: 'instant' });
                     }
                     checkUrlShareParam();
                 }
@@ -3468,7 +3482,7 @@
                 const state = JSON.parse(raw);
                 if (state) {
                     currentCategory = state.category || null;
-                    currentPage = state.page || 1;
+                    const targetPage = state.page || 1;
                     if (state.pageSize) {
                         pageSize = parseInt(state.pageSize, 10) || 40;
                         const sel = document.getElementById('pageSizeSelect');
@@ -3512,7 +3526,9 @@
                         activeQuickPill = state.quickPill;
                         updateQuickPillsUI();
                     }
-                    switchMainView(state.view || 'all');
+                    switchMainView(state.view || 'all', false);
+                    currentPage = targetPage;
+                    renderCards();
                     return true;
                 }
             } catch(e) {}
