@@ -4859,7 +4859,7 @@
             showToast('🎬 유튜브 링크 및 커버 이미지가 성공적으로 맵핑되었습니다!', 'success');
         }
 
-        async function saveEditTrack() {
+        async function saveEditTrack(autoApprove = false) {
             const id = document.getElementById('editTrackId').value;
             const title = document.getElementById('editTitle').value.trim();
             const cat = document.getElementById('editCategory').value.trim();
@@ -4877,7 +4877,8 @@
                     gameName: cat,
                     youtubeUrl: ytUrl,
                     imageUrl: imgUrl,
-                    isVerifiedLocked: isLocked
+                    isVerifiedLocked: isLocked,
+                    approve: !!autoApprove
                 };
                 if (sPlay !== undefined && sPlay !== '') payload.serverPlayable = parseInt(sPlay, 10);
                 if (cPlay !== undefined && cPlay !== '') payload.clientPlayable = parseInt(cPlay, 10);
@@ -4889,7 +4890,7 @@
                 });
                 const json = await res.json();
                 if (json.status === 'success') {
-                    showToast('오디오 정보, 재생 상태 및 고정 설정이 성공적으로 저장되었습니다!', 'success');
+                    showToast(json.message || (autoApprove ? '✅ 오디오 정보 저장 및 즉시 승인이 완료되었습니다!' : '오디오 정보가 성공적으로 저장되었습니다.'), 'success');
                     try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
                     closeModal('editTrackModal');
                     await loadRealAudios();
@@ -4897,7 +4898,7 @@
                     showToast(json.message || '수정 실패', 'error');
                 }
             } catch(e) {
-                showToast('수정 중 서버 통신 오류가 발생했습니다.', 'error');
+                showToast('수정 중 서버 통신 오류가 발생했습니다: ' + (e.message || ''), 'error');
             }
         }
 
@@ -6260,6 +6261,7 @@
             const custom = document.getElementById('bulkCustomInput').value.trim();
             const existing = document.getElementById('bulkSelectExisting').value;
             const targetCat = custom || existing;
+            const autoApprove = document.getElementById('bulkCatAutoApprove')?.checked || false;
 
             if (!targetCat) {
                 showToast('변경할 카테고리를 선택하거나 입력해주세요.', 'error');
@@ -6268,20 +6270,28 @@
             if (selectedTrackIds.size === 0) return;
 
             try {
-                for (const id of selectedTrackIds) {
-                    await fetch(`/api/audio/${id}`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ gameName: targetCat })
-                    });
+                const res = await apiFetch('/api/audio/bulk/category', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        audioIds: Array.from(selectedTrackIds),
+                        targetCategory: targetCat,
+                        autoApprove
+                    })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(json.message || `선택한 ${selectedTrackIds.size}개 곡의 카테고리가 '${targetCat}'(으)로 변경되었습니다.`, 'success');
+                    try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
+                    closeModal('bulkCategoryModal');
+                    selectedTrackIds.clear();
+                    toggleMultiSelectMode();
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '카테고리 일괄 변경 실패', 'error');
                 }
-                showToast(`선택한 ${selectedTrackIds.size}개 곡의 카테고리가 '${targetCat}'(으)로 변경되었습니다.`, 'success');
-                closeModal('bulkCategoryModal');
-                selectedTrackIds.clear();
-                toggleMultiSelectMode();
-                await loadRealAudios();
             } catch(e) {
-                showToast('카테고리 변경 중 오류가 발생했습니다.', 'error');
+                showToast('카테고리 변경 중 오류가 발생했습니다: ' + (e.message || ''), 'error');
             }
         }
 
