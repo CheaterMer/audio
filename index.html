@@ -2978,6 +2978,31 @@
 
         function handleImgError(img) {
             if (!img) return;
+            const step = parseInt(img.dataset.fallbackStep || '0', 10);
+            
+            // Step 1: Fallback to Roblox CDN Thumbnail if available
+            if (step === 0) {
+                img.dataset.fallbackStep = '1';
+                const robloxThumb = img.dataset.robloxThumb;
+                if (robloxThumb && !robloxThumb.includes('BrokenImage') && !robloxThumb.includes('UnapprovedImage') && img.src !== robloxThumb) {
+                    img.src = robloxThumb;
+                    return;
+                }
+            }
+
+            // Step 2: Fallback to Category Image if available
+            if (step <= 1) {
+                img.dataset.fallbackStep = '2';
+                const cat = img.dataset.cat;
+                const catImg = (cat && categoryMetadataMap[cat]) ? categoryMetadataMap[cat] : null;
+                if (catImg && img.src !== catImg) {
+                    img.src = catImg;
+                    return;
+                }
+            }
+
+            // Step 3: Default SVG fallback
+            img.dataset.fallbackStep = '3';
             img.onerror = null;
             img.src = DEFAULT_FALLBACK_IMG;
         }
@@ -3992,7 +4017,7 @@
                 <div class="track-card ${isSelected ? 'selected' : ''}" onclick="onCardClick('${esc(trackItem.id)}', event)">
                     <div class="card-cover-wrap">
                         <label class="card-checkbox" onclick="event.stopPropagation();onCheckboxClick('${esc(trackItem.id)}', event)" title="선택 (Shift+클릭: 연속 범위 일괄 선택)"><input type="checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation()" onchange="onCheckboxClick('${esc(trackItem.id)}', event)" /></label>
-                        <img src="${esc(cover)}" class="card-cover-img" onerror="handleImgError(this)" />
+                        <img src="${esc(cover)}" class="card-cover-img" data-roblox-thumb="${esc(trackItem.robloxThumbnailUrl || '')}" data-cat="${esc(trackItem.cat || '')}" onerror="handleImgError(this)" />
                         <span class="card-category-badge">${esc(displayName)}</span>
                         <button class="card-fav-btn ${trackItem.favorited ? 'active' : ''}" onclick="event.stopPropagation();toggleFav('${esc(trackItem.id)}')">★</button>
                         <!-- 오직 이 재생 버튼을 누를 때만 재생 실행! -->
@@ -4077,7 +4102,12 @@
             if (!cover) cover = categoryMetadataMap[track.cat] || DEFAULT_FALLBACK_IMG;
 
             const coverEl = document.getElementById('detailCoverImg');
-            if (coverEl) coverEl.src = cover;
+            if (coverEl) {
+                coverEl.dataset.fallbackStep = '0';
+                coverEl.dataset.robloxThumb = track.robloxThumbnailUrl || '';
+                coverEl.dataset.cat = track.cat || '';
+                coverEl.src = cover;
+            }
             const titleEl = document.getElementById('detailTitle');
             if (titleEl) titleEl.textContent = track.title || 'Untitled Track';
             const catBadgeEl = document.getElementById('detailCategoryBadge');
@@ -5673,7 +5703,7 @@
                 playYouTubeTrack(t.yt, t.durationSec || 0);
             } else if (!isYtPlayingMode) {
                 document.getElementById('playerPlayBtn').textContent = '▶';
-                showToast('해당 트랙은 웹 미리듣기가 지원되지 않는 에셋입니다 (Roblox ID: ' + (t ? t.assetId : '') + ')', 'error');
+                showToast('해당 트랙은 Roblox 권한 보호(401/403) 또는 스토어 비공개로 웹 미리듣기가 제한된 에셋입니다 (ID: ' + (t ? t.assetId : '') + ')', 'info');
             }
         }
 
@@ -5699,7 +5729,13 @@
             if (!cover && t.yt) cover = `https://img.youtube.com/vi/${t.yt}/mqdefault.jpg`;
             if (!cover && t.robloxThumbnailUrl && !t.robloxThumbnailUrl.includes('BrokenImage')) cover = t.robloxThumbnailUrl;
             if (!cover) cover = DEFAULT_FALLBACK_IMG;
-            document.getElementById('playerCoverImg').src = cover;
+            const playerCoverEl = document.getElementById('playerCoverImg');
+            if (playerCoverEl) {
+                playerCoverEl.dataset.fallbackStep = '0';
+                playerCoverEl.dataset.robloxThumb = t.robloxThumbnailUrl || '';
+                playerCoverEl.dataset.cat = t.cat || '';
+                playerCoverEl.src = cover;
+            }
             document.getElementById('playerTotalTime').textContent = t.dur || '0:00';
             document.getElementById('playerPlayBtn').textContent = '⏸';
 
