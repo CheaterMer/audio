@@ -4909,7 +4909,7 @@
                     showToast(json.message || (autoApprove ? '✅ 오디오 정보 저장 및 즉시 승인이 완료되었습니다!' : '오디오 정보가 성공적으로 저장되었습니다.'), 'success');
                     try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
                     closeModal('editTrackModal');
-                    await loadRealAudios();
+                    await loadRealAudios(true);
                 } else {
                     showToast(json.message || '수정 실패', 'error');
                 }
@@ -5233,9 +5233,9 @@
             }).join('');
         }
 
-        function switchMainView(view) {
+        function switchMainView(view, resetPage = true) {
             currentView = view;
-            currentPage = 1;
+            if (resetPage) currentPage = 1;
             document.querySelectorAll('.sidebar .nav-btn').forEach(b => b.classList.remove('active'));
             const tracksGrid = document.getElementById('tracksGrid');
             const catGrid = document.getElementById('categoryGalleryGrid');
@@ -6009,7 +6009,7 @@
                 const json = await res.json();
                 if (json.status === 'success') {
                     showToast('✓ 오디오가 승인되었습니다.', 'success');
-                    await loadRealAudios();
+                    await loadRealAudios(true);
                 } else {
                     showToast(json.message || '승인에 실패했습니다.', 'error');
                 }
@@ -6029,7 +6029,7 @@
                 const json = await res.json();
                 if (json.status === 'success') {
                     showToast('✕ 오디오가 거절되었습니다.', 'success');
-                    await loadRealAudios();
+                    await loadRealAudios(true);
                 } else {
                     showToast(json.message || '거절에 실패했습니다.', 'error');
                 }
@@ -6052,7 +6052,7 @@
                     showToast(`✓ ${json.count || selectedTrackIds.size}개 곡이 일괄 승인되었습니다.`, 'success');
                     selectedTrackIds.clear();
                     toggleMultiSelectMode();
-                    await loadRealAudios();
+                    await loadRealAudios(true);
                 } else {
                     showToast(json.message || '일괄 승인에 실패했습니다.', 'error');
                 }
@@ -6075,7 +6075,7 @@
                     showToast(`✕ ${json.count || selectedTrackIds.size}개 곡이 일괄 거절되었습니다.`, 'success');
                     selectedTrackIds.clear();
                     toggleMultiSelectMode();
-                    await loadRealAudios();
+                    await loadRealAudios(true);
                 } else {
                     showToast(json.message || '일괄 거절에 실패했습니다.', 'error');
                 }
@@ -6098,7 +6098,7 @@
                     showToast(`🗑️ ${json.count || selectedTrackIds.size}개 곡이 영구 삭제되었습니다.`, 'success');
                     selectedTrackIds.clear();
                     toggleMultiSelectMode();
-                    await loadRealAudios();
+                    await loadRealAudios(true);
                 } else {
                     showToast(json.message || '일괄 삭제에 실패했습니다.', 'error');
                 }
@@ -6127,7 +6127,7 @@
                     try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
                     selectedTrackIds.clear();
                     toggleMultiSelectMode();
-                    await loadRealAudios();
+                    await loadRealAudios(true);
                 } else {
                     showToast(json.message || '스튜디오 검증 요청 실패', 'error');
                 }
@@ -6302,7 +6302,7 @@
                     closeModal('bulkCategoryModal');
                     selectedTrackIds.clear();
                     toggleMultiSelectMode();
-                    await loadRealAudios();
+                    await loadRealAudios(true);
                 } else {
                     showToast(json.message || '카테고리 일괄 변경 실패', 'error');
                 }
