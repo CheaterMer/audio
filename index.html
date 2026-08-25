@@ -2479,9 +2479,9 @@
 
         <!-- ─── BULK CATEGORY MODAL ─── -->
         <div class="modal-overlay" id="bulkCategoryModal">
-            <div class="modal-box" style="width:min(460px, 95vw);">
+            <div class="modal-box" style="width:min(480px, 95vw);">
                 <div class="modal-header">
-                    <span class="modal-title">📁 카테고리 일괄 변경</span>
+                    <span class="modal-title">📁 카테고리 일괄 변경 및 승인</span>
                     <button class="modal-close-btn" onclick="closeModal('bulkCategoryModal')">&times;</button>
                 </div>
                 <div class="modal-body">
@@ -2495,8 +2495,16 @@
                         <label>또는 새 카테고리 직접 입력</label>
                         <input type="text" class="form-input" id="bulkCustomInput" placeholder="신규 카테고리명" />
                     </div>
-                    <button class="quick-tool-btn primary" style="width:100%;height:42px;justify-content:center;"
-                        onclick="executeBulkCategory()">일괄 변경 적용</button>
+
+                    <div style="margin-top:14px;margin-bottom:14px;padding:10px 12px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:8px;">
+                        <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;color:#a7f3d0;font-weight:700;margin:0;">
+                            <input type="checkbox" id="bulkCatAutoApprove" checked style="width:16px;height:16px;accent-color:#10b981;cursor:pointer;" />
+                            <span>✅ 변경과 동시에 선택된 모든 곡 즉시 승인 (status: active)</span>
+                        </label>
+                    </div>
+
+                    <button class="quick-tool-btn primary" style="width:100%;height:42px;justify-content:center;background:linear-gradient(135deg, #059669, #10b981);border-color:#34d399;font-weight:700;"
+                        onclick="executeBulkCategory()">일괄 변경 및 적용</button>
                 </div>
             </div>
         </div>
@@ -2617,8 +2625,12 @@
                         </div>
                     </div>
 
-                    <button class="quick-tool-btn primary" style="width:100%;height:42px;justify-content:center;margin-top:14px;"
-                        onclick="saveEditTrack()">저장 완료</button>
+                    <div style="display:flex;gap:10px;margin-top:16px;">
+                        <button class="quick-tool-btn" type="button" style="flex:1;height:42px;justify-content:center;background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);color:#cbd5e1;font-weight:700;"
+                            onclick="saveEditTrack(false)">💾 일반 저장</button>
+                        <button class="quick-tool-btn primary" type="button" style="flex:1.2;height:42px;justify-content:center;background:linear-gradient(135deg, #059669, #10b981);border-color:#34d399;color:#fff;font-weight:800;box-shadow:0 4px 14px rgba(16,185,129,0.35);"
+                            onclick="saveEditTrack(true)">✅ 저장 및 즉시 승인</button>
+                    </div>
                 </div>
             </div>
         </div>
