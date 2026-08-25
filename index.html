@@ -620,22 +620,27 @@
 
         /* ─── BATCH ACTION BAR ─── */
         .batch-floating-bar {
-            background: rgba(15, 23, 42, 0.92);
-            border: 1px solid rgba(99, 102, 241, 0.4);
+            background: rgba(15, 23, 42, 0.95);
+            border: 1.5px solid rgba(99, 102, 241, 0.5);
             border-radius: var(--radius-md);
             padding: 12px 18px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 18px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(16px);
-            animation: slideInDown 0.3s ease;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.2);
+            backdrop-filter: blur(20px);
+            animation: slideInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            flex-wrap: wrap;
+            gap: 12px;
+            position: sticky;
+            top: 75px;
+            z-index: 95;
         }
 
         @keyframes slideInDown {
             from {
-                transform: translateY(-10px);
+                transform: translateY(-12px);
                 opacity: 0;
             }
 
@@ -648,35 +653,76 @@
         .batch-bar-left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             font-size: 13px;
             font-weight: 600;
+            flex-wrap: wrap;
+        }
+
+        .batch-sub-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-secondary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            user-select: none;
+        }
+
+        .batch-sub-btn:hover {
+            background: rgba(99, 102, 241, 0.25);
+            border-color: rgba(99, 102, 241, 0.5);
+            color: #fff;
+            transform: translateY(-1px);
         }
 
         .batch-bar-actions {
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
         .batch-action-pill {
-            padding: 6px 14px;
+            padding: 6px 13px;
             border-radius: 8px;
             font-size: 12px;
             font-weight: 700;
             cursor: pointer;
-            border: 1px solid transparent;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
             transition: all 0.18s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            user-select: none;
+        }
+
+        .batch-action-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
         }
 
         .batch-action-pill.change-cat {
             background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+            border-color: rgba(139, 92, 246, 0.5);
             color: #fff;
         }
 
         .batch-action-pill.approve {
             background: #10b981;
+            border-color: #059669;
             color: #fff;
+        }
+
+        .batch-action-pill.delete {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
         }
 
         .batch-action-pill.delete {
@@ -876,20 +922,36 @@
             position: absolute;
             top: 8px;
             left: 8px;
-            width: 22px;
-            height: 22px;
+            width: 24px;
+            height: 24px;
             border-radius: 6px;
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.75);
+            border: 1.5px solid rgba(255, 255, 255, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 10;
             cursor: pointer;
+            transition: all 0.2s ease;
+            opacity: 0;
+        }
+
+        .track-card:hover .card-checkbox,
+        .track-card.selected .card-checkbox,
+        body.selection-mode-active .card-checkbox {
+            opacity: 1;
+        }
+
+        .card-checkbox:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 0, 0, 0.95);
+            transform: scale(1.1);
         }
 
         .card-checkbox input {
             cursor: pointer;
+            width: 15px;
+            height: 15px;
             accent-color: var(--accent-indigo);
         }
 
@@ -1294,6 +1356,125 @@
             flex-direction: column;
         }
 
+        /* ─── DISCORD MESSAGE VIEWER ─── */
+        .discord-msg-wrap {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            padding: 16px 18px;
+            background: #2b2d31;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: left;
+        }
+
+        .discord-msg-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #1e1f22;
+        }
+
+        .discord-msg-content-wrap {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .discord-msg-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+
+        .discord-msg-username {
+            font-weight: 700;
+            font-size: 14px;
+            color: #f2f3f5;
+        }
+
+        .discord-bot-tag {
+            background: #5865F2;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 1px 5px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .discord-msg-time {
+            font-size: 11px;
+            color: #949ba4;
+        }
+
+        .discord-msg-text {
+            font-size: 13.5px;
+            line-height: 1.6;
+            color: #dbdee1;
+            word-break: break-word;
+            font-family: var(--font-main);
+        }
+
+        .discord-id-tag {
+            background: rgba(88, 101, 242, 0.22);
+            border: 1px solid rgba(88, 101, 242, 0.45);
+            color: #c9cdfb;
+            padding: 1px 6px;
+            border-radius: 5px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-block;
+            margin: 1px 2px;
+        }
+
+        .discord-id-tag:hover {
+            background: #5865F2;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .discord-id-tag.current-id {
+            background: rgba(0, 229, 255, 0.2);
+            border-color: rgba(0, 229, 255, 0.6);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 8px rgba(0, 229, 255, 0.25);
+        }
+
+        .discord-id-chip {
+            background: #1e1f22;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #dbdee1;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.15s ease;
+        }
+
+        .discord-id-chip:hover {
+            background: rgba(88, 101, 242, 0.25);
+            border-color: rgba(88, 101, 242, 0.6);
+            color: #fff;
+        }
+
+        .discord-id-chip.active {
+            background: rgba(0, 229, 255, 0.18);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
         .modal-header {
             padding: 18px 24px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -1592,7 +1773,7 @@
                     <button class="quick-tool-btn admin-mode-active" id="adminModeToggleBtn" style="display:none;" onclick="toggleAdminMode()">
                         <span>🛡️</span> <span id="adminModeBtnText" data-i18n="audio_ui.admin_mode_on">관리자 모드 ON</span>
                     </button>
-                    <button class="quick-tool-btn admin-only-feature" id="toggleSelectModeBtn" style="display:none;" onclick="toggleMultiSelectMode()">
+                    <button class="quick-tool-btn" id="toggleSelectModeBtn" style="display:inline-flex;" onclick="toggleMultiSelectMode()">
                         <span>☑️</span> <span data-i18n="audio_ui.select_mode">다중 선택 모드</span>
                     </button>
                     <button class="quick-tool-btn primary admin-only-feature" id="addAudioNavBtn" style="display:none;" onclick="openAddAudioModal()">
@@ -1623,14 +1804,24 @@
             <!-- BATCH ACTION BAR (다중 선택 활성화 시 노출) -->
             <div class="batch-floating-bar" id="batchActionBar" style="display:none;">
                 <div class="batch-bar-left">
-                    <span>선택된 곡: <strong style="color:var(--accent-cyan)" id="batchCountText">0</strong>개</span>
-                    <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:12px;"
-                        onclick="selectAllBatch(true)">전체 선택</button>
-                    <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:12px;"
-                        onclick="selectAllBatch(false)">선택 해제</button>
+                    <span style="display:inline-flex;align-items:center;gap:4px;">
+                        <span>선택:</span>
+                        <strong style="color:var(--accent-cyan);font-size:15px;" id="batchCountText">0</strong>개
+                    </span>
+                    <div style="display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                        <button class="batch-sub-btn" onclick="selectBatch('all')" title="현재 필터된 모든 곡 선택">전체 선택</button>
+                        <button class="batch-sub-btn" onclick="selectBatch('page')" title="현재 페이지 곡만 선택">현재 페이지</button>
+                        <button class="batch-sub-btn" onclick="selectBatch('invert')" title="선택 상태 반전">선택 반전</button>
+                        <button class="batch-sub-btn" onclick="selectBatch('unmapped')" title="유튜브 영상이 없는 곡만 선택">미맵핑만</button>
+                        <button class="batch-sub-btn" onclick="selectBatch('none')" style="color:#f87171;" title="모든 선택 해제">선택 해제</button>
+                    </div>
                 </div>
                 <div class="batch-bar-actions">
-                    <button class="batch-action-pill change-cat" onclick="openBulkCategoryModal()">📁 카테고리 일괄 변경</button>
+                    <button class="batch-action-pill" style="background:rgba(192,132,252,0.18);border-color:rgba(192,132,252,0.4);color:#d8b4fe;" onclick="executeBulkDiscordRefetch()" title="서버의 dangs 자격증명으로 원본 디스코드 메시지 및 유튜브 일괄 복원">💬 디스코드 원본명 복원</button>
+                    <button class="batch-action-pill" style="background:rgba(168,85,247,0.18);border-color:rgba(168,85,247,0.4);color:#c084fc;" onclick="executeBulkAiIdentify()" title="글로벌 웹 검색 + 썸네일 OCR 기반 AI 일괄 역추적">🤖 AI+OCR 역추적</button>
+                    <button class="batch-action-pill" style="background:rgba(14,165,233,0.18);border-color:rgba(14,165,233,0.4);color:#38bdf8;" onclick="executeBulkRobloxTitle()" title="공식 Roblox 에셋 원본명 일괄 가져오기">🔄 Roblox 원본명</button>
+                    <button class="batch-action-pill change-cat" onclick="openBulkCategoryModal()" title="선택한 곡들의 카테고리를 한 번에 변경">📁 카테고리 일괄 변경</button>
+                    <button class="batch-action-pill" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);color:#f1f5f9;" onclick="copySelectedAssetIds()" title="선택한 모든 Roblox Asset ID 클립보드 복사">📋 ID 목록 복사</button>
                     <button class="batch-action-pill approve owner-only-feature" id="batchApproveBtn" onclick="handleBulkApprove()">✓ 일괄 승인</button>
                     <button class="batch-action-pill owner-only-feature" style="background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3);color:#f87171;" onclick="handleBulkReject()">✕ 일괄 거절</button>
                     <button class="batch-action-pill owner-only-feature" style="background:rgba(168,85,247,0.15);border-color:rgba(168,85,247,0.3);color:#c084fc;" onclick="openBulkPlayabilityModal()">⚡ 재생 상태 일괄 변경</button>
@@ -2219,8 +2410,14 @@
                                 <input type="text" class="form-input" id="editAssetId" disabled style="opacity:0.6;font-family:var(--font-mono);height:32px;" />
                             </div>
                             <div class="form-group" style="margin-bottom:0;">
-                                <label style="font-size:11px;">카테고리 (Category)</label>
-                                <input type="text" class="form-input" id="editCategory" style="height:32px;" />
+                                <label style="font-size:11px;display:flex;justify-content:space-between;align-items:center;">
+                                    <span>카테고리 (Category)</span>
+                                    <span style="font-size:10px;color:var(--text-muted);">드롭다운 선택 또는 직접 입력</span>
+                                </label>
+                                <div style="display:flex;flex-direction:column;gap:5px;">
+                                    <select class="form-input" id="editCategorySelect" style="background:#161b22;height:32px;font-size:12px;" onchange="onEditCategorySelectChange()"></select>
+                                    <input type="text" class="form-input" id="editCategory" placeholder="또는 카테고리명 직접 입력" style="height:30px;font-size:12px;" oninput="onEditCategoryInputChange()" />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2479,12 +2676,50 @@
                         <button class="quick-tool-btn primary" id="detailShareBtn" style="flex:2;height:42px;justify-content:center;font-size:13px;font-weight:700;" data-i18n="audio_ui.detail_share_btn">
                             🔗 이 오디오 공유하기 (링크 복사)
                         </button>
+                        <button class="quick-tool-btn" id="detailRefetchDiscordBtn" style="flex:1.6;height:42px;justify-content:center;font-size:12px;color:#c084fc;background:rgba(192,132,252,0.12);border-color:rgba(192,132,252,0.35);font-weight:700;" onclick="executeSingleDiscordRefetch(currentDetailTrackId)" title="dangs 자격증명으로 디스코드 원본 곡명 및 유튜브 링크를 다시 가져와 DB에 저장합니다.">
+                            🔄 이름 다시 가져오기
+                        </button>
                         <button class="quick-tool-btn" id="detailCopyAssetBtn" style="flex:1;height:42px;justify-content:center;font-size:12px;" data-i18n="audio_ui.detail_copy_id_btn">
                             📋 ID 복사
                         </button>
                         <a class="quick-tool-btn" id="detailRobloxStoreLink" href="#" target="_blank" style="flex:1;height:42px;justify-content:center;font-size:12px;text-decoration:none;" data-i18n="audio_ui.detail_roblox_store_btn">
                             ↗ Roblox Store
                         </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── DISCORD FULL MESSAGE VIEWER MODAL ─── -->
+        <div class="modal-overlay" id="discordMessageModal" style="display:none;">
+            <div class="modal-box" style="width:min(680px, 95vw);background:#313338;border:1px solid rgba(255,255,255,0.12);color:#dbdee1;box-shadow:0 20px 60px rgba(0,0,0,0.7);padding:0;overflow:hidden;border-radius:14px;display:flex;flex-direction:column;">
+                <!-- Header -->
+                <div style="background:#2b2d31;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.08);">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span style="font-size:20px;">💬</span>
+                        <div>
+                            <div style="font-weight:800;font-size:15px;color:#f2f3f5;">디스코드 원본 메시지</div>
+                            <div style="font-size:11px;color:#949ba4;" id="discordModalSubTitle">Roblox Asset ID에 연결된 디스코드 출처 전문</div>
+                        </div>
+                    </div>
+                    <button class="modal-close-btn" onclick="closeModal('discordMessageModal')" style="color:#b5bac1;font-size:24px;background:none;border:none;cursor:pointer;line-height:1;">&times;</button>
+                </div>
+
+                <!-- Body / Content -->
+                <div style="padding:20px 22px;max-height:70vh;overflow-y:auto;" id="discordModalBody">
+                    <!-- Dynamic Discord Message Content -->
+                </div>
+
+                <!-- Footer Actions -->
+                <div style="background:#2b2d31;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.08);flex-wrap:wrap;gap:10px;">
+                    <div id="discordModalFooterLeft" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <button class="quick-tool-btn" onclick="applyDiscordRefetchFromModal()" id="discordApplyRefetchBtn" style="background:linear-gradient(135deg, #10b981, #059669);color:#fff;border:none;font-weight:700;font-size:12px;padding:7px 14px;border-radius:6px;cursor:pointer;display:none;" title="이 디스코드 원본 메시지로부터 실제 곡명, 유튜브 링크, 카테고리를 다시 파싱하여 DB에 바로 덮어씁니다.">
+                            🔄 이 메시지 정보로 이름 다시 가져오기 (DB 갱신)
+                        </button>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <button class="quick-tool-btn" onclick="copyDiscordMessageContent()" id="discordCopyMsgBtn" style="background:#4e5058;color:#fff;border:none;font-weight:700;font-size:12px;padding:7px 13px;border-radius:6px;cursor:pointer;display:none;">📋 본문 복사</button>
+                        <a href="#" target="_blank" id="discordDirectOpenLink" class="quick-tool-btn" style="background:#5865F2;color:#fff;border:none;font-weight:700;font-size:12px;padding:7px 15px;border-radius:6px;text-decoration:none;display:none;align-items:center;gap:5px;">🎮 디스코드에서 열기 ↗</a>
                     </div>
                 </div>
             </div>
@@ -3551,7 +3786,7 @@
                 return `
                 <div class="track-card ${isSelected ? 'selected' : ''}" onclick="onCardClick('${esc(trackItem.id)}', event)">
                     <div class="card-cover-wrap">
-                        ${isSelectionMode ? `<label class="card-checkbox" onclick="event.stopPropagation()"><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelectTrack('${esc(trackItem.id)}')" /></label>` : ''}
+                        <label class="card-checkbox" onclick="event.stopPropagation();onCheckboxClick('${esc(trackItem.id)}', event)" title="선택 (Shift+클릭: 연속 범위 일괄 선택)"><input type="checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation()" onchange="onCheckboxClick('${esc(trackItem.id)}', event)" /></label>
                         <img src="${esc(cover)}" class="card-cover-img" onerror="handleImgError(this)" />
                         <span class="card-category-badge">${esc(displayName)}</span>
                         <button class="card-fav-btn ${trackItem.favorited ? 'active' : ''}" onclick="event.stopPropagation();toggleFav('${esc(trackItem.id)}')">★</button>
@@ -3574,7 +3809,7 @@
                             <div class="mini-btn-group">
                                 ${(isAdminMode && currentUserTier === 'owner' && trackItem.status === 'pending_review') ? `<button class="card-action-icon-btn" title="승인" style="color:#10b981;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleApprove('${esc(trackItem.id)}')">✓</button><button class="card-action-icon-btn" title="거절" style="color:#f87171;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleReject('${esc(trackItem.id)}')">✕</button>` : ''}
                                 ${isAdminMode ? `<button class="card-action-icon-btn" title="정보 수정" style="color:var(--accent-gold);" onclick="event.stopPropagation();openEditTrackModal('${esc(trackItem.id)}')">✏️</button>` : ''}
-                                ${trackItem.sourceUrl ? `<a class="card-action-icon-btn" href="${esc(trackItem.sourceUrl)}" target="_blank" onclick="event.stopPropagation()" title="💬 디스코드 원본 메시지로 이동" style="color:#c084fc;font-size:13px;text-decoration:none;">💬</a>` : ''}
+                                <button class="card-action-icon-btn" title="💬 디스코드 원문 메시지 전체 보기" style="color:#c084fc;font-size:13px;background:none;border:none;cursor:pointer;" onclick="event.stopPropagation();openDiscordMessageModal('${esc(trackItem.id)}')">💬</button>
                                 <button class="card-action-icon-btn" title="${esc(t('audio_ui.detail_btn_tooltip_detail', '상세 정보'))}" style="color:var(--accent-cyan, #06b6d4);" onclick="event.stopPropagation();openTrackDetailModal('${esc(trackItem.id)}')">ℹ️</button>
                                 <button class="card-action-icon-btn" title="${esc(t('audio_ui.detail_btn_tooltip_share', '공유 링크 복사'))}" style="color:#818cf8;" onclick="event.stopPropagation();copyShareLink('${esc(trackItem.id)}')">🔗</button>
                                 <button class="card-action-icon-btn" title="${esc(t('audio_ui.copy_id', 'Asset ID 복사'))}" onclick="event.stopPropagation();navigator.clipboard.writeText('${safeAssetId}');showToast(t('audio_ui.detail_copy_id_toast', 'Asset ID 복사 완료: ') + '${safeAssetId}', 'success')">📋</button>
@@ -3690,17 +3925,12 @@
                 }
             }
 
-            // Discord Source Link
+            // Discord Source Link & Full Message Viewer
             const sourceBox = document.getElementById('detailSourceBox');
             const sourceRow = document.getElementById('detailSourceRow');
             if (sourceBox) {
-                if (track.sourceUrl) {
-                    if (sourceRow) sourceRow.style.display = 'flex';
-                    sourceBox.innerHTML = `<a href="${esc(track.sourceUrl)}" target="_blank" style="color:#c084fc;font-weight:700;display:inline-flex;align-items:center;gap:4px;word-break:break-all;">💬 메시지 바로보기 ↗</a>`;
-                } else {
-                    if (sourceRow) sourceRow.style.display = 'none';
-                    sourceBox.innerHTML = `<span style="color:var(--text-muted);font-size:12px;">-</span>`;
-                }
+                if (sourceRow) sourceRow.style.display = 'flex';
+                sourceBox.innerHTML = `<button class="quick-tool-btn" onclick="openDiscordMessageModal('${esc(track.id)}')" style="color:#c084fc;font-weight:700;padding:3px 10px;font-size:12px;display:inline-flex;align-items:center;gap:5px;cursor:pointer;background:rgba(192,132,252,0.12);border:1px solid rgba(192,132,252,0.3);border-radius:6px;">💬 전체 메시지 보기</button>`;
             }
 
             // YouTube Mapping
@@ -3729,6 +3959,229 @@
             if (playDemoBtn) playDemoBtn.onclick = () => playTrackDemo(track.id);
 
             openModal('trackDetailModal');
+        }
+
+        let currentDiscordMessageData = null;
+        let currentModalAssetId = null;
+
+        async function openDiscordMessageModal(trackId) {
+            const track = tracksData.find(x => String(x.id) === String(trackId) || String(x.assetId) === String(trackId));
+            const assetId = track ? track.assetId : String(trackId).replace(/^r_/, '');
+            currentModalAssetId = assetId;
+            
+            openModal('discordMessageModal');
+            const bodyEl = document.getElementById('discordModalBody');
+            const subTitleEl = document.getElementById('discordModalSubTitle');
+            const directLinkEl = document.getElementById('discordDirectOpenLink');
+            const copyBtn = document.getElementById('discordCopyMsgBtn');
+            const applyBtn = document.getElementById('discordApplyRefetchBtn');
+
+            if (subTitleEl) subTitleEl.textContent = `Roblox Asset ID: ${assetId} ${track?.title ? `(${track.title})` : ''}`;
+            if (directLinkEl) directLinkEl.style.display = 'none';
+            if (copyBtn) copyBtn.style.display = 'none';
+            if (applyBtn) applyBtn.style.display = 'none';
+
+            bodyEl.innerHTML = `
+                <div style="padding:40px 20px;text-align:center;color:#949ba4;">
+                    <div style="font-size:28px;margin-bottom:12px;display:inline-block;animation:spin 1s linear infinite;">⏳</div>
+                    <div style="font-weight:700;font-size:14px;color:#f2f3f5;">디스코드 원본 메시지 조회 중...</div>
+                    <div style="font-size:12px;margin-top:6px;color:#949ba4;">dangs 자격증명으로 원본 메시지 및 첨부 내용을 로드하고 있습니다.</div>
+                </div>
+            `;
+
+            try {
+                const res = await apiFetch(`/api/audio/discord-message/${encodeURIComponent(assetId)}`);
+                const json = await res.json();
+
+                if (json.status === 'success' && json.data) {
+                    const data = json.data;
+                    currentDiscordMessageData = data;
+
+                    if (directLinkEl && data.sourceUrl) {
+                        directLinkEl.href = data.sourceUrl;
+                        directLinkEl.style.display = 'inline-flex';
+                    }
+                    if (copyBtn) copyBtn.style.display = 'inline-flex';
+                    if (applyBtn) applyBtn.style.display = 'inline-flex';
+
+                    // Format date
+                    let dateStr = '-';
+                    try {
+                        if (data.timestamp) {
+                            const d = new Date(data.timestamp);
+                            dateStr = d.toLocaleString('ko-KR', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+                        }
+                    } catch (_) {}
+
+                    // Format content with highlighted IDs and links
+                    let formattedContent = esc(data.content || '');
+                    if (Array.isArray(data.extractedIds)) {
+                        data.extractedIds.forEach(id => {
+                            const isCurrent = (id === assetId);
+                            const regex = new RegExp(`\\b${id}\\b`, 'g');
+                            formattedContent = formattedContent.replace(regex, `<span class="discord-id-tag ${isCurrent ? 'current-id' : ''}" onclick="copyAssetIdFromMsg('${id}')" title="클릭하여 복사: ${id}">🎵 ${id}</span>`);
+                        });
+                    }
+                    // Preserve line breaks
+                    formattedContent = formattedContent.replace(/\n/g, '<br/>');
+
+                    // Attachments HTML
+                    let attachmentsHtml = '';
+                    if (Array.isArray(data.attachments) && data.attachments.length > 0) {
+                        attachmentsHtml = `
+                            <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;">
+                                <div style="font-size:11px;font-weight:700;color:#949ba4;">📎 첨부 미디어 (${data.attachments.length}개)</div>
+                                <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));gap:10px;">
+                                    ${data.attachments.map(att => {
+                                        const isImg = att.contentType?.startsWith('image/') || /\.(png|jpe?g|gif|webp)$/i.test(att.url);
+                                        if (isImg) {
+                                            return `
+                                                <a href="${esc(att.url)}" target="_blank" style="display:block;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);background:#1e1f22;">
+                                                    <img src="${esc(att.url)}" style="width:100%;height:140px;object-fit:cover;" onerror="this.style.display='none'" />
+                                                </a>
+                                            `;
+                                        }
+                                        return `
+                                            <a href="${esc(att.url)}" target="_blank" style="padding:10px;border-radius:8px;background:#2b2d31;border:1px solid rgba(255,255,255,0.08);color:#00a8fc;font-size:12px;text-decoration:none;display:flex;align-items:center;gap:6px;word-break:break-all;">
+                                                📄 ${esc(att.filename || '첨부 파일')} ↗
+                                            </a>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // Extracted IDs Bar
+                    let idChipsHtml = '';
+                    if (Array.isArray(data.extractedIds) && data.extractedIds.length > 0) {
+                        idChipsHtml = `
+                            <div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);">
+                                <div style="font-size:11px;font-weight:700;color:#949ba4;margin-bottom:8px;">🎵 이 메시지에서 감지된 Roblox Asset ID (${data.extractedIds.length}개)</div>
+                                <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                                    ${data.extractedIds.map(id => `
+                                        <button class="discord-id-chip ${id === assetId ? 'active' : ''}" onclick="copyAssetIdFromMsg('${id}')" title="클릭하여 ID 복사">
+                                            <span>${id === assetId ? '🎯' : '🎵'}</span> <span>${id}</span>
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    bodyEl.innerHTML = `
+                        <!-- Discord Message Row -->
+                        <div class="discord-msg-wrap">
+                            <img src="${esc(data.author?.avatarUrl)}" class="discord-msg-avatar" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" />
+                            <div class="discord-msg-content-wrap">
+                                <div class="discord-msg-header">
+                                    <span class="discord-msg-username">${esc(data.author?.globalName || data.author?.username || 'Discord User')}</span>
+                                    ${data.author?.bot ? '<span class="discord-bot-tag">BOT</span>' : ''}
+                                    <span class="discord-msg-time">${esc(dateStr)}</span>
+                                </div>
+                                <div class="discord-msg-text">${formattedContent}</div>
+                                ${attachmentsHtml}
+                                ${idChipsHtml}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    bodyEl.innerHTML = `
+                        <div style="padding:40px 20px;text-align:center;color:#949ba4;">
+                            <div style="font-size:32px;margin-bottom:12px;">💬</div>
+                            <div style="font-weight:700;font-size:15px;color:#f2f3f5;">디스코드 원본 메시지를 찾지 못했습니다.</div>
+                            <div style="font-size:12px;margin-top:6px;color:#949ba4;">메시지가 삭제되었거나 아직 디스코드 링크가 등록되지 않은 오디오입니다.</div>
+                            <div style="margin-top:16px;display:flex;justify-content:center;gap:10px;">
+                                <button class="quick-tool-btn" onclick="executeSingleDiscordRefetch('${assetId}')" style="background:#5865F2;color:#fff;border:none;padding:7px 15px;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer;">🔄 dangs 자격증명으로 자동 검색</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch(err) {
+                bodyEl.innerHTML = `
+                    <div style="padding:30px 20px;text-align:center;color:#f87171;">
+                        <div style="font-size:24px;margin-bottom:8px;">✕</div>
+                        <div style="font-weight:700;">메시지 로드 중 오류가 발생했습니다.</div>
+                        <div style="font-size:12px;margin-top:4px;color:#949ba4;">${esc(err.message)}</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function executeSingleDiscordRefetch(assetId) {
+            showToast('💬 디스코드 서버군에서 원본 메시지 검색 중...', 'info');
+            try {
+                const res = await apiFetch(`/api/audio/discord-refetch/${encodeURIComponent(assetId)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ apply: true })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast('✅ 디스코드 원본 메시지 검색 성공!', 'success');
+                    await loadRealAudios();
+                    openDiscordMessageModal(assetId);
+                } else {
+                    showToast(json.message || '원본 메시지를 찾지 못했습니다.', 'warning');
+                }
+            } catch (e) {
+                showToast('검색 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        async function applyDiscordRefetchFromModal() {
+            if (!currentModalAssetId) return;
+            const btn = document.getElementById('discordApplyRefetchBtn');
+            const origText = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '⏳ 이름 다시 가져오는 중...';
+            }
+
+            try {
+                const sourceUrl = currentDiscordMessageData?.sourceUrl || null;
+                const res = await apiFetch(`/api/audio/discord-refetch/${encodeURIComponent(currentModalAssetId)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sourceUrl, apply: true })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    const identified = json.data?.identifiedTitle || '완료';
+                    showToast(`✅ 디스코드 원본 정보로 다시 가져오기 성공: "${identified}"`, 'success');
+                    await loadRealAudios();
+                    const subTitleEl = document.getElementById('discordModalSubTitle');
+                    if (subTitleEl) {
+                        subTitleEl.textContent = `Roblox Asset ID: ${currentModalAssetId} (${identified})`;
+                    }
+                } else {
+                    showToast(json.message || '이름 다시 가져오기에 실패했습니다.', 'warning');
+                }
+            } catch(err) {
+                showToast('이름 다시 가져오기 요청 중 오류: ' + (err.message || ''), 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = origText;
+                }
+            }
+        }
+
+        function copyDiscordMessageContent() {
+            if (!currentDiscordMessageData || !currentDiscordMessageData.content) return;
+            navigator.clipboard.writeText(currentDiscordMessageData.content).then(() => {
+                showToast('📋 디스코드 메시지 본문이 복사되었습니다!', 'success');
+            }).catch(() => {
+                prompt('디스코드 메시지 본문:', currentDiscordMessageData.content);
+            });
+        }
+
+        function copyAssetIdFromMsg(assetId) {
+            navigator.clipboard.writeText(assetId).then(() => {
+                showToast(`📋 Roblox Asset ID 복사 완료: ${assetId}`, 'success');
+            }).catch(() => {
+                prompt('Asset ID:', assetId);
+            });
         }
 
         let isUrlParamHandled = false;
@@ -3764,13 +4217,88 @@
             }
         }
 
+        function populateEditCategoryDropdown(currentCat) {
+            const selectEl = document.getElementById('editCategorySelect');
+            const inputEl = document.getElementById('editCategory');
+            if (!selectEl) return;
+
+            // Count tracks per category
+            const catCounts = {};
+            if (Array.isArray(tracksData)) {
+                tracksData.forEach(t => {
+                    const c = (t.cat || '').trim();
+                    if (c) catCounts[c] = (catCounts[c] || 0) + 1;
+                });
+            }
+
+            // Get sorted unique categories
+            const allCats = Object.keys(catCounts).sort((a, b) => (catCounts[b] - catCounts[a]) || a.localeCompare(b));
+
+            // Ensure currentCat is in the list
+            if (currentCat && !allCats.includes(currentCat)) {
+                allCats.unshift(currentCat);
+            }
+
+            let optionsHtml = '';
+            allCats.forEach(c => {
+                const count = catCounts[c] || 0;
+                const dispName = getCategoryDisplayName(c);
+                const label = (dispName !== c) ? `📁 ${dispName} (${c}) - ${count}곡` : `📁 ${c} - ${count}곡`;
+                optionsHtml += `<option value="${esc(c)}">${esc(label)}</option>`;
+            });
+
+            optionsHtml += `<option value="__custom__">➕ 직접 입력 (새 카테고리...)</option>`;
+            selectEl.innerHTML = optionsHtml;
+
+            if (currentCat && allCats.includes(currentCat)) {
+                selectEl.value = currentCat;
+            } else if (currentCat) {
+                selectEl.value = '__custom__';
+            }
+
+            if (inputEl) inputEl.value = currentCat || '';
+        }
+
+        function onEditCategorySelectChange() {
+            const selectEl = document.getElementById('editCategorySelect');
+            const inputEl = document.getElementById('editCategory');
+            if (!selectEl || !inputEl) return;
+
+            if (selectEl.value === '__custom__') {
+                inputEl.value = '';
+                inputEl.placeholder = '신규 카테고리명 입력...';
+                inputEl.focus();
+            } else {
+                inputEl.value = selectEl.value;
+            }
+        }
+
+        function onEditCategoryInputChange() {
+            const selectEl = document.getElementById('editCategorySelect');
+            const inputEl = document.getElementById('editCategory');
+            if (!selectEl || !inputEl) return;
+
+            const val = inputEl.value.trim();
+            let matched = false;
+            for (let i = 0; i < selectEl.options.length; i++) {
+                if (selectEl.options[i].value.toLowerCase() === val.toLowerCase()) {
+                    selectEl.selectedIndex = i;
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                selectEl.value = '__custom__';
+            }
+        }
+
         function openEditTrackModal(trackId) {
             const t = tracksData.find(x => String(x.id) === String(trackId));
             if (!t) return;
             document.getElementById('editTrackId').value = t.id;
             document.getElementById('editAssetId').value = t.assetId;
             document.getElementById('editTitle').value = t.title;
-            document.getElementById('editCategory').value = t.cat;
+            populateEditCategoryDropdown(t.cat);
             document.getElementById('editYtUrl').value = t.youtubeUrl || '';
             document.getElementById('editImageUrl').value = t.imageUrl || '';
             document.getElementById('editIsVerifiedLocked').checked = (t.isVerifiedLocked === 1);
@@ -3854,7 +4382,7 @@
                         ytInput.value = json.data.youtubeUrl;
                     }
                     if (catInput && json.data.gameName && (!catInput.value || catInput.value === '기타 / 미분류' || catInput.value === 'Other')) {
-                        catInput.value = json.data.gameName;
+                        populateEditCategoryDropdown(json.data.gameName);
                     }
                     if (discordBtn && json.data.sourceUrl) {
                         discordBtn.style.display = 'inline-flex';
@@ -4484,35 +5012,309 @@
             toggleMobileSidebar(false);
         }
 
-        function toggleSelectTrack(id) {
-            if (selectedTrackIds.has(id)) selectedTrackIds.delete(id);
-            else selectedTrackIds.add(id);
+        let lastClickedTrackId = null;
+
+        function handleCardSelection(id, event) {
+            const list = getFilteredTracks();
+            const curIndex = list.findIndex(t => String(t.id) === String(id));
+            if (curIndex === -1) return;
+
+            if (event && event.shiftKey && lastClickedTrackId !== null) {
+                const prevIndex = list.findIndex(t => String(t.id) === String(lastClickedTrackId));
+                if (prevIndex !== -1) {
+                    const start = Math.min(prevIndex, curIndex);
+                    const end = Math.max(prevIndex, curIndex);
+                    const shouldSelect = !selectedTrackIds.has(id) || selectedTrackIds.has(lastClickedTrackId);
+
+                    for (let i = start; i <= end; i++) {
+                        if (shouldSelect) {
+                            selectedTrackIds.add(list[i].id);
+                        } else {
+                            selectedTrackIds.delete(list[i].id);
+                        }
+                    }
+                    lastClickedTrackId = id;
+                    if (selectedTrackIds.size > 0 && !isSelectionMode) {
+                        isSelectionMode = true;
+                        document.body.classList.add('selection-mode-active');
+                        const bar = document.getElementById('batchActionBar');
+                        if (bar) bar.style.display = 'flex';
+                        const btn = document.getElementById('toggleSelectModeBtn');
+                        if (btn) btn.classList.add('active-select-mode');
+                    }
+                    updateBatchCounts();
+                    renderCards();
+                    return;
+                }
+            }
+
+            if (selectedTrackIds.has(id)) {
+                selectedTrackIds.delete(id);
+            } else {
+                selectedTrackIds.add(id);
+            }
+            lastClickedTrackId = id;
+
+            if (selectedTrackIds.size > 0 && !isSelectionMode) {
+                isSelectionMode = true;
+                document.body.classList.add('selection-mode-active');
+                const bar = document.getElementById('batchActionBar');
+                if (bar) bar.style.display = 'flex';
+                const btn = document.getElementById('toggleSelectModeBtn');
+                if (btn) btn.classList.add('active-select-mode');
+            }
+            updateBatchCounts();
+            renderCards();
+        }
+
+        function onCheckboxClick(id, event) {
+            handleCardSelection(id, event);
+        }
+
+        function toggleSelectTrack(id, event) {
+            handleCardSelection(id, event);
+        }
+
+        function selectBatch(type) {
+            const list = getFilteredTracks();
+            const paged = list.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+            if (type === 'all') {
+                list.forEach(t => selectedTrackIds.add(t.id));
+                showToast(`전체 ${list.length}개 곡이 선택되었습니다.`, 'info');
+            } else if (type === 'page') {
+                paged.forEach(t => selectedTrackIds.add(t.id));
+                showToast(`현재 페이지 ${paged.length}개 곡이 선택되었습니다.`, 'info');
+            } else if (type === 'invert') {
+                list.forEach(t => {
+                    if (selectedTrackIds.has(t.id)) selectedTrackIds.delete(t.id);
+                    else selectedTrackIds.add(t.id);
+                });
+                showToast('선택 상태가 반전되었습니다.', 'info');
+            } else if (type === 'unmapped') {
+                let count = 0;
+                list.forEach(t => {
+                    if (!t.youtubeUrl && !t.yt) {
+                        selectedTrackIds.add(t.id);
+                        count++;
+                    }
+                });
+                showToast(`유튜브 미맵핑 ${count}개 곡이 선택되었습니다.`, 'info');
+            } else if (type === 'no_source') {
+                let count = 0;
+                list.forEach(t => {
+                    if (!t.sourceUrl) {
+                        selectedTrackIds.add(t.id);
+                        count++;
+                    }
+                });
+                showToast(`디스코드 출처 미등록 ${count}개 곡이 선택되었습니다.`, 'info');
+            } else if (type === 'none') {
+                selectedTrackIds.clear();
+                lastClickedTrackId = null;
+                showToast('선택이 해제되었습니다.', 'info');
+            }
+
+            if (selectedTrackIds.size > 0 && !isSelectionMode) {
+                isSelectionMode = true;
+                document.body.classList.add('selection-mode-active');
+                const bar = document.getElementById('batchActionBar');
+                if (bar) bar.style.display = 'flex';
+                const btn = document.getElementById('toggleSelectModeBtn');
+                if (btn) btn.classList.add('active-select-mode');
+            } else if (selectedTrackIds.size === 0) {
+                const bar = document.getElementById('batchActionBar');
+                if (bar && !isSelectionMode) bar.style.display = 'none';
+            }
+
             updateBatchCounts();
             renderCards();
         }
 
         function selectAllBatch(all) {
-            const list = getFilteredTracks();
-            if (all) list.forEach(t => selectedTrackIds.add(t.id));
-            else selectedTrackIds.clear();
-            updateBatchCounts();
-            renderCards();
+            selectBatch(all ? 'all' : 'none');
         }
 
         function updateBatchCounts() {
-            document.getElementById('batchCountText').textContent = selectedTrackIds.size;
-            document.getElementById('bulkModalCount').textContent = selectedTrackIds.size;
+            const count = selectedTrackIds.size;
+            const countEl = document.getElementById('batchCountText');
+            if (countEl) countEl.textContent = count;
+            const bulkCountEl = document.getElementById('bulkModalCount');
+            if (bulkCountEl) bulkCountEl.textContent = count;
+
+            const bar = document.getElementById('batchActionBar');
+            if (bar) {
+                if (count > 0 || isSelectionMode) {
+                    bar.style.display = 'flex';
+                } else {
+                    bar.style.display = 'none';
+                }
+            }
         }
 
         function toggleMultiSelectMode() {
             isSelectionMode = !isSelectionMode;
+            document.body.classList.toggle('selection-mode-active', isSelectionMode);
             const btn = document.getElementById('toggleSelectModeBtn');
             const bar = document.getElementById('batchActionBar');
-            btn.classList.toggle('active-select-mode', isSelectionMode);
-            bar.style.display = isSelectionMode ? 'flex' : 'none';
-            if (!isSelectionMode) selectedTrackIds.clear();
+            if (btn) btn.classList.toggle('active-select-mode', isSelectionMode);
+            if (bar) bar.style.display = (isSelectionMode || selectedTrackIds.size > 0) ? 'flex' : 'none';
+            if (!isSelectionMode) {
+                selectedTrackIds.clear();
+                lastClickedTrackId = null;
+            }
             updateBatchCounts();
             renderCards();
+        }
+
+        // 1. Bulk Discord Refetch (Using dangs credentials)
+        async function executeBulkDiscordRefetch() {
+            if (selectedTrackIds.size === 0) {
+                showToast('선택된 곡이 없습니다.', 'info');
+                return;
+            }
+            const ids = Array.from(selectedTrackIds);
+            if (!confirm(`선택한 ${ids.length}개 곡에 대해 Discord 원본 등록명 및 유튜브 링크 일괄 복원을 시작하시겠습니까?\n(서버의 dangs 자격증명으로 고속 조회 및 검색을 진행합니다)`)) {
+                return;
+            }
+
+            let successCount = 0;
+            let failCount = 0;
+            showToast(`💬 디스코드 일괄 복원 시작: 총 ${ids.length}곡...`, 'info');
+
+            for (let idx = 0; idx < ids.length; idx++) {
+                const id = ids[idx];
+                const track = tracksData.find(t => t.id === id);
+                const assetId = track ? track.assetId : String(id).replace(/^r_/, '');
+                
+                try {
+                    const res = await apiFetch(`/api/audio/discord-refetch/${encodeURIComponent(assetId)}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ apply: true, sourceUrl: track?.sourceUrl || null })
+                    });
+                    const json = await res.json();
+                    if (json.status === 'success' && json.data?.identifiedTitle) {
+                        successCount++;
+                        if (idx % 2 === 0 || idx === ids.length - 1) {
+                            showToast(`💬 [${idx + 1}/${ids.length}] "${json.data.identifiedTitle}" 복원 완료!`, 'info');
+                        }
+                    } else {
+                        failCount++;
+                    }
+                } catch (e) {
+                    failCount++;
+                }
+            }
+
+            showToast(`✅ 일괄 디스코드 복원 완료: 성공 ${successCount}곡, 실패/미등록 ${failCount}곡`, 'success');
+            selectedTrackIds.clear();
+            updateBatchCounts();
+            try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
+            await loadRealAudios();
+        }
+
+        // 2. Bulk Roblox Official Title
+        async function executeBulkRobloxTitle() {
+            if (selectedTrackIds.size === 0) {
+                showToast('선택된 곡이 없습니다.', 'info');
+                return;
+            }
+            const ids = Array.from(selectedTrackIds);
+            if (!confirm(`선택한 ${ids.length}개 곡에 대해 Roblox 원본 등록명을 일괄 적용하시겠습니까?`)) {
+                return;
+            }
+
+            let updatedCount = 0;
+            showToast(`🔄 Roblox 원본명 일괄 조회 시작: 총 ${ids.length}곡...`, 'info');
+
+            for (let idx = 0; idx < ids.length; idx++) {
+                const id = ids[idx];
+                const track = tracksData.find(t => t.id === id);
+                const assetId = track ? track.assetId : String(id).replace(/^r_/, '');
+
+                try {
+                    const res = await apiFetch(`/api/audio/roblox-title/${encodeURIComponent(assetId)}`);
+                    const json = await res.json();
+                    if (json.status === 'success' && json.originalRobloxTitle) {
+                        await apiFetch(`/api/audio/update/${encodeURIComponent(id)}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ title: json.originalRobloxTitle })
+                        });
+                        updatedCount++;
+                    }
+                } catch (e) {}
+            }
+
+            showToast(`✅ Roblox 원본명 일괄 적용 완료: 총 ${updatedCount}곡 갱신!`, 'success');
+            selectedTrackIds.clear();
+            updateBatchCounts();
+            try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
+            await loadRealAudios();
+        }
+
+        // 3. Bulk AI Web Search + OCR Identify
+        async function executeBulkAiIdentify() {
+            if (selectedTrackIds.size === 0) {
+                showToast('선택된 곡이 없습니다.', 'info');
+                return;
+            }
+            const ids = Array.from(selectedTrackIds);
+            if (!confirm(`선택한 ${ids.length}개 곡에 대해 AI 글로벌 웹 검색 + 썸네일 OCR 역추적을 일괄 실행하시겠습니까?`)) {
+                return;
+            }
+
+            let updatedCount = 0;
+            showToast(`🤖 AI+OCR 일괄 역추적 시작: 총 ${ids.length}곡...`, 'info');
+
+            for (let idx = 0; idx < ids.length; idx++) {
+                const id = ids[idx];
+                const track = tracksData.find(t => t.id === id);
+                const assetId = track ? track.assetId : String(id).replace(/^r_/, '');
+
+                try {
+                    const res = await apiFetch(`/api/audio/identify/${encodeURIComponent(assetId)}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ apply: true })
+                    });
+                    const json = await res.json();
+                    if (json.status === 'success' && json.data?.identifiedTitle) {
+                        updatedCount++;
+                        if (idx % 2 === 0 || idx === ids.length - 1) {
+                            showToast(`🤖 [${idx + 1}/${ids.length}] "${json.data.identifiedTitle}" 정제 완료!`, 'info');
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            showToast(`✅ AI 일괄 역추적 완료: 총 ${updatedCount}곡 갱신!`, 'success');
+            selectedTrackIds.clear();
+            updateBatchCounts();
+            try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
+            await loadRealAudios();
+        }
+
+        // 4. Copy Selected Asset IDs
+        function copySelectedAssetIds() {
+            if (selectedTrackIds.size === 0) {
+                showToast('선택된 곡이 없습니다.', 'info');
+                return;
+            }
+            const ids = [];
+            selectedTrackIds.forEach(id => {
+                const t = tracksData.find(x => x.id === id);
+                if (t && t.assetId) ids.push(t.assetId);
+                else ids.push(String(id).replace(/^r_/, ''));
+            });
+            if (ids.length === 0) return;
+
+            navigator.clipboard.writeText(ids.join('\n')).then(() => {
+                showToast(`📋 ${ids.length}개 Roblox Asset ID 목록이 복사되었습니다!`, 'success');
+            }).catch(() => {
+                prompt(`선택된 ${ids.length}개 Asset ID:`, ids.join(', '));
+            });
         }
 
         let isYtPlayingMode = false;
@@ -4897,10 +5699,10 @@
             }
         }
 
-        // 카드 본체 클릭 시 (다중선택 모드가 아니면 자동 재생되지 않음)
+        // 카드 본체 클릭 시 (다중선택 모드이거나 Shift/Ctrl 키를 누른 상태인 경우 일괄 선택 처리)
         function onCardClick(id, event) {
-            if (isSelectionMode) {
-                toggleSelectTrack(id);
+            if (isSelectionMode || (event && (event.shiftKey || event.ctrlKey || event.metaKey))) {
+                handleCardSelection(id, event);
             }
         }
 
