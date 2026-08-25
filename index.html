@@ -1500,6 +1500,32 @@
             transform: translateY(-1px);
         }
 
+        .badge-content-deleted {
+            background: rgba(239, 68, 68, 0.18);
+            border: 1px solid rgba(239, 68, 68, 0.45);
+            color: #fca5a5;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .badge-private-offsale {
+            background: rgba(245, 158, 11, 0.18);
+            border: 1px solid rgba(245, 158, 11, 0.45);
+            color: #fcd34d;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+
         .modal-header {
             padding: 18px 24px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -1849,6 +1875,7 @@
                     <button class="batch-action-pill" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);color:#f1f5f9;" onclick="copySelectedAssetIds()" title="선택한 모든 Roblox Asset ID 클립보드 복사">📋 ID 목록 복사</button>
                     <button class="batch-action-pill approve owner-only-feature" id="batchApproveBtn" onclick="handleBulkApprove()">✓ 일괄 승인</button>
                     <button class="batch-action-pill owner-only-feature" style="background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3);color:#f87171;" onclick="handleBulkReject()">✕ 일괄 거절</button>
+                    <button class="batch-action-pill owner-only-feature" style="background:rgba(239,68,68,0.22);border-color:rgba(239,68,68,0.45);color:#fca5a5;" onclick="executeBulkHide()" title="선택한 오디오들을 메인 및 검토 대기 큐에서 일괄 숨김 처리">🚫 일괄 숨김</button>
                     <button class="batch-action-pill owner-only-feature" style="background:rgba(168,85,247,0.15);border-color:rgba(168,85,247,0.3);color:#c084fc;" onclick="openBulkPlayabilityModal()">⚡ 재생 상태 일괄 변경</button>
                     <button class="batch-action-pill owner-only-feature" style="background:rgba(59,130,246,0.15);border-color:rgba(59,130,246,0.3);color:#60a5fa;" onclick="handleBulkStudioReverify()">🎮 스튜디오 검증 요청</button>
                     <button class="batch-action-pill owner-only-feature" style="background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3);color:#fca5a5;" onclick="executeBulkAutoMap()">🎬 유튜브 자동 맵핑</button>
@@ -1912,6 +1939,14 @@
                         <!-- Discord Author / Uploader Filter Dropdown -->
                         <select class="filter-select-box" id="filterAuthorSelect" onchange="onFilterAuthorChange(this.value)" style="border-color:rgba(192,132,252,0.35);color:#d8b4fe;">
                             <option value="all">👤 작성자 전체</option>
+                        </select>
+
+                        <!-- Roblox Status (Public / Private Off-sale / Content Deleted) Filter Dropdown -->
+                        <select class="filter-select-box" id="filterRobloxStatusSelect" onchange="onFilterRobloxStatusChange(this.value)" style="border-color:rgba(56,189,248,0.35);color:#38bdf8;">
+                            <option value="all">🌐 Roblox 상태 전체</option>
+                            <option value="public">🟢 공개 활성 (Public)</option>
+                            <option value="private_offsale">🔒 개인/비공개 (Off-sale)</option>
+                            <option value="content_deleted">🚫 Content Deleted (모더레이션)</option>
                         </select>
                     </div>
 
@@ -2033,6 +2068,7 @@
                         <button class="modal-tab-btn owner-only-feature" onclick="switchAdminTab('blacklist', this)">🚫 카테고리 숨김</button>
                         <button class="modal-tab-btn owner-only-feature" onclick="switchAdminTab('restore', this)">🗑️ 에셋 복원</button>
                         <button class="modal-tab-btn owner-only-feature" onclick="switchAdminTab('optimize', this)">⚡ 유지보수/최적화</button>
+                        <button class="modal-tab-btn owner-only-feature" onclick="switchAdminTab('ghostCleaner', this)">👻 가짜 ID 정리</button>
                     </div>
 
                     <!-- 1. DB STATS TAB -->
@@ -2361,6 +2397,51 @@
                     <div id="adminTabOptimize" style="display:none;">
                         <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">데이터베이스 단편화를 정리하고 파일 용량을 최적화합니다.</p>
                         <button class="quick-tool-btn primary" onclick="runVacuum()">⚡ SQLite VACUUM 최적화 실행</button>
+                    </div>
+
+                    <!-- 7. GHOST CLEANER TAB -->
+                    <div id="adminTabGhostCleaner" style="display:none;">
+                        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">
+                            디스코드 스노우플레이크(유저/메시지 ID 등)나 오인 수집된 <strong>Roblox에 존재하지 않는 가짜/유령 Asset ID</strong>를 Roblox 공식 API로 전수 검증하여 안전하게 백업 후 DB에서 일괄 영구 삭제합니다.
+                        </p>
+
+                        <div style="padding:14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:8px;margin-bottom:14px;">
+                            <div style="font-size:13px;font-weight:700;color:#f87171;margin-bottom:4px;">🛡️ 안전 백업 보장</div>
+                            <div style="font-size:11px;color:var(--text-secondary);line-height:1.45;">
+                                - 삭제 전 전체 대상 데이터가 <code>data/ghost_audios_backup_[TIMESTAMP].json</code> 파일로 자동 백업됩니다.<br>
+                                - 모더레이션(Content Deleted) 및 비공개(Offsale) 상태인 정상 Roblox 에셋은 <strong>안전하게 보존</strong>됩니다.
+                            </div>
+                        </div>
+
+                        <div style="display:flex;gap:10px;margin-bottom:14px;">
+                            <button class="quick-tool-btn primary" id="btnScanGhostAudios" style="flex:1;height:40px;justify-content:center;font-weight:700;" onclick="executeScanGhostAudios()">
+                                🔍 가짜 ID 전수 스캔 시작
+                            </button>
+                            <button class="quick-tool-btn" id="btnCleanGhostAudios" style="height:40px;background:rgba(239,68,68,0.2);color:#f87171;border-color:rgba(239,68,68,0.4);font-weight:700;display:none;" onclick="executeCleanupGhostAudios()">
+                                🗑️ 감지된 가짜 ID 일괄 삭제
+                            </button>
+                        </div>
+
+                        <!-- Scan Status / Result Box -->
+                        <div id="ghostScanStatusBox" style="display:none;padding:12px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid var(--border-subtle);margin-bottom:14px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                                <span style="font-size:12px;font-weight:700;color:var(--accent-cyan);" id="ghostScanTitle">검증 결과 요약</span>
+                                <span style="font-size:11px;color:var(--text-muted);" id="ghostScanCountText">-</span>
+                            </div>
+                            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;" id="ghostScanSummaryText"></div>
+                            <div id="ghostScanSampleList" style="max-height:180px;overflow-y:auto;font-size:11px;font-family:var(--font-mono);border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:6px;background:rgba(0,0,0,0.2);"></div>
+                        </div>
+
+                        <!-- Content Deleted Bulk Hide -->
+                        <div style="margin-top:16px;padding:14px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:8px;">
+                            <div style="font-size:13px;font-weight:700;color:#fca5a5;margin-bottom:4px;">🚫 Content Deleted 오디오 일괄 숨기기</div>
+                            <p style="font-size:11px;color:var(--text-secondary);line-height:1.45;margin-bottom:10px;">
+                                Roblox 정책 위반으로 검열/삭제된 에셋들을 메인 대시보드와 검토 대기 큐에서 일괄 숨김 처리(Soft-Hide)하여 깨끗하게 정리합니다. (언제든 복원 가능)
+                            </p>
+                            <button class="quick-tool-btn" style="width:100%;height:38px;justify-content:center;background:rgba(239,68,68,0.2);color:#fca5a5;border-color:rgba(239,68,68,0.45);font-weight:700;" onclick="executeBulkHideDeleted()">
+                                🚫 Content Deleted 오디오 전체 일괄 숨김 실행
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2897,15 +2978,8 @@
 
         function handleImgError(img) {
             if (!img) return;
-            const cur = img.src || '';
-            if (cur.includes('mqdefault.jpg')) {
-                img.src = cur.replace('mqdefault.jpg', 'hqdefault.jpg');
-            } else if (cur.includes('hqdefault.jpg')) {
-                img.src = cur.replace('hqdefault.jpg', 'default.jpg');
-            } else {
-                img.onerror = null;
-                img.src = DEFAULT_FALLBACK_IMG;
-            }
+            img.onerror = null;
+            img.src = DEFAULT_FALLBACK_IMG;
         }
 
         const playerAudio = document.getElementById('globalAudioPlayer');
@@ -3251,6 +3325,8 @@
                     discordAuthorId: t.discordAuthorId || '',
                     discordAuthorName: t.discordAuthorName || t.authorName || '',
                     discordAuthorAvatar: t.discordAuthorAvatar || '',
+                    robloxStatus: t.robloxStatus || 'public',
+                    robloxThumbnailUrl: t.robloxThumbnailUrl || '',
                     favorited: !!t.favorited
                 };
             });
@@ -3323,6 +3399,7 @@
         let currentFilterYoutube = 'all'; // all | mapped | unmapped
         let currentFilterPlayability = 'all'; // all | active | partial | inactive | unverified
         let currentFilterAuthor = 'all';
+        let currentFilterRobloxStatus = 'all'; // all | public | private_offsale | content_deleted
         let isLockedFilterOnly = false;
         let activeQuickPill = 'all';
 
@@ -3338,6 +3415,7 @@
                     filterYoutube: currentFilterYoutube,
                     filterPlayability: currentFilterPlayability,
                     filterAuthor: currentFilterAuthor,
+                    filterRobloxStatus: currentFilterRobloxStatus,
                     filterLocked: isLockedFilterOnly,
                     quickPill: activeQuickPill
                 };
@@ -3383,6 +3461,11 @@
                         const authSel = document.getElementById('filterAuthorSelect');
                         if (authSel) authSel.value = currentFilterAuthor;
                     }
+                    if (state.filterRobloxStatus) {
+                        currentFilterRobloxStatus = state.filterRobloxStatus;
+                        const rbxSel = document.getElementById('filterRobloxStatusSelect');
+                        if (rbxSel) rbxSel.value = currentFilterRobloxStatus;
+                    }
                     if (typeof state.filterLocked === 'boolean') {
                         isLockedFilterOnly = state.filterLocked;
                         const lockChip = document.getElementById('filterLockedChip');
@@ -3407,10 +3490,11 @@
         }
 
         function updateCounts() {
-            const total = tracksData.length;
-            const favCount = tracksData.filter(t => t.favorited).length;
-            const pendingCount = tracksData.filter(t => t.status === 'pending_review').length;
-            const cats = new Set(tracksData.map(t => t.cat).filter(Boolean));
+            const visibleTracks = tracksData.filter(t => t.status !== 'hidden');
+            const total = visibleTracks.length;
+            const favCount = visibleTracks.filter(t => t.favorited).length;
+            const pendingCount = visibleTracks.filter(t => t.status === 'pending_review').length;
+            const cats = new Set(visibleTracks.map(t => t.cat).filter(Boolean));
 
             document.getElementById('badgeAllCount').textContent = total;
             if (document.getElementById('badgeFavsCount')) document.getElementById('badgeFavsCount').textContent = favCount;
@@ -3422,12 +3506,13 @@
         function renderCategoryChips() {
             const carousel = document.getElementById('catChipsCarousel');
             const counts = {};
-            tracksData.forEach(t => {
+            const visibleTracks = tracksData.filter(t => t.status !== 'hidden');
+            visibleTracks.forEach(t => {
                 if (t.cat) counts[t.cat] = (counts[t.cat] || 0) + 1;
             });
 
             const sortedCats = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).slice(0, 12);
-            let html = `<div class="cat-tag-pill ${!currentCategory ? 'active' : ''}" onclick="filterByCat('all')">${t('audio_ui.all_cats', '전체')} (${tracksData.length})</div>`;
+            let html = `<div class="cat-tag-pill ${!currentCategory ? 'active' : ''}" onclick="filterByCat('all')">${t('audio_ui.all_cats', '전체')} (${visibleTracks.length})</div>`;
             sortedCats.forEach(cat => {
                 const displayName = getCategoryDisplayName(cat);
                 html += `<div class="cat-tag-pill ${currentCategory === cat ? 'active' : ''}" onclick="filterByCat('${cat}')">${displayName} (${counts[cat]})</div>`;
@@ -3438,7 +3523,7 @@
             const sidebarCatList = document.getElementById('sidebarCategoryList');
             if (sidebarCatList) {
                 sidebarCatList.innerHTML = sortedCats.slice(0, 7).map(cat => {
-                    const sample = tracksData.find(t => t.cat === cat && t.yt);
+                    const sample = visibleTracks.find(t => t.cat === cat && t.yt);
                     let thumb = categoryMetadataMap[cat] || (sample ? `https://img.youtube.com/vi/${sample.yt}/mqdefault.jpg` : DEFAULT_FALLBACK_IMG);
                     const displayName = getCategoryDisplayName(cat);
                     return `
@@ -3494,12 +3579,14 @@
         }
 
         function getFilteredTracks() {
-            let list = [...tracksData];
+            let list = (currentView === 'hidden' || currentFilterRobloxStatus === 'content_deleted')
+                ? (currentFilterRobloxStatus === 'content_deleted' ? tracksData.filter(t => t.robloxStatus === 'content_deleted') : tracksData.filter(t => t.status === 'hidden'))
+                : tracksData.filter(t => t.status !== 'hidden');
 
             // 1. Base View Filter
             if (currentView === 'favorites') {
                 list = list.filter(t => t.favorited);
-            } else if (currentView === 'pending') {
+            } else if (currentView === 'pending' && currentFilterRobloxStatus !== 'content_deleted') {
                 list = list.filter(t => t.status === 'pending_review');
             }
 
@@ -3522,7 +3609,7 @@
                 );
             }
 
-            // 4. Secondary Status Filters (YouTube, Playability, Author, Locked)
+            // 4. Secondary Status Filters (YouTube, Playability, Author, Locked, RobloxStatus)
             // YouTube Filter
             if (currentFilterYoutube === 'mapped') {
                 list = list.filter(t => !!(t.youtubeUrl || t.yt));
@@ -3555,6 +3642,17 @@
             // Locked Filter
             if (isLockedFilterOnly) {
                 list = list.filter(t => t.isVerifiedLocked === 1);
+            }
+
+            // Roblox Status Filter
+            if (currentFilterRobloxStatus && currentFilterRobloxStatus !== 'all') {
+                if (currentFilterRobloxStatus === 'public') {
+                    list = list.filter(t => t.robloxStatus === 'public' || (!t.robloxStatus && t.robloxStatus !== 'content_deleted' && t.robloxStatus !== 'private_offsale'));
+                } else if (currentFilterRobloxStatus === 'private_offsale') {
+                    list = list.filter(t => t.robloxStatus === 'private_offsale');
+                } else if (currentFilterRobloxStatus === 'content_deleted') {
+                    list = list.filter(t => t.robloxStatus === 'content_deleted');
+                }
             }
 
             // 5. Multi-dimensional Sorting
@@ -3656,6 +3754,13 @@
             saveAudioState();
         }
 
+        function onFilterRobloxStatusChange(val) {
+            currentFilterRobloxStatus = val || 'all';
+            currentPage = 1;
+            renderCards();
+            saveAudioState();
+        }
+
         function onFilterAuthorChange(val) {
             currentFilterAuthor = val || 'all';
             currentPage = 1;
@@ -3688,16 +3793,13 @@
                 });
             }
 
-            const authors = Object.keys(authorCounts).sort((a, b) => (authorCounts[b] - authorCounts[a]) || a.localeCompare(b));
+            const sortedAuthors = Object.entries(authorCounts).sort((a, b) => b[1] - a[1]);
+            selectEl.innerHTML = '<option value="all">👤 작성자 전체 (All Uploaders)</option>' +
+                sortedAuthors.map(([name, count]) => `<option value="${esc(name)}">${esc(name)} (${count.toLocaleString()}곡)</option>`).join('');
 
-            let optionsHtml = '<option value="all">👤 작성자 전체 (All Uploaders)</option>';
-            authors.forEach(auth => {
-                const count = authorCounts[auth];
-                optionsHtml += `<option value="${esc(auth)}">👤 ${esc(auth)} (${count}곡)</option>`;
-            });
-
-            selectEl.innerHTML = optionsHtml;
-            selectEl.value = currentFilterAuthor || 'all';
+            if (currentFilterAuthor) {
+                selectEl.value = currentFilterAuthor;
+            }
         }
 
         function toggleLockedFilter() {
@@ -3710,12 +3812,7 @@
         }
 
         function updateQuickPillsUI() {
-            const pills = ['pillAll', 'pillActive', 'pillYtMapped', 'pillYtUnmapped', 'pillInactive'];
-            pills.forEach(p => {
-                const el = document.getElementById(p);
-                if (el) el.classList.remove('active');
-            });
-
+            document.querySelectorAll('.quick-pill').forEach(p => p.classList.remove('active'));
             if (currentFilterPlayability === 'active') {
                 document.getElementById('pillActive')?.classList.add('active');
             } else if (currentFilterPlayability === 'inactive') {
@@ -3765,6 +3862,7 @@
             currentFilterYoutube = 'all';
             currentFilterPlayability = 'all';
             currentFilterAuthor = 'all';
+            currentFilterRobloxStatus = 'all';
             isLockedFilterOnly = false;
             activeQuickPill = 'all';
 
@@ -3772,6 +3870,7 @@
             const ytSel = document.getElementById('filterYoutubeSelect');
             const playSel = document.getElementById('filterPlayabilitySelect');
             const authSel = document.getElementById('filterAuthorSelect');
+            const rbxSel = document.getElementById('filterRobloxStatusSelect');
             const lockChip = document.getElementById('filterLockedChip');
             const searchInput = document.getElementById('searchInput');
 
@@ -3779,6 +3878,7 @@
             if (ytSel) ytSel.value = 'all';
             if (playSel) playSel.value = 'all';
             if (authSel) authSel.value = 'all';
+            if (rbxSel) rbxSel.value = 'all';
             if (lockChip) lockChip.classList.remove('active');
             if (searchInput) searchInput.value = '';
 
@@ -3881,6 +3981,7 @@
                 const isSelected = selectedTrackIds.has(trackItem.id);
                 let cover = trackItem.imageUrl;
                 if (!cover && trackItem.yt) cover = `https://img.youtube.com/vi/${trackItem.yt}/mqdefault.jpg`;
+                if (!cover && trackItem.robloxThumbnailUrl && !trackItem.robloxThumbnailUrl.includes('BrokenImage')) cover = trackItem.robloxThumbnailUrl;
                 if (!cover) cover = categoryMetadataMap[trackItem.cat] || DEFAULT_FALLBACK_IMG;
 
                 const displayName = getCategoryDisplayName(trackItem.cat);
@@ -3900,7 +4001,11 @@
                     <div class="card-body">
                         <div class="track-name" title="${safeTitle}">${safeTitle}</div>
                         <div class="track-meta-row">
-                            <span class="roblox-id-badge">🎵 ${safeAssetId}</span>
+                            <div style="display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                                <span class="roblox-id-badge">🎵 ${safeAssetId}</span>
+                                ${trackItem.robloxStatus === 'content_deleted' ? '<span class="badge-content-deleted" title="Roblox 정책 위반으로 해시가 삭제/차단된 에셋입니다.">🚫 Deleted</span>' : ''}
+                                ${trackItem.robloxStatus === 'private_offsale' ? '<span class="badge-private-offsale" title="Roblox 스토어 비공개(Off-sale) 에셋입니다.">🔒 비공개</span>' : ''}
+                            </div>
                             <div class="status-indicators">
                                 ${trackItem.isVerifiedLocked === 1 ? '<span style="font-size:11px;color:#f59e0b;font-weight:700;" title="관리자 수동 고정 (자동 재검증 방지)">🔒</span>' : ''}
                                 <span class="dot-indicator ${trackItem.serverPlayable === 1 ? 'dot-green' : 'dot-gold'}" title="Server 검증: ${trackItem.serverPlayable}"></span>
@@ -3968,6 +4073,7 @@
 
             let cover = track.imageUrl;
             if (!cover && track.yt) cover = `https://img.youtube.com/vi/${track.yt}/mqdefault.jpg`;
+            if (!cover && track.robloxThumbnailUrl && !track.robloxThumbnailUrl.includes('BrokenImage')) cover = track.robloxThumbnailUrl;
             if (!cover) cover = categoryMetadataMap[track.cat] || DEFAULT_FALLBACK_IMG;
 
             const coverEl = document.getElementById('detailCoverImg');
@@ -5591,6 +5697,7 @@
             document.getElementById('playerSub').textContent = `🎵 ${t.assetId}`;
             let cover = t.imageUrl;
             if (!cover && t.yt) cover = `https://img.youtube.com/vi/${t.yt}/mqdefault.jpg`;
+            if (!cover && t.robloxThumbnailUrl && !t.robloxThumbnailUrl.includes('BrokenImage')) cover = t.robloxThumbnailUrl;
             if (!cover) cover = DEFAULT_FALLBACK_IMG;
             document.getElementById('playerCoverImg').src = cover;
             document.getElementById('playerTotalTime').textContent = t.dur || '0:00';
@@ -6216,6 +6323,65 @@
             }
         }
 
+        async function executeBulkHide() {
+            const selected = Array.from(selectedTrackIds);
+            if (selected.length === 0) {
+                showToast('숨길 곡을 먼저 선택해주세요.', 'info');
+                return;
+            }
+
+            if (!confirm(`선택한 ${selected.length}개의 오디오를 메인 화면 및 검토 대기 목록에서 숨기시겠습니까?\n(데이터는 보존되며 관리자 패널에서 언제든 복원할 수 있습니다.)`)) {
+                return;
+            }
+
+            try {
+                showToast(`${selected.length}개 오디오 숨김 처리 중...`, 'info');
+                const res = await apiFetch('/api/audio/admin/bulk-hide', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ audioIds: selected })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(`🚫 ${json.hiddenCount || selected.length}개 오디오가 성공적으로 숨김 처리되었습니다!`, 'success');
+                    selectedTrackIds.clear();
+                    updateSelectionUI();
+                    try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '숨김 처리 실패', 'error');
+                }
+            } catch (err) {
+                showToast('일괄 숨김 요청 중 서버 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        async function executeBulkHideDeleted() {
+            if (!confirm('Roblox Content Deleted 상태인 모든 오디오를 메인 및 검토 대기 큐에서 일괄 숨김 처리하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                showToast('Content Deleted 오디오 일괄 숨김 실행 중...', 'info');
+                const res = await apiFetch('/api/audio/admin/bulk-hide', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ target: 'content_deleted' })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(`🚫 총 ${json.hiddenCount}개의 Content Deleted 오디오가 일괄 숨김 처리되었습니다!`, 'success');
+                    try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
+                    await loadRealAudios();
+                    closeModal('unifiedAdminModal');
+                } else {
+                    showToast(json.message || '일괄 숨김 실패', 'error');
+                }
+            } catch (err) {
+                showToast('일괄 숨김 요청 중 서버 오류 발생', 'error');
+            }
+        }
+
         async function loadDeletedAudiosList() {
             const listEl = document.getElementById('adminDeletedAudiosList');
             if (!listEl) return;
@@ -6610,7 +6776,7 @@
         function switchAdminTab(tab, btn) {
             document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            ['stats', 'aiRestore', 'creatorImport', 'studio', 'catImg', 'catWarning', 'rename', 'blacklist', 'restore', 'optimize'].forEach(t => {
+            ['stats', 'aiRestore', 'creatorImport', 'studio', 'catImg', 'catWarning', 'rename', 'blacklist', 'restore', 'optimize', 'ghostCleaner'].forEach(t => {
                 const el = document.getElementById(`adminTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 if (el) el.style.display = t === tab ? 'block' : 'none';
             });
@@ -6619,6 +6785,101 @@
             if (tab === 'restore') loadDeletedAudiosList();
             if (tab === 'catWarning') onAdminWarnCatSelectChange();
             if (tab === 'blacklist') loadBanCategoryVisibility();
+        }
+
+        let scannedGhostAssetIds = [];
+
+        async function executeScanGhostAudios() {
+            const btnScan = document.getElementById('btnScanGhostAudios');
+            const btnClean = document.getElementById('btnCleanGhostAudios');
+            const statusBox = document.getElementById('ghostScanStatusBox');
+            const titleEl = document.getElementById('ghostScanTitle');
+            const countText = document.getElementById('ghostScanCountText');
+            const summaryText = document.getElementById('ghostScanSummaryText');
+            const sampleList = document.getElementById('ghostScanSampleList');
+
+            btnScan.disabled = true;
+            btnScan.textContent = '⚡ Roblox 공식 API 전수 검증 중... (수초 소요)';
+            if (btnClean) btnClean.style.display = 'none';
+            if (statusBox) statusBox.style.display = 'block';
+            if (titleEl) titleEl.textContent = '🔎 전수 검증 진행 중...';
+            if (countText) countText.textContent = '검증 중';
+            if (summaryText) summaryText.textContent = 'DB 내 전체 Asset ID를 50개 단위로 Roblox 공식 Toolbox 및 Economy API와 대조하고 있습니다...';
+            if (sampleList) sampleList.innerHTML = '<div style="color:var(--text-muted);padding:8px;">Roblox 공식 응답을 대기 중입니다...</div>';
+
+            try {
+                const res = await apiFetch('/api/audio/admin/scan-invalid-assets', { method: 'POST' });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    scannedGhostAssetIds = json.invalidIds || [];
+                    if (titleEl) titleEl.textContent = `✅ 검증 완료 (총 ${json.totalAudios?.toLocaleString()}개 곡 검사)`;
+                    if (countText) countText.textContent = `가짜 ID: ${scannedGhostAssetIds.length.toLocaleString()}개 / 정상: ${json.validCount?.toLocaleString()}개`;
+                    
+                    if (scannedGhostAssetIds.length > 0) {
+                        if (summaryText) {
+                            summaryText.innerHTML = `⚠️ <strong>${scannedGhostAssetIds.length.toLocaleString()}개</strong>의 Roblox에 등록된 적 없는 가짜/유령 ID(디스코드 스노우플레이크 등)가 발견되었습니다.<br><span style="color:#10b981;">(삭제 실행 시 원본 JSON 파일로 자동 백업된 후 안전하게 정리됩니다.)</span>`;
+                        }
+                        if (sampleList) {
+                            sampleList.innerHTML = (json.invalidSamples || []).map(s => `
+                                <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                                    <span style="color:#f87171;">❌ ${esc(s.assetId)}</span>
+                                    <span style="color:var(--text-muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(s.title)}</span>
+                                </div>
+                            `).join('');
+                        }
+                        if (btnClean) btnClean.style.display = 'inline-flex';
+                    } else {
+                        if (summaryText) summaryText.innerHTML = '✨ <strong style="color:var(--accent-green);">발견된 가짜/유령 ID가 없습니다!</strong> DB가 이미 깨끗하게 정리되어 있습니다.';
+                        if (sampleList) sampleList.innerHTML = '<div style="color:var(--accent-green);padding:8px;">모든 오디오가 Roblox에 실존하는 에셋입니다.</div>';
+                    }
+                } else {
+                    showToast(json.message || '스캔 실패', 'error');
+                }
+            } catch(e) {
+                showToast('스캔 중 오류 발생: ' + (e.message || ''), 'error');
+            } finally {
+                btnScan.disabled = false;
+                btnScan.textContent = '🔍 가짜 ID 전수 스캔 다시 실행';
+            }
+        }
+
+        async function executeCleanupGhostAudios() {
+            if (scannedGhostAssetIds.length === 0) {
+                showToast('삭제할 가짜 ID가 없습니다.', 'warning');
+                return;
+            }
+
+            if (!confirm(`⚠️ 정말로 감지된 ${scannedGhostAssetIds.length.toLocaleString()}개의 가짜/유령 오디오 ID를 영구 삭제하시겠습니까?\n\n(삭제 전 전체 항목이 data/ 폴더에 JSON 백업됩니다.)`)) {
+                return;
+            }
+
+            const btnClean = document.getElementById('btnCleanGhostAudios');
+            btnClean.disabled = true;
+            btnClean.textContent = '🗑️ 백업 및 삭제 진행 중...';
+
+            try {
+                const res = await apiFetch('/api/audio/admin/cleanup-invalid-assets', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ assetIds: scannedGhostAssetIds, createBackup: true })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(`🎉 총 ${json.deletedCount?.toLocaleString()}개의 가짜 ID가 성공적으로 삭제되었습니다! (백업: ${json.backupFile})`, 'success');
+                    scannedGhostAssetIds = [];
+                    btnClean.style.display = 'none';
+                    try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
+                    closeModal('unifiedAdminModal');
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '삭제 실패', 'error');
+                }
+            } catch(e) {
+                showToast('삭제 요청 중 오류: ' + (e.message || ''), 'error');
+            } finally {
+                btnClean.disabled = false;
+                btnClean.textContent = '🗑️ 감지된 가짜 ID 일괄 삭제';
+            }
         }
 
         function populateAiRestoreCategories() {
