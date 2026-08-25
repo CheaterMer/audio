@@ -3834,16 +3834,18 @@
 
             const titleInput = document.getElementById('editTitle');
             const ytInput = document.getElementById('editYtUrl');
+            const catInput = document.getElementById('editCategory');
             const discordBtn = document.getElementById('editDiscordSourceBtn');
             const currentSourceUrl = discordBtn?.href || '';
 
-            titleInput.placeholder = '💬 Discord 원본 메시지 분석 중...';
+            const origPlaceholder = titleInput.placeholder;
+            titleInput.placeholder = '💬 Discord dangs 자격증명으로 원본 메시지 검색/조회 중...';
 
             try {
                 const res = await apiFetch(`/api/audio/discord-refetch/${encodeURIComponent(assetId)}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ apply: false })
+                    body: JSON.stringify({ sourceUrl: currentSourceUrl.startsWith('http') ? currentSourceUrl : null, apply: false })
                 });
                 const json = await res.json();
                 if (json.status === 'success' && json.data?.identifiedTitle) {
@@ -3851,47 +3853,33 @@
                     if (json.data.youtubeUrl && !ytInput.value) {
                         ytInput.value = json.data.youtubeUrl;
                     }
-                    showToast(`💬 Discord 등록명 가져오기 완료: "${json.data.identifiedTitle}"`, 'success');
-                } else if (json.status === 'no_source_url' || json.code === 'NO_SOURCE_URL') {
-                    const userLink = prompt('이 곡은 디스코드 출처 링크가 저장되어 있지 않은 기존 오디오입니다.\n공유된 디스코드 메시지 링크가 있다면 붙여넣어 주세요:\n(취소 시 [🤖 AI+OCR 역추적]으로 자동 분석합니다)');
-                    if (userLink && userLink.trim() && userLink.includes('discord.com/channels/')) {
-                        const retryRes = await apiFetch(`/api/audio/discord-refetch/${encodeURIComponent(assetId)}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ sourceUrl: userLink.trim(), apply: false })
-                        });
-                        const retryJson = await retryRes.json();
-                        if (retryJson.status === 'success' && retryJson.data?.identifiedTitle) {
-                            titleInput.value = retryJson.data.identifiedTitle;
-                            if (retryJson.data.youtubeUrl && !ytInput.value) ytInput.value = retryJson.data.youtubeUrl;
-                            showToast(`💬 Discord 등록명 가져오기 완료: "${retryJson.data.identifiedTitle}"`, 'success');
-                            if (discordBtn) { discordBtn.style.display = 'inline-flex'; discordBtn.href = userLink.trim(); }
-                        } else {
-                            const popupUrl = `${userLink.trim().split('#')[0]}#auto-import&targetId=${encodeURIComponent(assetId)}`;
-                            window.open(popupUrl, '_blank', 'width=900,height=750');
-                            showToast(`⚡ 크롬 자동화 팝업을 열었습니다. (타겟 ID: ${assetId})`, 'info');
-                        }
-                    } else if (userLink === null) {
-                        identifyAiForEdit();
-                    } else {
-                        showToast('디스코드 링크가 입력되지 않아 [🤖 AI 역추적]을 실행합니다.', 'info');
-                        identifyAiForEdit();
+                    if (catInput && json.data.gameName && (!catInput.value || catInput.value === '기타 / 미분류' || catInput.value === 'Other')) {
+                        catInput.value = json.data.gameName;
                     }
+                    if (discordBtn && json.data.sourceUrl) {
+                        discordBtn.style.display = 'inline-flex';
+                        discordBtn.href = json.data.sourceUrl;
+                    }
+                    showToast(`💬 Discord 등록명 조회 완료: "${json.data.identifiedTitle}"`, 'success');
                 } else if (json.status === 'queued_to_chrome' || currentSourceUrl.startsWith('http')) {
-                    // Fallback to targeted Chrome popup (only fetches requested ID, rate limit protected)
                     const targetSource = json.task?.sourceUrl || currentSourceUrl;
                     if (targetSource && targetSource.startsWith('http')) {
                         const popupUrl = `${targetSource.split('#')[0]}#auto-import&targetId=${encodeURIComponent(assetId)}`;
                         window.open(popupUrl, '_blank', 'width=900,height=750');
-                        showToast(`⚡ 크롬 템퍼몽키 자동화 창을 열었습니다. (타겟 ID: ${assetId})`, 'info');
+                        showToast(`⚡ 디스코드 창을 열었습니다. (타겟 ID: ${assetId})`, 'info');
                     } else {
-                        showToast(`⚡ ${json.message}`, 'info');
+                        showToast(json.message || '디스코드 메시지를 찾지 못해 [🤖 AI 역추적]을 실행합니다.', 'info');
+                        identifyAiForEdit();
                     }
                 } else {
-                    showToast(json.message || 'Discord 메시지에서 곡명을 추출하지 못했습니다.', 'warning');
+                    showToast(json.message || 'Discord 메시지를 찾지 못해 [🤖 AI 역추적]을 실행합니다.', 'info');
+                    identifyAiForEdit();
                 }
             } catch (e) {
-                showToast('Discord 통신 중 오류가 발생했습니다.', 'error');
+                showToast('Discord 통신 중 오류가 발생하여 [🤖 AI 역추적]을 실행합니다.', 'warning');
+                identifyAiForEdit();
+            } finally {
+                titleInput.placeholder = origPlaceholder;
             }
         }
 
