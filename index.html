@@ -1475,6 +1475,31 @@
             color: var(--accent-cyan);
         }
 
+        .card-author-chip {
+            font-size: 11px;
+            font-weight: 700;
+            color: #d8b4fe;
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            padding: 1px 7px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            max-width: 110px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .card-author-chip:hover {
+            background: #a855f7;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
         .modal-header {
             padding: 18px 24px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -1882,6 +1907,11 @@
                             <option value="inactive" data-i18n="audio_ui.filter_play_inactive">🔴 비활성화/실패</option>
                             <option value="queued" data-i18n="audio_ui.filter_play_queued">🎯 1순위 검증 대기</option>
                             <option value="unverified" data-i18n="audio_ui.filter_play_unverified">⚪ 일반 미검증</option>
+                        </select>
+
+                        <!-- Discord Author / Uploader Filter Dropdown -->
+                        <select class="filter-select-box" id="filterAuthorSelect" onchange="onFilterAuthorChange(this.value)" style="border-color:rgba(192,132,252,0.35);color:#d8b4fe;">
+                            <option value="all">👤 작성자 전체</option>
                         </select>
                     </div>
 
@@ -2665,6 +2695,10 @@
                             <span style="color:var(--text-muted);">💬 디스코드 원본 출처:</span>
                             <div id="detailSourceBox">-</div>
                         </div>
+                        <div style="font-size:12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:4px;" id="detailDiscordAuthorRow">
+                            <span style="color:var(--text-muted);">👤 디스코드 작성자:</span>
+                            <div id="detailDiscordAuthorBox">-</div>
+                        </div>
                         <div style="font-size:12px;display:flex;justify-content:space-between;align-items:center;">
                             <span style="color:var(--text-muted);" data-i18n="audio_ui.detail_youtube_label">YouTube 연동:</span>
                             <div id="detailYtBox">-</div>
@@ -3214,6 +3248,9 @@
                     updatedBy: t.updatedBy || '',
                     updatedAt: t.updatedAt || '',
                     sourceUrl: t.sourceUrl || '',
+                    discordAuthorId: t.discordAuthorId || '',
+                    discordAuthorName: t.discordAuthorName || t.authorName || '',
+                    discordAuthorAvatar: t.discordAuthorAvatar || '',
                     favorited: !!t.favorited
                 };
             });
@@ -3230,6 +3267,7 @@
                 tracksData = parseRawTracksData(cachedRawTracks);
                 updateCounts();
                 renderCategoryChips();
+                populateAuthorFilterDropdown();
                 if (!restoreAudioState()) {
                     switchMainView('all');
                 }
@@ -3260,6 +3298,7 @@
                     saveToCache('tracks_data', json.data);
                     updateCounts();
                     renderCategoryChips();
+                    populateAuthorFilterDropdown();
                     if (!restoreAudioState()) {
                         switchMainView('all');
                     }
@@ -3283,6 +3322,7 @@
         let currentSortMode = localStorage.getItem('kadio_sort_mode') || 'recommended';
         let currentFilterYoutube = 'all'; // all | mapped | unmapped
         let currentFilterPlayability = 'all'; // all | active | partial | inactive | unverified
+        let currentFilterAuthor = 'all';
         let isLockedFilterOnly = false;
         let activeQuickPill = 'all';
 
@@ -3297,6 +3337,7 @@
                     sortMode: currentSortMode,
                     filterYoutube: currentFilterYoutube,
                     filterPlayability: currentFilterPlayability,
+                    filterAuthor: currentFilterAuthor,
                     filterLocked: isLockedFilterOnly,
                     quickPill: activeQuickPill
                 };
@@ -3336,6 +3377,11 @@
                         currentFilterPlayability = state.filterPlayability;
                         const playSel = document.getElementById('filterPlayabilitySelect');
                         if (playSel) playSel.value = currentFilterPlayability;
+                    }
+                    if (state.filterAuthor) {
+                        currentFilterAuthor = state.filterAuthor;
+                        const authSel = document.getElementById('filterAuthorSelect');
+                        if (authSel) authSel.value = currentFilterAuthor;
                     }
                     if (typeof state.filterLocked === 'boolean') {
                         isLockedFilterOnly = state.filterLocked;
@@ -3470,11 +3516,13 @@
                     (t.cat && t.cat.toLowerCase().includes(query)) ||
                     (getCategoryDisplayName(t.cat).toLowerCase().includes(query)) ||
                     (t.assetId && String(t.assetId).includes(query)) ||
-                    (t.youtubeUrl && t.youtubeUrl.toLowerCase().includes(query))
+                    (t.youtubeUrl && t.youtubeUrl.toLowerCase().includes(query)) ||
+                    (t.discordAuthorName && t.discordAuthorName.toLowerCase().includes(query)) ||
+                    (t.authorName && t.authorName.toLowerCase().includes(query))
                 );
             }
 
-            // 4. Secondary Status Filters (YouTube, Playability, Locked)
+            // 4. Secondary Status Filters (YouTube, Playability, Author, Locked)
             // YouTube Filter
             if (currentFilterYoutube === 'mapped') {
                 list = list.filter(t => !!(t.youtubeUrl || t.yt));
@@ -3493,6 +3541,15 @@
                 list = list.filter(t => t.verificationStatus === 'queued');
             } else if (currentFilterPlayability === 'unverified') {
                 list = list.filter(t => (t.serverPlayable === -1 && t.clientPlayable === -1 && t.verificationStatus !== 'queued') || t.verificationStatus === 'unverified');
+            }
+
+            // Discord Author / Uploader Filter
+            if (currentFilterAuthor && currentFilterAuthor !== 'all') {
+                list = list.filter(t => 
+                    (t.discordAuthorName && t.discordAuthorName.toLowerCase() === currentFilterAuthor.toLowerCase()) ||
+                    (t.discordAuthorId && String(t.discordAuthorId) === currentFilterAuthor) ||
+                    (t.authorName && t.authorName.toLowerCase() === currentFilterAuthor.toLowerCase())
+                );
             }
 
             // Locked Filter
@@ -3599,6 +3656,50 @@
             saveAudioState();
         }
 
+        function onFilterAuthorChange(val) {
+            currentFilterAuthor = val || 'all';
+            currentPage = 1;
+            renderCards();
+            saveAudioState();
+        }
+
+        function filterByAuthor(authorName) {
+            if (!authorName) return;
+            currentFilterAuthor = authorName;
+            const selectEl = document.getElementById('filterAuthorSelect');
+            if (selectEl) selectEl.value = authorName;
+            currentPage = 1;
+            renderCards();
+            showToast(`👤 작성자 필터 적용: "${authorName}"`, 'info');
+            saveAudioState();
+        }
+
+        function populateAuthorFilterDropdown() {
+            const selectEl = document.getElementById('filterAuthorSelect');
+            if (!selectEl) return;
+
+            const authorCounts = {};
+            if (Array.isArray(tracksData)) {
+                tracksData.forEach(t => {
+                    const author = (t.discordAuthorName || t.authorName || '').trim();
+                    if (author) {
+                        authorCounts[author] = (authorCounts[author] || 0) + 1;
+                    }
+                });
+            }
+
+            const authors = Object.keys(authorCounts).sort((a, b) => (authorCounts[b] - authorCounts[a]) || a.localeCompare(b));
+
+            let optionsHtml = '<option value="all">👤 작성자 전체 (All Uploaders)</option>';
+            authors.forEach(auth => {
+                const count = authorCounts[auth];
+                optionsHtml += `<option value="${esc(auth)}">👤 ${esc(auth)} (${count}곡)</option>`;
+            });
+
+            selectEl.innerHTML = optionsHtml;
+            selectEl.value = currentFilterAuthor || 'all';
+        }
+
         function toggleLockedFilter() {
             isLockedFilterOnly = !isLockedFilterOnly;
             const chip = document.getElementById('filterLockedChip');
@@ -3663,18 +3764,21 @@
             currentSortMode = 'recommended';
             currentFilterYoutube = 'all';
             currentFilterPlayability = 'all';
+            currentFilterAuthor = 'all';
             isLockedFilterOnly = false;
             activeQuickPill = 'all';
 
             const sortSel = document.getElementById('sortSelect');
             const ytSel = document.getElementById('filterYoutubeSelect');
             const playSel = document.getElementById('filterPlayabilitySelect');
+            const authSel = document.getElementById('filterAuthorSelect');
             const lockChip = document.getElementById('filterLockedChip');
             const searchInput = document.getElementById('searchInput');
 
             if (sortSel) sortSel.value = 'recommended';
             if (ytSel) ytSel.value = 'all';
             if (playSel) playSel.value = 'all';
+            if (authSel) authSel.value = 'all';
             if (lockChip) lockChip.classList.remove('active');
             if (searchInput) searchInput.value = '';
 
@@ -3805,7 +3909,10 @@
                             </div>
                         </div>
                         <div class="card-footer-actions">
-                            <span style="font-size:11px;color:var(--text-muted);">${esc(trackItem.dur)}</span>
+                            <div style="display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden;">
+                                <span style="font-size:11px;color:var(--text-muted);flex-shrink:0;">${esc(trackItem.dur)}</span>
+                                ${(trackItem.discordAuthorName || trackItem.authorName) ? `<span class="card-author-chip" onclick="event.stopPropagation();filterByAuthor('${esc(trackItem.discordAuthorName || trackItem.authorName)}')" title="작성자: ${esc(trackItem.discordAuthorName || trackItem.authorName)} (클릭 시 이 작성자의 곡만 모아보기)">👤 ${esc(trackItem.discordAuthorName || trackItem.authorName)}</span>` : ''}
+                            </div>
                             <div class="mini-btn-group">
                                 ${(isAdminMode && currentUserTier === 'owner' && trackItem.status === 'pending_review') ? `<button class="card-action-icon-btn" title="승인" style="color:#10b981;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleApprove('${esc(trackItem.id)}')">✓</button><button class="card-action-icon-btn" title="거절" style="color:#f87171;font-size:13px;font-weight:800;" onclick="event.stopPropagation();handleSingleReject('${esc(trackItem.id)}')">✕</button>` : ''}
                                 ${isAdminMode ? `<button class="card-action-icon-btn" title="정보 수정" style="color:var(--accent-gold);" onclick="event.stopPropagation();openEditTrackModal('${esc(trackItem.id)}')">✏️</button>` : ''}
@@ -3931,6 +4038,20 @@
             if (sourceBox) {
                 if (sourceRow) sourceRow.style.display = 'flex';
                 sourceBox.innerHTML = `<button class="quick-tool-btn" onclick="openDiscordMessageModal('${esc(track.id)}')" style="color:#c084fc;font-weight:700;padding:3px 10px;font-size:12px;display:inline-flex;align-items:center;gap:5px;cursor:pointer;background:rgba(192,132,252,0.12);border:1px solid rgba(192,132,252,0.3);border-radius:6px;">💬 전체 메시지 보기</button>`;
+            }
+
+            // Discord Author
+            const authorBox = document.getElementById('detailDiscordAuthorBox');
+            const authorRow = document.getElementById('detailDiscordAuthorRow');
+            const authorName = track.discordAuthorName || track.authorName;
+            if (authorBox) {
+                if (authorName) {
+                    if (authorRow) authorRow.style.display = 'flex';
+                    authorBox.innerHTML = `<button class="card-author-chip" onclick="filterByAuthor('${esc(authorName)}');closeModal('trackDetailModal')" title="클릭 시 이 작성자의 곡만 모아보기" style="max-width:none;font-size:12px;padding:3px 10px;">👤 ${esc(authorName)} ↗</button>`;
+                } else {
+                    if (authorRow) authorRow.style.display = 'none';
+                    authorBox.innerHTML = '-';
+                }
             }
 
             // YouTube Mapping
@@ -5843,7 +5964,101 @@
             }
         }
 
+        async function executeBulkDiscordRefetch() {
+            const targetIds = Array.from(selectedTrackIds);
+            if (targetIds.length === 0) {
+                showToast('디스코드 원본 정보를 복원할 곡을 1개 이상 선택해주세요.', 'warning');
+                return;
+            }
 
+            if (!confirm(`선택한 ${targetIds.length}개 곡에 대해 디스코드 원본 정보(곡명, 유튜브, 카테고리, 작성자) 일괄 복원을 실행하시겠습니까?`)) return;
+
+            showToast(`💬 선택한 ${targetIds.length}개 곡 디스코드 일괄 복원 진행 중...`, 'info');
+
+            try {
+                const res = await apiFetch('/api/audio/discord-refetch-batch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ assetIds: targetIds, apply: true })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(`✅ 디스코드 일괄 복원 완료! (총 ${json.total}개 중 ${json.updated}개 갱신됨)`, 'success');
+                    selectedTrackIds.clear();
+                    toggleMultiSelectMode();
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || '일괄 복원에 실패했습니다.', 'error');
+                }
+            } catch(err) {
+                showToast('일괄 복원 요청 중 오류: ' + (err.message || ''), 'error');
+            }
+        }
+
+        async function executeBulkAiIdentify() {
+            const targetIds = Array.from(selectedTrackIds);
+            if (targetIds.length === 0) {
+                showToast('AI 역추적할 곡을 1개 이상 선택해주세요.', 'warning');
+                return;
+            }
+
+            if (!confirm(`선택한 ${targetIds.length}개 곡에 대해 글로벌 웹 검색 + 이미지 OCR AI 일괄 역추적을 실행하시겠습니까?`)) return;
+
+            showToast(`🤖 선택한 ${targetIds.length}개 곡 AI+OCR 역추적 시작...`, 'info');
+
+            try {
+                const res = await apiFetch('/api/audio/admin/batch-ai-identify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ assetIds: targetIds, apply: true })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(`✅ AI 일괄 역추적 완료! (총 ${json.total}개 중 ${json.updated}개 갱신됨)`, 'success');
+                    selectedTrackIds.clear();
+                    toggleMultiSelectMode();
+                    await loadRealAudios();
+                } else {
+                    showToast(json.message || 'AI 역추적에 실패했습니다.', 'error');
+                }
+            } catch(err) {
+                showToast('AI 역추적 요청 중 오류: ' + (err.message || ''), 'error');
+            }
+        }
+
+        async function executeBulkRobloxTitle() {
+            const targetIds = Array.from(selectedTrackIds);
+            if (targetIds.length === 0) {
+                showToast('Roblox 원본명을 가져올 곡을 1개 이상 선택해주세요.', 'warning');
+                return;
+            }
+
+            if (!confirm(`선택한 ${targetIds.length}개 곡에 대해 공식 Roblox Store 에셋 원본명을 일괄 적용하시겠습니까?`)) return;
+
+            showToast(`🔄 Roblox 에셋명 일괄 동기화 중...`, 'info');
+
+            let updatedCount = 0;
+            for (const rawId of targetIds) {
+                const assetId = String(rawId).replace(/^r_/, '').replace(/^a_/, '');
+                try {
+                    const res = await apiFetch(`/api/audio/roblox-title/${encodeURIComponent(assetId)}`);
+                    const json = await res.json();
+                    if (json.status === 'success' && json.title) {
+                        await apiFetch(`/api/audio/${rawId}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ title: json.title })
+                        });
+                        updatedCount++;
+                    }
+                } catch (_) {}
+            }
+
+            showToast(`✅ Roblox 원본명 동기화 완료 (${updatedCount}/${targetIds.length}개 갱신)`, 'success');
+            selectedTrackIds.clear();
+            toggleMultiSelectMode();
+            await loadRealAudios();
+        }
 
         async function submitAddAudio() {
             const assetId = document.getElementById('newAssetId').value.trim();
