@@ -684,6 +684,218 @@
             font-weight: 700;
         }
 
+        /* ─── HIERARCHICAL SUB-CATEGORY CHIP ROW ─── */
+        .sub-category-chips-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            margin-bottom: 14px;
+            background: rgba(30, 41, 59, 0.55);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: var(--radius-md);
+            backdrop-filter: blur(16px);
+            animation: fadeInSubCats 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+
+        @keyframes fadeInSubCats {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sub-cat-chips-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            white-space: nowrap;
+            flex-shrink: 0;
+            padding-right: 6px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sub-category-carousel {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding: 2px 0;
+            flex: 1;
+        }
+
+        .sub-category-carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .sub-cat-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            user-select: none;
+        }
+
+        .sub-cat-pill:hover {
+            background: rgba(0, 229, 255, 0.15);
+            border-color: rgba(0, 229, 255, 0.4);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .sub-cat-pill.active {
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.25), rgba(99, 102, 241, 0.35));
+            border-color: var(--accent-cyan);
+            color: #fff;
+            font-weight: 800;
+            box-shadow: 0 0 14px rgba(0, 229, 255, 0.35);
+        }
+
+        /* ─── BREADCRUMB NAVIGATION BAR ─── */
+        .category-breadcrumb-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .breadcrumb-item {
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .breadcrumb-item:hover {
+            color: var(--accent-cyan);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .breadcrumb-item.active {
+            color: #fff;
+            cursor: default;
+            font-weight: 800;
+        }
+
+        .breadcrumb-item.active:hover {
+            background: none;
+            color: #fff;
+        }
+
+        .breadcrumb-separator {
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 11px;
+            user-select: none;
+        }
+
+        /* ─── CATEGORY EXPLORATION GALLERY ─── */
+        .category-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .category-gallery-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .category-gallery-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-hover);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+        }
+
+        .category-gallery-cover {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            background: #11151c;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .category-gallery-body {
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .category-gallery-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .category-gallery-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .category-gallery-count {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: rgba(0, 229, 255, 0.15);
+            color: var(--accent-cyan);
+            font-weight: 700;
+        }
+
+        .category-gallery-sub-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .gallery-sub-chip {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .gallery-sub-chip:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #fff;
+        }
+
         /* ─── BATCH ACTION BAR ─── */
         .batch-floating-bar {
             background: rgba(15, 23, 42, 0.95);
@@ -2327,6 +2539,16 @@
                 <button class="carousel-nav-btn carousel-nav-next" id="catCarouselNextBtn" onclick="scrollCatCarousel(1)" aria-label="다음 카테고리" title="다음 카테고리">›</button>
             </div>
 
+            <!-- SUB-CATEGORY / AU SECONDARY CHIP ROW (활성화된 부모 카테고리의 하위 폴더들) -->
+            <div class="sub-category-chips-wrapper" id="subCatChipsWrapper" style="display:none;">
+                <div class="sub-cat-chips-label">
+                    <span>📂</span> <span id="subCatParentTitle">하위 분류:</span>
+                </div>
+                <div class="sub-category-carousel" id="subCatChipsCarousel">
+                    <!-- Sub-category chips loaded dynamically -->
+                </div>
+            </div>
+
             <!-- BATCH ACTION BAR (다중 선택 활성화 시 노출) -->
             <div class="batch-floating-bar" id="batchActionBar" style="display:none;">
                 <div class="batch-bar-left">
@@ -2356,6 +2578,11 @@
                     <button class="batch-action-pill owner-only-feature" style="background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3);color:#fca5a5;" onclick="executeBulkAutoMap()">🎬 유튜브 자동 맵핑</button>
                     <button class="batch-action-pill delete owner-only-feature" onclick="handleBulkDelete()">🗑️ 선택 삭제</button>
                 </div>
+            </div>
+
+            <!-- BREADCRUMB NAVIGATION -->
+            <div class="category-breadcrumb-bar" id="categoryBreadcrumb" style="display:none;">
+                <!-- Breadcrumbs rendered dynamically -->
             </div>
 
             <!-- VIEW HEADER -->
@@ -2454,6 +2681,11 @@
             <!-- 1. TRACKS GRID CONTAINER -->
             <div class="tracks-grid" id="tracksGrid">
                 <!-- 트랙 카드들이 동적으로 렌더링됩니다 -->
+            </div>
+
+            <!-- 2. CATEGORY GALLERY GRID CONTAINER -->
+            <div class="category-gallery-grid" id="categoryGalleryView" style="display:none;">
+                <!-- 카테고리 갤러리 카드들이 동적으로 렌더링됩니다 -->
             </div>
 
             <!-- PAGINATION & PAGE SIZE CONTROLS BAR -->
@@ -3144,12 +3376,16 @@
                     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">선택한 <strong
                             id="bulkModalCount" style="color:var(--accent-cyan)">0</strong>개 곡의 카테고리를 한 번에 변경합니다.</p>
                     <div class="form-group">
-                        <label>기존 카테고리에서 선택</label>
+                        <label>기존 메인 카테고리에서 선택</label>
                         <select class="form-input" id="bulkSelectExisting" style="background:#161b22;"></select>
                     </div>
                     <div class="form-group">
-                        <label>또는 새 카테고리 직접 입력</label>
+                        <label>또는 새 메인 카테고리 직접 입력</label>
                         <input type="text" class="form-input" id="bulkCustomInput" placeholder="신규 카테고리명" />
+                    </div>
+                    <div class="form-group">
+                        <label>하위 분류 / AU 폴더 (선택)</label>
+                        <input type="text" class="form-input" id="bulkSubCategoryInput" placeholder="하위 폴더/AU명 (예: Underfell, 없으면 비워둠)" />
                     </div>
 
                     <div style="margin-top:14px;margin-bottom:14px;padding:10px 12px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:8px;">
@@ -3184,14 +3420,24 @@
                                 <label style="font-size:11px;">Roblox Asset ID</label>
                                 <input type="text" class="form-input" id="editAssetId" disabled style="opacity:0.6;font-family:var(--font-mono);height:32px;" />
                             </div>
-                            <div class="form-group" style="margin-bottom:0;">
+                            <div class="form-group" style="margin-bottom:6px;">
                                 <label style="font-size:11px;display:flex;justify-content:space-between;align-items:center;">
-                                    <span>카테고리 (Category)</span>
-                                    <span style="font-size:10px;color:var(--text-muted);">드롭다운 선택 또는 직접 입력</span>
+                                    <span>메인 카테고리 (Category)</span>
+                                    <span style="font-size:10px;color:var(--text-muted);">드롭다운 또는 직접 입력</span>
                                 </label>
                                 <div style="display:flex;flex-direction:column;gap:5px;">
                                     <select class="form-input" id="editCategorySelect" style="background:#161b22;height:32px;font-size:12px;" onchange="onEditCategorySelectChange()"></select>
-                                    <input type="text" class="form-input" id="editCategory" placeholder="또는 카테고리명 직접 입력" style="height:30px;font-size:12px;" oninput="onEditCategoryInputChange()" />
+                                    <input type="text" class="form-input" id="editCategory" placeholder="메인 카테고리명 직접 입력" style="height:30px;font-size:12px;" oninput="onEditCategoryInputChange()" />
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label style="font-size:11px;display:flex;justify-content:space-between;align-items:center;">
+                                    <span>하위 분류 / AU 폴더 (Sub-Category)</span>
+                                    <span style="font-size:10px;color:var(--text-muted);">선택적</span>
+                                </label>
+                                <div style="display:flex;flex-direction:column;gap:5px;">
+                                    <select class="form-input" id="editSubCategorySelect" style="background:#161b22;height:32px;font-size:12px;" onchange="onEditSubCategorySelectChange()"></select>
+                                    <input type="text" class="form-input" id="editSubCategory" placeholder="하위 폴더/AU명 (예: Underfell, 없으면 비워둠)" style="height:30px;font-size:12px;" />
                                 </div>
                             </div>
                         </div>
@@ -3600,6 +3846,9 @@
         let selectedTrackIds = new Set();
         let currentView = 'all';
         let currentCategory = null;
+        let currentSubCategory = null;
+        let categoryHierarchyList = [];
+        let categoryHierarchyMap = {};
         let currentPage = 1;
         let pageSize = 40;
         let currentPlayingTrackId = null;
@@ -3969,6 +4218,12 @@
             if (cachedTrans) categoryTranslations = cachedTrans;
             const cachedMeta = getFromCache('category_metadata');
             if (cachedMeta) categoryMetadataMap = cachedMeta;
+            const cachedHier = getFromCache('category_hierarchy');
+            if (cachedHier && Array.isArray(cachedHier)) {
+                categoryHierarchyList = cachedHier;
+                categoryHierarchyMap = {};
+                categoryHierarchyList.forEach(item => { categoryHierarchyMap[item.parent] = item; });
+            }
 
             // 2. Fetch fresh from backend
             try {
@@ -3989,6 +4244,17 @@
                     saveToCache('category_metadata', categoryMetadataMap);
                 }
             } catch(e) {}
+
+            try {
+                const res3 = await apiFetch('/api/audio/categories/hierarchy');
+                const json3 = await res3.json();
+                if (json3.status === 'success' && Array.isArray(json3.data)) {
+                    categoryHierarchyList = json3.data;
+                    categoryHierarchyMap = {};
+                    categoryHierarchyList.forEach(item => { categoryHierarchyMap[item.parent] = item; });
+                    saveToCache('category_hierarchy', categoryHierarchyList);
+                }
+            } catch(e) {}
         }
 
         function getCategoryDisplayName(cat) {
@@ -4007,10 +4273,22 @@
                     const m = t.youtubeUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
                     if (m) ytId = m[1];
                 }
+
+                const rawGame = (t.category || t.gameName || 'Music').trim();
+                let resolvedCat = rawGame;
+                let resolvedSubCat = t.subCategory ? String(t.subCategory).trim() : '';
+
+                if (!resolvedSubCat && rawGame.includes('/')) {
+                    const parts = rawGame.split('/');
+                    resolvedCat = parts[0].trim();
+                    resolvedSubCat = parts.slice(1).join('/').trim();
+                }
+
                 return {
                     id: t.id,
                     title: t.title || 'Untitled Track',
-                    cat: t.category || t.gameName || 'Music',
+                    cat: resolvedCat,
+                    subCategory: resolvedSubCat,
                     assetId: t.audioAssetId || t.id,
                     type: t.type || 'global',
                     dur: fmtTime(t.duration),
@@ -4145,6 +4423,7 @@
 
             if (isGitHubPages) {
                 if (currentCategory) params.set('cat', currentCategory);
+                if (currentSubCategory && currentSubCategory !== 'all') params.set('sub', currentSubCategory);
                 if (currentView && currentView !== 'all') params.set('view', currentView);
                 const basePath = pathname || './';
                 const qs = params.toString();
@@ -4157,6 +4436,9 @@
 
             if (currentCategory) {
                 basePath = `${prefix}/category/${encodeURIComponent(currentCategory)}`;
+                if (currentSubCategory && currentSubCategory !== 'all') {
+                    params.set('sub', currentSubCategory);
+                }
             } else if (currentView && currentView !== 'all') {
                 basePath = `${prefix}/view/${encodeURIComponent(currentView)}`;
             } else {
@@ -4191,6 +4473,7 @@
                 const searchParams = new URLSearchParams(window.location.search || '');
 
                 let detectedCategory = null;
+                let detectedSubCategory = null;
                 let detectedView = 'all';
                 let detectedPage = 1;
                 let detectedTrackId = null;
@@ -4220,6 +4503,9 @@
                 // 2. Query parameter overrides (takes precedence or augments)
                 if (searchParams.has('cat') || searchParams.has('category')) {
                     detectedCategory = searchParams.get('cat') || searchParams.get('category');
+                }
+                if (searchParams.has('sub') || searchParams.has('subCategory') || searchParams.has('au')) {
+                    detectedSubCategory = searchParams.get('sub') || searchParams.get('subCategory') || searchParams.get('au');
                 }
                 if (searchParams.has('page') || searchParams.has('p')) {
                     detectedPage = parseInt(searchParams.get('page') || searchParams.get('p'), 10) || 1;
@@ -4289,6 +4575,7 @@
                 if (lockChip) lockChip.classList.toggle('active', isLockedFilterOnly);
 
                 currentCategory = (detectedCategory === 'all' || !detectedCategory) ? null : detectedCategory;
+                currentSubCategory = (detectedSubCategory === 'all' || !detectedSubCategory) ? null : detectedSubCategory;
                 currentView = detectedView || 'all';
                 currentPage = Math.max(1, detectedPage);
 
@@ -4318,6 +4605,7 @@
                 const state = {
                     view: currentView || 'all',
                     category: currentCategory || null,
+                    subCategory: currentSubCategory || null,
                     page: currentPage || 1,
                     pageSize: pageSize || 40,
                     search: document.getElementById('searchInput')?.value || '',
@@ -4349,6 +4637,7 @@
                 const state = JSON.parse(raw);
                 if (state) {
                     currentCategory = state.category || null;
+                    currentSubCategory = state.subCategory || null;
                     const targetPage = state.page || 1;
                     if (state.pageSize) {
                         pageSize = parseInt(state.pageSize, 10) || 40;
@@ -4528,6 +4817,226 @@
             setTimeout(updateCarouselNavButtons, 200);
         }
 
+        function switchMainView(view, syncUrl = true, resetPage = true) {
+            currentView = view || 'all';
+            if (resetPage) currentPage = 1;
+
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active');
+                if (el.getAttribute('data-view') === currentView) {
+                    el.classList.add('active');
+                }
+            });
+
+            // Update main view title
+            const titleEl = document.getElementById('viewTitle');
+            const subTitleEl = document.getElementById('viewSubTitle');
+            const catWrapper = document.getElementById('catChipsCarouselWrapper');
+            const subCatWrapper = document.getElementById('subCatChipsWrapper');
+            const breadcrumbBar = document.getElementById('categoryBreadcrumb');
+            const filterToolbar = document.getElementById('filterSortToolbar');
+            const quickPillsWrap = document.getElementById('quickPillsFilterWrap');
+            const tracksGrid = document.getElementById('tracksGrid');
+            const categoryGallery = document.getElementById('categoryGalleryView');
+
+            if (currentView === 'categories') {
+                if (titleEl) titleEl.textContent = t('audio_ui.view_categories_title', '카테고리 갤러리');
+                if (subTitleEl) subTitleEl.textContent = t('audio_ui.view_categories_sub', '모든 카테고리를 한눈에 탐색하세요.');
+                if (catWrapper) catWrapper.style.display = 'none';
+                if (subCatWrapper) subCatWrapper.style.display = 'none';
+                if (breadcrumbBar) breadcrumbBar.style.display = 'none';
+                if (filterToolbar) filterToolbar.style.display = 'none';
+                if (quickPillsWrap) quickPillsWrap.style.display = 'none';
+                if (tracksGrid) tracksGrid.style.display = 'none';
+                if (categoryGallery) {
+                    categoryGallery.style.display = 'grid';
+                    renderCategoryGallery();
+                }
+            } else {
+                if (categoryGallery) categoryGallery.style.display = 'none';
+                if (tracksGrid) tracksGrid.style.display = 'grid';
+                if (filterToolbar) filterToolbar.style.display = '';
+                if (quickPillsWrap) quickPillsWrap.style.display = '';
+                if (catWrapper) catWrapper.style.display = '';
+
+                if (currentView === 'favorites') {
+                    if (titleEl) titleEl.textContent = t('audio_ui.view_favs_title', '즐겨찾기 음원');
+                    if (subTitleEl) subTitleEl.textContent = t('audio_ui.view_favs_sub', '내가 하트를 누른 오디오 목록입니다.');
+                } else if (currentView === 'pending') {
+                    if (titleEl) titleEl.textContent = t('audio_ui.view_pending_title', '검토 대기 음원');
+                    if (subTitleEl) subTitleEl.textContent = t('audio_ui.view_pending_sub', '검토 승인 대기 중인 오디오 목록입니다.');
+                } else {
+                    if (currentCategory) {
+                        const displayName = getCategoryDisplayName(currentCategory);
+                        if (titleEl) titleEl.textContent = `${displayName}${currentSubCategory ? ' > ' + (currentSubCategory === '__direct__' ? '직속 음원' : currentSubCategory) : ''}`;
+                    } else {
+                        if (titleEl) titleEl.textContent = t('audio_ui.view_all_title', '전체 오디오 라이브러리');
+                    }
+                    updateCounts();
+                }
+            }
+
+            renderCategoryChips();
+            renderCards();
+            if (syncUrl) syncStateToUrl();
+        }
+
+        function filterByCat(cat, subCat = null, preserveSubFilters = false) {
+            // Check Content Warning gate first
+            if (cat && cat !== 'all' && typeof checkCategoryContentWarning === 'function' && !checkCategoryContentWarning(cat)) {
+                return;
+            }
+
+            currentCategory = (cat === 'all' || !cat) ? null : cat;
+            currentSubCategory = subCat;
+            currentPage = 1;
+
+            if (currentView !== 'all') {
+                currentView = 'all';
+                document.querySelectorAll('.nav-item').forEach(el => {
+                    el.classList.toggle('active', el.getAttribute('data-view') === 'all');
+                });
+                const catGallery = document.getElementById('categoryGalleryView');
+                const tracksGrid = document.getElementById('tracksGrid');
+                if (catGallery) catGallery.style.display = 'none';
+                if (tracksGrid) tracksGrid.style.display = 'grid';
+                const ftb = document.getElementById('filterSortToolbar');
+                const qpw = document.getElementById('quickPillsFilterWrap');
+                const ccw = document.getElementById('catChipsCarouselWrapper');
+                if (ftb) ftb.style.display = '';
+                if (qpw) qpw.style.display = '';
+                if (ccw) ccw.style.display = '';
+            }
+
+            const titleEl = document.getElementById('viewTitle');
+            if (currentCategory) {
+                const displayName = getCategoryDisplayName(currentCategory);
+                if (titleEl) titleEl.textContent = `${displayName}${currentSubCategory ? ' > ' + (currentSubCategory === '__direct__' ? '직속 음원' : currentSubCategory) : ''}`;
+            } else {
+                if (titleEl) titleEl.textContent = t('audio_ui.view_all_title', '전체 오디오 라이브러리');
+            }
+
+            renderCategoryChips();
+            renderCards();
+            syncStateToUrl();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function filterBySubCat(subCat) {
+            currentSubCategory = (subCat === 'all' || !subCat) ? null : subCat;
+            currentPage = 1;
+
+            const titleEl = document.getElementById('viewTitle');
+            if (currentCategory) {
+                const displayName = getCategoryDisplayName(currentCategory);
+                if (titleEl) titleEl.textContent = `${displayName}${currentSubCategory ? ' > ' + (currentSubCategory === '__direct__' ? '직속 음원' : currentSubCategory) : ''}`;
+            }
+
+            renderSubCategoryChips();
+            renderCategoryBreadcrumbs();
+            renderCards();
+            syncStateToUrl();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderSubCategoryChips() {
+            const wrapper = document.getElementById('subCatChipsWrapper');
+            const carousel = document.getElementById('subCatChipsCarousel');
+            const parentTitle = document.getElementById('subCatParentTitle');
+            if (!wrapper || !carousel) return;
+
+            if (!currentCategory) {
+                wrapper.style.display = 'none';
+                return;
+            }
+
+            // Find defined sub-categories or tracks with subCategory
+            const hierItem = categoryHierarchyMap[currentCategory];
+            const definedSubs = (hierItem && Array.isArray(hierItem.subCategories)) ? hierItem.subCategories : [];
+            
+            // Also collect any subCategories present in active tracks for this category
+            const subCounts = {};
+            let directCount = 0;
+            let totalInCat = 0;
+
+            const visibleTracks = tracksData.filter(t => t.status !== 'hidden' && t.cat && t.cat.toLowerCase() === currentCategory.toLowerCase());
+            totalInCat = visibleTracks.length;
+
+            visibleTracks.forEach(t => {
+                const sub = (t.subCategory || '').trim();
+                if (sub) {
+                    subCounts[sub] = (subCounts[sub] || 0) + 1;
+                } else {
+                    directCount++;
+                }
+            });
+
+            // Merge defined subs with detected subs
+            const allSubNames = new Set(definedSubs.map(s => s.name));
+            Object.keys(subCounts).forEach(s => allSubNames.add(s));
+
+            if (allSubNames.size === 0) {
+                // No sub-categories for this parent
+                wrapper.style.display = 'none';
+                return;
+            }
+
+            wrapper.style.display = 'flex';
+            if (parentTitle) {
+                parentTitle.textContent = `${getCategoryDisplayName(currentCategory)} AU / 폴더:`;
+            }
+
+            let chipsHtml = '';
+            // 1. [전체 (${totalInCat})] chip
+            const isAllActive = (!currentSubCategory || currentSubCategory === 'all');
+            chipsHtml += `<button class="sub-cat-pill ${isAllActive ? 'active' : ''}" onclick="filterBySubCat('all')">🌐 전체 (${totalInCat})</button>`;
+
+            // 2. [직속/원작 (${directCount})] chip (if there are direct tracks)
+            if (directCount > 0) {
+                const isDirectActive = (currentSubCategory === '__direct__');
+                chipsHtml += `<button class="sub-cat-pill ${isDirectActive ? 'active' : ''}" onclick="filterBySubCat('__direct__')">📁 직속/원작 (${directCount})</button>`;
+            }
+
+            // 3. Sub-category pills sorted by track count
+            const sortedSubList = Array.from(allSubNames).sort((a, b) => (subCounts[b] || 0) - (subCounts[a] || 0));
+            sortedSubList.forEach(subName => {
+                const count = subCounts[subName] || 0;
+                const isSubActive = (currentSubCategory && currentSubCategory.toLowerCase() === subName.toLowerCase());
+                chipsHtml += `<button class="sub-cat-pill ${isSubActive ? 'active' : ''}" onclick="filterBySubCat('${subName.replace(/'/g, "\\'")}')">📂 ${esc(subName)} (${count})</button>`;
+            });
+
+            carousel.innerHTML = chipsHtml;
+        }
+
+        function renderCategoryBreadcrumbs() {
+            const bar = document.getElementById('categoryBreadcrumb');
+            if (!bar) return;
+
+            if (!currentCategory) {
+                bar.style.display = 'none';
+                return;
+            }
+
+            bar.style.display = 'flex';
+            const parentName = getCategoryDisplayName(currentCategory);
+
+            let html = `
+                <span class="breadcrumb-item" onclick="filterByCat('all')">🏠 전체</span>
+                <span class="breadcrumb-separator">›</span>
+                <span class="breadcrumb-item ${!currentSubCategory ? 'active' : ''}" onclick="filterByCat('${currentCategory.replace(/'/g, "\\'")}')">📁 ${esc(parentName)}</span>
+            `;
+
+            if (currentSubCategory) {
+                const subDisplay = (currentSubCategory === '__direct__') ? '직속 음원' : currentSubCategory;
+                html += `
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-item active">📂 ${esc(subDisplay)}</span>
+                `;
+            }
+
+            bar.innerHTML = html;
+        }
+
         function renderCategoryChips() {
             const carousel = document.getElementById('catChipsCarousel');
             if (!carousel) return;
@@ -4549,6 +5058,10 @@
             setupCarouselInteractions();
             scrollActiveCategoryIntoView();
 
+            // Render hierarchical sub-category chips and breadcrumbs
+            renderSubCategoryChips();
+            renderCategoryBreadcrumbs();
+
             // Popular categories in sidebar
             const sidebarCatList = document.getElementById('sidebarCategoryList');
             if (sidebarCatList) {
@@ -4566,6 +5079,81 @@
                     `;
                 }).join('');
             }
+        }
+
+        function renderCategoryGallery() {
+            const gallery = document.getElementById('categoryGalleryView');
+            if (!gallery) return;
+
+            const visibleTracks = tracksData.filter(t => t.status !== 'hidden');
+            const catMap = {};
+
+            visibleTracks.forEach(t => {
+                const c = t.cat || '기타';
+                if (!catMap[c]) {
+                    catMap[c] = {
+                        name: c,
+                        totalCount: 0,
+                        directCount: 0,
+                        subCounts: {},
+                        sampleYt: '',
+                        sampleImg: ''
+                    };
+                }
+                catMap[c].totalCount++;
+                if (t.subCategory) {
+                    catMap[c].subCounts[t.subCategory] = (catMap[c].subCounts[t.subCategory] || 0) + 1;
+                } else {
+                    catMap[c].directCount++;
+                }
+                if (!catMap[c].sampleYt && t.yt) catMap[c].sampleYt = t.yt;
+                if (!catMap[c].sampleImg && t.imageUrl) catMap[c].sampleImg = t.imageUrl;
+            });
+
+            const sortedCatNames = Object.keys(catMap).sort((a, b) => catMap[b].totalCount - catMap[a].totalCount);
+
+            if (sortedCatNames.length === 0) {
+                gallery.innerHTML = `<div style="grid-column:1/-1;padding:60px 20px;text-align:center;color:var(--text-muted)">등록된 카테고리가 없습니다.</div>`;
+                return;
+            }
+
+            gallery.innerHTML = sortedCatNames.map(catName => {
+                const info = catMap[catName];
+                const designatedImg = categoryMetadataMap[catName];
+                let cover = designatedImg || info.sampleImg;
+                if (!cover && info.sampleYt) cover = `https://img.youtube.com/vi/${info.sampleYt}/mqdefault.jpg`;
+                if (!cover) cover = DEFAULT_FALLBACK_IMG;
+
+                const displayName = getCategoryDisplayName(catName);
+                const subNames = Object.keys(info.subCounts).sort((a, b) => info.subCounts[b] - info.subCounts[a]);
+
+                let subChipsHtml = '';
+                if (subNames.length > 0) {
+                    subChipsHtml = `
+                        <div class="category-gallery-sub-chips">
+                            ${subNames.slice(0, 8).map(s => `
+                                <span class="gallery-sub-chip" onclick="event.stopPropagation();filterByCat('${catName.replace(/'/g, "\\'")}', '${s.replace(/'/g, "\\'")}')">
+                                    📂 ${esc(s)} (${info.subCounts[s]})
+                                </span>
+                            `).join('')}
+                            ${subNames.length > 8 ? `<span class="gallery-sub-chip" style="opacity:0.6;">+${subNames.length - 8}개 더보기</span>` : ''}
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="category-gallery-card" onclick="filterByCat('${catName.replace(/'/g, "\\'")}')">
+                        <img src="${esc(cover)}" class="category-gallery-cover" data-cat="${esc(catName)}" onerror="handleImgError(this)" />
+                        <div class="category-gallery-body">
+                            <div class="category-gallery-title-row">
+                                <span class="category-gallery-title">${esc(displayName)}</span>
+                                <span class="category-gallery-count">${info.totalCount}곡</span>
+                            </div>
+                            ${subChipsHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         /* ─── MULTI-DIMENSIONAL SORT & FILTER PIPELINE ─── */
@@ -4621,9 +5209,17 @@
                 list = list.filter(t => t.status === 'pending_review');
             }
 
-            // 2. Category Filter
+            // 2. Category & Sub-Category Hierarchy Filter
             if (currentCategory && currentCategory !== 'all') {
-                list = list.filter(t => t.cat && t.cat.toLowerCase() === currentCategory.toLowerCase());
+                list = list.filter(t => {
+                    const matchesParent = t.cat && t.cat.toLowerCase() === currentCategory.toLowerCase();
+                    if (!matchesParent) return false;
+                    if (!currentSubCategory || currentSubCategory === 'all') return true;
+                    if (currentSubCategory === '__direct__') {
+                        return !t.subCategory || t.subCategory.trim() === '';
+                    }
+                    return t.subCategory && t.subCategory.toLowerCase() === currentSubCategory.toLowerCase();
+                });
             }
 
             // 3. Search Query Filter
@@ -4632,6 +5228,7 @@
                 list = list.filter(t => 
                     (t.title && t.title.toLowerCase().includes(query)) ||
                     (t.cat && t.cat.toLowerCase().includes(query)) ||
+                    (t.subCategory && t.subCategory.toLowerCase().includes(query)) ||
                     (getCategoryDisplayName(t.cat).toLowerCase().includes(query)) ||
                     (t.assetId && String(t.assetId).includes(query)) ||
                     (t.youtubeUrl && t.youtubeUrl.toLowerCase().includes(query)) ||
@@ -5488,7 +6085,7 @@
             }
         }
 
-        function populateEditCategoryDropdown(currentCat) {
+        function populateEditCategoryDropdown(currentCat, currentSubCat = '') {
             const selectEl = document.getElementById('editCategorySelect');
             const inputEl = document.getElementById('editCategory');
             if (!selectEl) return;
@@ -5528,6 +6125,48 @@
             }
 
             if (inputEl) inputEl.value = currentCat || '';
+
+            populateEditSubCategoryDropdown(currentCat, currentSubCat);
+        }
+
+        function populateEditSubCategoryDropdown(parentCat, selectedSub = '') {
+            const subSelectEl = document.getElementById('editSubCategorySelect');
+            const subInputEl = document.getElementById('editSubCategory');
+            if (!subSelectEl) return;
+
+            if (!parentCat || parentCat === '__custom__') {
+                subSelectEl.innerHTML = '<option value="">(하위 분류 없음 / 직접 입력)</option>';
+                if (subInputEl) subInputEl.value = selectedSub || '';
+                return;
+            }
+
+            const hierItem = categoryHierarchyMap[parentCat];
+            const definedSubs = (hierItem && Array.isArray(hierItem.subCategories)) ? hierItem.subCategories : [];
+            const subCounts = {};
+            tracksData.filter(t => t.cat === parentCat).forEach(t => {
+                if (t.subCategory) subCounts[t.subCategory] = (subCounts[t.subCategory] || 0) + 1;
+            });
+
+            const allSubs = new Set(definedSubs.map(s => s.name));
+            Object.keys(subCounts).forEach(s => allSubs.add(s));
+
+            let subOptions = '<option value="">(직속 음원 / 하위 폴더 없음)</option>';
+            Array.from(allSubs).sort().forEach(sub => {
+                const count = subCounts[sub] || 0;
+                subOptions += `<option value="${esc(sub)}">📂 ${esc(sub)}${count > 0 ? ` (${count}곡)` : ''}</option>`;
+            });
+            subOptions += '<option value="__custom__">➕ 직접 입력 (새 AU/폴더...)</option>';
+            subSelectEl.innerHTML = subOptions;
+
+            if (selectedSub && allSubs.has(selectedSub)) {
+                subSelectEl.value = selectedSub;
+            } else if (selectedSub) {
+                subSelectEl.value = '__custom__';
+            } else {
+                subSelectEl.value = '';
+            }
+
+            if (subInputEl) subInputEl.value = selectedSub || '';
         }
 
         function onEditCategorySelectChange() {
@@ -5539,8 +6178,24 @@
                 inputEl.value = '';
                 inputEl.placeholder = '신규 카테고리명 입력...';
                 inputEl.focus();
+                populateEditSubCategoryDropdown('', '');
             } else {
                 inputEl.value = selectEl.value;
+                populateEditSubCategoryDropdown(selectEl.value, '');
+            }
+        }
+
+        function onEditSubCategorySelectChange() {
+            const subSelectEl = document.getElementById('editSubCategorySelect');
+            const subInputEl = document.getElementById('editSubCategory');
+            if (!subSelectEl || !subInputEl) return;
+
+            if (subSelectEl.value === '__custom__') {
+                subInputEl.value = '';
+                subInputEl.placeholder = '신규 AU/하위 폴더명 입력...';
+                subInputEl.focus();
+            } else {
+                subInputEl.value = subSelectEl.value;
             }
         }
 
@@ -5561,6 +6216,7 @@
             if (!matched) {
                 selectEl.value = '__custom__';
             }
+            populateEditSubCategoryDropdown(val, document.getElementById('editSubCategory')?.value || '');
         }
 
         function openEditTrackModal(trackId) {
@@ -5569,7 +6225,7 @@
             document.getElementById('editTrackId').value = t.id;
             document.getElementById('editAssetId').value = t.assetId;
             document.getElementById('editTitle').value = t.title;
-            populateEditCategoryDropdown(t.cat);
+            populateEditCategoryDropdown(t.cat, t.subCategory || '');
             document.getElementById('editYtUrl').value = t.youtubeUrl || '';
             document.getElementById('editImageUrl').value = t.imageUrl || '';
             document.getElementById('editIsVerifiedLocked').checked = (t.isVerifiedLocked === 1);
@@ -5865,6 +6521,7 @@
             const id = document.getElementById('editTrackId').value;
             const title = document.getElementById('editTitle').value.trim();
             const cat = document.getElementById('editCategory').value.trim();
+            const subCat = document.getElementById('editSubCategory')?.value.trim() || null;
             const ytUrl = document.getElementById('editYtUrl').value.trim();
             const imgUrl = document.getElementById('editImageUrl').value.trim();
             const isLocked = document.getElementById('editIsVerifiedLocked').checked ? 1 : 0;
@@ -5877,6 +6534,7 @@
                 const payload = {
                     title: title,
                     gameName: cat,
+                    subCategory: subCat,
                     youtubeUrl: ytUrl,
                     imageUrl: imgUrl,
                     isVerifiedLocked: isLocked,
@@ -7707,6 +8365,7 @@
             const custom = document.getElementById('bulkCustomInput').value.trim();
             const existing = document.getElementById('bulkSelectExisting').value;
             const targetCat = custom || existing;
+            const targetSub = document.getElementById('bulkSubCategoryInput')?.value.trim() || null;
             const autoApprove = document.getElementById('bulkCatAutoApprove')?.checked || false;
 
             if (!targetCat) {
@@ -7721,13 +8380,14 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         audioIds: Array.from(selectedTrackIds),
-                        targetCategory: targetCat,
+                        category: targetCat,
+                        subCategory: targetSub,
                         autoApprove
                     })
                 });
                 const json = await res.json();
                 if (json.status === 'success') {
-                    showToast(json.message || `선택한 ${selectedTrackIds.size}개 곡의 카테고리가 '${targetCat}'(으)로 변경되었습니다.`, 'success');
+                    showToast(json.message || `선택한 ${selectedTrackIds.size}개 곡의 카테고리가 '${targetCat}${targetSub ? ' > ' + targetSub : ''}'(으)로 변경되었습니다.`, 'success');
                     try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
                     closeModal('bulkCategoryModal');
                     selectedTrackIds.clear();
