@@ -1435,6 +1435,34 @@
             min-width: 0;
         }
 
+        .volume-slider-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 75px;
+            height: 36px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        #volumeSlider {
+            width: 100%;
+            height: 5px;
+            accent-color: var(--accent-cyan);
+            cursor: pointer;
+            outline: none;
+            border-radius: 3px;
+        }
+
+        #volumeNormalizerBtn {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 0 8px;
+            border-radius: 8px;
+            width: auto;
+            min-width: 44px;
+        }
+
         .dock-btn.active {
             color: var(--accent-cyan);
             border-color: rgba(0, 229, 255, 0.45);
@@ -1442,18 +1470,18 @@
             text-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
         }
 
-        /* ─── AUDIO VISUALIZER CANVAS ─── */
+        /* ─── AUDIO VISUALIZER CANVAS (ABSOLUTE BACKGROUND) ─── */
         .visualizer-canvas-wrap {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            border-radius: inherit;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            pointer-events: none !important;
+            overflow: hidden !important;
+            border-radius: inherit !important;
             opacity: 0.35;
-            z-index: 0;
+            z-index: 0 !important;
         }
 
         #audioVisualizerCanvas {
@@ -1462,9 +1490,11 @@
             display: block;
         }
 
-        .floating-player-dock > * {
+        .dock-left-track,
+        .dock-center-controls,
+        .dock-right-actions {
             position: relative;
-            z-index: 1;
+            z-index: 2;
         }
 
         /* ─── COMPACT MINI PLAYER (PiP Mode) ─── */
@@ -2492,18 +2522,16 @@
             </div>
 
             <div class="dock-right-actions">
-                <button class="dock-btn" id="volumeNormalizerBtn" onclick="toggleVolumeNormalizer()" title="귀갱 방지 / 볼륨 평준화 (Volume Limiter) ON/OFF" style="font-size:12px;font-weight:700;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:var(--text-secondary);">🛡️ EQ</button>
-                <button class="dock-btn" id="boomboxQuickCopyBtn" onclick="openCurrentTrackBoomboxModal()" title="Roblox 붐박스 명령어 형식으로 복사" style="font-size:14px;">📻</button>
-                <button class="dock-btn" id="volMuteBtn" onclick="toggleMute()" title="음소거 토글 (M)" style="padding:0 4px;font-size:14px;background:none;border:none;cursor:pointer;">🔊</button>
-                <div class="volume-slider-wrap" style="position:relative;display:flex;align-items:center;width:70px;height:24px;cursor:pointer;">
-                    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.7" 
-                        oninput="changeVolume(this.value)" 
-                        style="width:100%;height:5px;accent-color:var(--accent-cyan);cursor:pointer;outline:none;border-radius:3px;" />
+                <button class="dock-btn" id="volumeNormalizerBtn" onclick="toggleVolumeNormalizer()" title="귀갱 방지 / 볼륨 평준화 (Volume Limiter) ON/OFF">🛡️ EQ</button>
+                <button class="dock-btn" id="boomboxQuickCopyBtn" onclick="openCurrentTrackBoomboxModal()" title="Roblox 붐박스 명령어 형식으로 복사">📻</button>
+                <button class="dock-btn" id="volMuteBtn" onclick="toggleMute()" title="음소거 토글 (M)">🔊</button>
+                <div class="volume-slider-wrap">
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.7" oninput="changeVolume(this.value)" />
                 </div>
                 <button class="dock-btn" id="miniPlayerToggleBtn" onclick="toggleMiniPlayerDock()" title="미니 플레이어 모드 전환">🗗</button>
                 <button class="dock-btn" id="hotkeysHelpBtn" onclick="openModal('hotkeysModal')" title="단축키 안내 (?)">⌨️</button>
                 <button class="dock-btn" id="playerDetailBtn" onclick="openCurrentTrackDetail()" title="상세 정보">ℹ️</button>
-                <button class="dock-btn" id="playerCollapseBtn" onclick="togglePlayerDockCollapse(true)" title="플레이어 아래로 내리기/접기 (H)" style="font-size:14px;color:var(--text-muted);">🔻</button>
+                <button class="dock-btn" id="playerCollapseBtn" onclick="togglePlayerDockCollapse(true)" title="플레이어 아래로 내리기/접기 (H)">🔻</button>
             </div>
         </div>
 
