@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16"/>
+      <stop offset="50%" stop-color="#121826"/>
+      <stop offset="100%" stop-color="#0a0e1a"/>
+    </linearGradient>
+
+    <!-- Wave Glow Gradients -->
+    <linearGradient id="waveGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#00e5ff"/>
+    </linearGradient>
+
+    <linearGradient id="circleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#6366f1" stop-opacity="0.05"/>
+    </linearGradient>
+
+    <linearGradient id="glowRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.2"/>
+    </linearGradient>
+
+    <!-- Soft Glow Filter -->
+    <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="subtleGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="400" height="400" fill="url(#bgGrad)"/>
+
+  <!-- Subtle Radial Background Accents -->
+  <circle cx="200" cy="200" r="160" fill="none" stroke="url(#circleGrad)" stroke-width="1" stroke-dasharray="4 8" opacity="0.6"/>
+  <circle cx="200" cy="200" r="120" fill="none" stroke="url(#glowRing)" stroke-width="1.5" opacity="0.4"/>
+  <circle cx="200" cy="200" r="85" fill="rgba(15, 23, 42, 0.6)" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1"/>
+
+  <!-- Glowing Sound Wave Bars (Equalizer / Waveform) -->
+  <g filter="url(#neonGlow)" opacity="0.95">
+    <!-- Center Wave Bars with Rounded Caps -->
+    <rect x="92"  y="180" width="8" height="40" rx="4" fill="url(#waveGrad)" opacity="0.5"/>
+    <rect x="108" y="165" width="8" height="70" rx="4" fill="url(#waveGrad)" opacity="0.65"/>
+    <rect x="124" y="150" width="8" height="100" rx="4" fill="url(#waveGrad)" opacity="0.8"/>
+    <rect x="140" y="130" width="8" height="140" rx="4" fill="url(#waveGrad)" opacity="0.9"/>
+    <rect x="156" y="115" width="8" height="170" rx="4" fill="url(#waveGrad)"/>
+    <rect x="172" y="140" width="8" height="120" rx="4" fill="url(#waveGrad)"/>
+    <rect x="188" y="95"  width="8" height="210" rx="4" fill="url(#waveGrad)"/>
+    <rect x="204" y="110" width="8" height="180" rx="4" fill="url(#waveGrad)"/>
+    <rect x="220" y="135" width="8" height="130" rx="4" fill="url(#waveGrad)"/>
+    <rect x="236" y="120" width="8" height="160" rx="4" fill="url(#waveGrad)"/>
+    <rect x="252" y="145" width="8" height="110" rx="4" fill="url(#waveGrad)" opacity="0.9"/>
+    <rect x="268" y="160" width="8" height="80" rx="4" fill="url(#waveGrad)" opacity="0.8"/>
+    <rect x="284" y="172" width="8" height="56" rx="4" fill="url(#waveGrad)" opacity="0.65"/>
+    <rect x="300" y="185" width="8" height="30" rx="4" fill="url(#waveGrad)" opacity="0.5"/>
+  </g>
+
+  <!-- Ambient Glowing Center Dot / Pulse Ring -->
+  <circle cx="200" cy="200" r="3" fill="#00e5ff" filter="url(#subtleGlow)"/>
+</svg>

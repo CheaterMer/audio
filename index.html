@@ -25,6 +25,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap"
         rel="stylesheet" />
+    <!-- i18n Translation Engine -->
     <script src="./js/i18n.js"></script>
     <style>
         :root {
@@ -392,23 +393,85 @@
             box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
         }
 
-        /* ─── QUICK CATEGORIES CAROUSEL ─── */
+        /* ─── QUICK CATEGORIES CAROUSEL WRAPPER ─── */
+        .category-carousel-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            margin: 0 0 28px 0;
+        }
+
         .category-carousel {
             display: flex;
             align-items: center;
             gap: 10px;
             overflow-x: auto;
-            margin: 0 0 28px 0;
+            margin: 0;
             padding: 6px 2px;
             scrollbar-width: none;
             width: 100%;
             position: relative;
-            z-index: 10;
+            z-index: 1;
             flex-shrink: 0;
+            scroll-behavior: smooth;
+            cursor: grab;
+            user-select: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .category-carousel.is-dragging {
+            cursor: grabbing;
+            scroll-behavior: auto;
         }
 
         .category-carousel::-webkit-scrollbar {
             display: none;
+        }
+
+        .carousel-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            z-index: 10;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .category-carousel-wrapper:hover .carousel-nav-btn.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .carousel-nav-btn:hover {
+            background: rgba(99, 102, 241, 0.9);
+            border-color: rgba(99, 102, 241, 0.6);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 0 16px rgba(99, 102, 241, 0.5);
+        }
+
+        .carousel-nav-prev {
+            left: -14px;
+        }
+
+        .carousel-nav-next {
+            right: -14px;
         }
 
         .cat-tag-pill {
@@ -422,18 +485,21 @@
             white-space: nowrap;
             cursor: pointer;
             transition: all 0.18s ease;
+            flex-shrink: 0;
         }
 
         .cat-tag-pill:hover {
             background: rgba(255, 255, 255, 0.12);
             color: #fff;
+            transform: translateY(-1px);
         }
 
         .cat-tag-pill.active {
-            background: #fff;
-            color: #000;
-            border-color: #fff;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            border-color: rgba(99, 102, 241, 0.6);
             font-weight: 700;
+            box-shadow: 0 0 14px rgba(99, 102, 241, 0.35);
         }
 
         /* ─── LIGHT THEME HIGH CONTRAST ─── */
@@ -2005,8 +2071,12 @@
             </header>
 
             <!-- HORIZONTAL QUICK CATEGORIES (방문자 인기 기준 칩) -->
-            <div class="category-carousel" id="catChipsCarousel">
-                <!-- Loaded dynamically -->
+            <div class="category-carousel-wrapper" id="catChipsCarouselWrapper">
+                <button class="carousel-nav-btn carousel-nav-prev" id="catCarouselPrevBtn" onclick="scrollCatCarousel(-1)" aria-label="이전 카테고리" title="이전 카테고리">‹</button>
+                <div class="category-carousel" id="catChipsCarousel">
+                    <!-- Loaded dynamically -->
+                </div>
+                <button class="carousel-nav-btn carousel-nav-next" id="catCarouselNextBtn" onclick="scrollCatCarousel(1)" aria-label="다음 카테고리" title="다음 카테고리">›</button>
             </div>
 
             <!-- BATCH ACTION BAR (다중 선택 활성화 시 노출) -->
@@ -3869,34 +3939,51 @@
 
                 if (searchParams.has('sort')) {
                     currentSortMode = searchParams.get('sort') || 'recommended';
-                    const sortSel = document.getElementById('sortSelect');
-                    if (sortSel) sortSel.value = currentSortMode;
+                } else {
+                    currentSortMode = 'recommended';
                 }
+                const sortSel = document.getElementById('sortSelect');
+                if (sortSel) sortSel.value = currentSortMode;
+
                 if (searchParams.has('yt')) {
                     currentFilterYoutube = searchParams.get('yt') || 'all';
-                    const ytSel = document.getElementById('filterYoutubeSelect');
-                    if (ytSel) ytSel.value = currentFilterYoutube;
+                } else {
+                    currentFilterYoutube = 'all';
                 }
+                const ytSel = document.getElementById('filterYoutubeSelect');
+                if (ytSel) ytSel.value = currentFilterYoutube;
+
                 if (searchParams.has('play')) {
                     currentFilterPlayability = searchParams.get('play') || 'all';
-                    const playSel = document.getElementById('filterPlayabilitySelect');
-                    if (playSel) playSel.value = currentFilterPlayability;
+                } else {
+                    currentFilterPlayability = 'all';
                 }
+                const playSel = document.getElementById('filterPlayabilitySelect');
+                if (playSel) playSel.value = currentFilterPlayability;
+
                 if (searchParams.has('author')) {
                     currentFilterAuthor = searchParams.get('author') || 'all';
-                    const authSel = document.getElementById('filterAuthorSelect');
-                    if (authSel) authSel.value = currentFilterAuthor;
+                } else {
+                    currentFilterAuthor = 'all';
                 }
+                const authSel = document.getElementById('filterAuthorSelect');
+                if (authSel) authSel.value = currentFilterAuthor;
+
                 if (searchParams.has('rbx')) {
                     currentFilterRobloxStatus = searchParams.get('rbx') || 'all';
-                    const rbxSel = document.getElementById('filterRobloxStatusSelect');
-                    if (rbxSel) rbxSel.value = currentFilterRobloxStatus;
+                } else {
+                    currentFilterRobloxStatus = 'all';
                 }
+                const rbxSel = document.getElementById('filterRobloxStatusSelect');
+                if (rbxSel) rbxSel.value = currentFilterRobloxStatus;
+
                 if (searchParams.has('locked')) {
                     isLockedFilterOnly = searchParams.get('locked') === '1' || searchParams.get('locked') === 'true';
-                    const lockChip = document.getElementById('filterLockedChip');
-                    if (lockChip) lockChip.classList.toggle('active', isLockedFilterOnly);
+                } else {
+                    isLockedFilterOnly = false;
                 }
+                const lockChip = document.getElementById('filterLockedChip');
+                if (lockChip) lockChip.classList.toggle('active', isLockedFilterOnly);
 
                 currentCategory = (detectedCategory === 'all' || !detectedCategory) ? null : detectedCategory;
                 currentView = detectedView || 'all';
@@ -4033,21 +4120,131 @@
             document.getElementById('viewSubTitle').textContent = `총 ${total.toLocaleString()}개의 오디오 에셋이 준비되어 있습니다.`;
         }
 
+        // Carousel scroll button handler
+        function scrollCatCarousel(direction) {
+            const carousel = document.getElementById('catChipsCarousel');
+            if (!carousel) return;
+            const scrollAmount = Math.max(240, carousel.clientWidth * 0.6) * direction;
+            carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            setTimeout(updateCarouselNavButtons, 250);
+        }
+
+        // Update nav buttons visibility based on scroll position
+        function updateCarouselNavButtons() {
+            const carousel = document.getElementById('catChipsCarousel');
+            const prevBtn = document.getElementById('catCarouselPrevBtn');
+            const nextBtn = document.getElementById('catCarouselNextBtn');
+            if (!carousel || !prevBtn || !nextBtn) return;
+
+            const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+            if (maxScroll <= 5) {
+                prevBtn.classList.remove('visible');
+                nextBtn.classList.remove('visible');
+                return;
+            }
+            if (carousel.scrollLeft > 10) {
+                prevBtn.classList.add('visible');
+            } else {
+                prevBtn.classList.remove('visible');
+            }
+            if (carousel.scrollLeft < maxScroll - 10) {
+                nextBtn.classList.add('visible');
+            } else {
+                nextBtn.classList.remove('visible');
+            }
+        }
+
+        // Setup wheel, drag-to-scroll, and auto-centering for catChipsCarousel
+        function setupCarouselInteractions() {
+            const carousel = document.getElementById('catChipsCarousel');
+            if (!carousel || carousel._hasInteractionsBound) return;
+            carousel._hasInteractionsBound = true;
+
+            // 1. Mouse wheel horizontal scrolling
+            carousel.addEventListener('wheel', (e) => {
+                if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && e.deltaY !== 0) {
+                    e.preventDefault();
+                    carousel.scrollLeft += e.deltaY * 1.1;
+                    updateCarouselNavButtons();
+                }
+            }, { passive: false });
+
+            // 2. Mouse Drag-to-Scroll (Grab & Drag)
+            let isDown = false;
+            let startX = 0;
+            let scrollLeft = 0;
+            let hasMoved = false;
+
+            carousel.addEventListener('mousedown', (e) => {
+                if (e.button !== 0) return;
+                isDown = true;
+                hasMoved = false;
+                carousel.classList.add('is-dragging');
+                startX = e.pageX - carousel.offsetLeft;
+                scrollLeft = carousel.scrollLeft;
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (!isDown) return;
+                isDown = false;
+                carousel.classList.remove('is-dragging');
+            });
+
+            carousel.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - carousel.offsetLeft;
+                const walk = (x - startX) * 1.4;
+                if (Math.abs(walk) > 4) {
+                    hasMoved = true;
+                }
+                carousel.scrollLeft = scrollLeft - walk;
+                updateCarouselNavButtons();
+            });
+
+            // Prevent pill click after drag motion
+            carousel.addEventListener('click', (e) => {
+                if (hasMoved) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, true);
+
+            carousel.addEventListener('scroll', updateCarouselNavButtons, { passive: true });
+            window.addEventListener('resize', updateCarouselNavButtons, { passive: true });
+        }
+
+        // Center active category chip into view
+        function scrollActiveCategoryIntoView() {
+            const carousel = document.getElementById('catChipsCarousel');
+            if (!carousel) return;
+            const activePill = carousel.querySelector('.cat-tag-pill.active');
+            if (activePill) {
+                activePill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+            setTimeout(updateCarouselNavButtons, 200);
+        }
+
         function renderCategoryChips() {
             const carousel = document.getElementById('catChipsCarousel');
+            if (!carousel) return;
             const counts = {};
             const visibleTracks = tracksData.filter(t => t.status !== 'hidden');
             visibleTracks.forEach(t => {
                 if (t.cat) counts[t.cat] = (counts[t.cat] || 0) + 1;
             });
 
-            const sortedCats = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).slice(0, 12);
+            const sortedCats = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+            const topCatsForCarousel = sortedCats.slice(0, 30);
             let html = `<div class="cat-tag-pill ${!currentCategory ? 'active' : ''}" onclick="filterByCat('all')">${t('audio_ui.all_cats', '전체')} (${visibleTracks.length})</div>`;
-            sortedCats.forEach(cat => {
+            topCatsForCarousel.forEach(cat => {
                 const displayName = getCategoryDisplayName(cat);
-                html += `<div class="cat-tag-pill ${currentCategory === cat ? 'active' : ''}" onclick="filterByCat('${cat}')">${displayName} (${counts[cat]})</div>`;
+                html += `<div class="cat-tag-pill ${currentCategory === cat ? 'active' : ''}" onclick="filterByCat('${cat.replace(/'/g, "\\'")}')">${displayName} (${counts[cat]})</div>`;
             });
             carousel.innerHTML = html;
+
+            setupCarouselInteractions();
+            scrollActiveCategoryIntoView();
 
             // Popular categories in sidebar
             const sidebarCatList = document.getElementById('sidebarCategoryList');
@@ -4057,7 +4254,7 @@
                     let thumb = categoryMetadataMap[cat] || (sample ? `https://img.youtube.com/vi/${sample.yt}/mqdefault.jpg` : DEFAULT_FALLBACK_IMG);
                     const displayName = getCategoryDisplayName(cat);
                     return `
-                        <div class="cat-chip-item ${currentCategory === cat ? 'active' : ''}" onclick="filterByCat('${cat}')">
+                        <div class="cat-chip-item ${currentCategory === cat ? 'active' : ''}" onclick="filterByCat('${cat.replace(/'/g, "\\'")}')">
                             <img src="${thumb}" class="cat-thumb" onerror="handleImgError(this)" />
                             <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${displayName}</span>
                             <span class="cat-count">${counts[cat]}</span>
@@ -5763,7 +5960,39 @@
             toggleMobileSidebar(false);
         }
 
-        function filterByCat(cat, forcePass = false, updateUrl = true) {
+        function resetSubFilters(options = { resetSearch: true, resetSubFilters: true }) {
+            if (options.resetSearch) {
+                const sInput = document.getElementById('searchInput');
+                if (sInput) sInput.value = '';
+            }
+            if (options.resetSubFilters) {
+                currentFilterYoutube = 'all';
+                currentFilterPlayability = 'all';
+                currentFilterAuthor = 'all';
+                currentFilterRobloxStatus = 'all';
+                isLockedFilterOnly = false;
+                activeQuickPill = 'all';
+
+                const ytSel = document.getElementById('filterYoutubeSelect');
+                if (ytSel) ytSel.value = 'all';
+                const playSel = document.getElementById('filterPlayabilitySelect');
+                if (playSel) playSel.value = 'all';
+                const authSel = document.getElementById('filterAuthorSelect');
+                if (authSel) authSel.value = 'all';
+                const rbxSel = document.getElementById('filterRobloxStatusSelect');
+                if (rbxSel) rbxSel.value = 'all';
+                const lockBtn = document.getElementById('filterLockedBtn');
+                if (lockBtn) lockBtn.classList.remove('active');
+                const lockChip = document.getElementById('filterLockedChip');
+                if (lockChip) lockChip.classList.remove('active');
+
+                document.querySelectorAll('.quick-filter-pill, .filter-pill, .filter-chip').forEach(p => {
+                    p.classList.toggle('active', p.dataset.filter === 'all' || !p.dataset.filter);
+                });
+            }
+        }
+
+        function filterByCat(cat, forcePass = false, updateUrl = true, resetFilters = true) {
             const BAN_WARNING_CATEGORY = '이거 사용해서 밴 먹어도 내 책임 아님 ㅅㄱ  you can get ban';
             if (cat === BAN_WARNING_CATEGORY) {
                 if (!isUserLoggedIn && !isAdminMode) {
@@ -5775,6 +6004,9 @@
 
             if (!forcePass && !checkCategoryWarningGate(cat)) {
                 return;
+            }
+            if (resetFilters) {
+                resetSubFilters({ resetSearch: true, resetSubFilters: true });
             }
             currentCategory = (cat === 'all') ? null : cat;
             currentPage = 1;
@@ -6629,15 +6861,13 @@
 
             initWebAudioEngine();
 
-            // Multi-Proxy Fallback Chain for Audio Playback:
-            // 1. Direct Cloudflare Worker Proxy
-            // 2. Backend Stream Proxy (/api/audio/preview/:id)
-            // 3. YouTube Fallback
+            // Stream Proxy Chain:
+            // 1. Direct Backend Stream Proxy (/api/audio/preview/:id)
+            // 2. YouTube Fallback
             const assetId = t.assetId || String(t.id).replace(/^r_/, '');
-            const cfProxyUrl = `https://roblox-audio-proxy.wolfdmitrich-github.workers.dev/preview/${assetId}`;
             const backendProxyUrl = `${API_BASE}/api/audio/preview/${t.id}`;
 
-            playerAudio.src = cfProxyUrl;
+            playerAudio.src = backendProxyUrl;
             playerAudio.volume = isMuted ? 0 : (isVolumeNormalizerEnabled ? Math.min(0.75, currentVolume) : currentVolume);
 
             playerAudio.play().then(() => {
@@ -6646,19 +6876,9 @@
                 if (ytPlayerInstance && typeof ytPlayerInstance.pauseVideo === 'function') {
                     try { ytPlayerInstance.pauseVideo(); } catch(e) {}
                 }
-            }).catch(e => {
-                // Step 2 fallback: Try backend proxy stream
-                playerAudio.src = backendProxyUrl;
-                playerAudio.play().then(() => {
-                    isYtPlayingMode = false;
-                    if (ytProgressInterval) clearInterval(ytProgressInterval);
-                    if (ytPlayerInstance && typeof ytPlayerInstance.pauseVideo === 'function') {
-                        try { ytPlayerInstance.pauseVideo(); } catch(e) {}
-                    }
-                }).catch(() => {
-                    // Step 3 fallback: YouTube / Private Asset Notice
-                    triggerYtFallback(t);
-                });
+            }).catch(() => {
+                // Fallback: YouTube / Private Asset Notice
+                triggerYtFallback(t);
             });
         }
 

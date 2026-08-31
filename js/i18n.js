@@ -31,6 +31,57 @@
         });
     }
 
+    // Helper to find the base URL where i18n.js is hosted
+    function getI18nBaseUrl() {
+        try {
+            if (document.currentScript && document.currentScript.src) {
+                const src = document.currentScript.src;
+                const idx = src.lastIndexOf('/js/i18n.js');
+                if (idx !== -1) return src.substring(0, idx + 1);
+                const idx2 = src.lastIndexOf('/i18n.js');
+                if (idx2 !== -1) return src.substring(0, idx2 + 1);
+            }
+            const scripts = document.getElementsByTagName('script');
+            for (let i = scripts.length - 1; i >= 0; i--) {
+                const src = scripts[i].src || '';
+                if (src.includes('i18n.js')) {
+                    const idx = src.lastIndexOf('/js/i18n.js');
+                    if (idx !== -1) return src.substring(0, idx + 1);
+                    const idx2 = src.lastIndexOf('/i18n.js');
+                    if (idx2 !== -1) return src.substring(0, idx2 + 1);
+                }
+            }
+        } catch (_) {}
+        return '';
+    }
+
+    async function loadJsonLocale(langCode) {
+        const base = getI18nBaseUrl();
+        const candidates = [
+            base ? `${base}locales/${langCode}.json` : null,
+            `./locales/${langCode}.json`,
+            `/locales/${langCode}.json`,
+            `../locales/${langCode}.json`,
+            `../../locales/${langCode}.json`
+        ].filter(Boolean);
+
+        const uniqueCandidates = Array.from(new Set(candidates));
+
+        for (const url of uniqueCandidates) {
+            try {
+                const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                if (!res.ok) continue;
+                const cType = res.headers.get('content-type') || '';
+                if (cType.includes('text/html')) continue;
+                const text = await res.text();
+                if (text && !text.trim().startsWith('<')) {
+                    return JSON.parse(text);
+                }
+            } catch (_) {}
+        }
+        return null;
+    }
+
     // Initialize Language
     async function initLanguage() {
         let lang = localStorage.getItem('preferred_lang') || localStorage.getItem('kadio-lang');
@@ -42,23 +93,24 @@
         localStorage.setItem('preferred_lang', currentLang);
         localStorage.setItem('kadio-lang', currentLang);
 
-
         try {
-            // Load KO dictionary first as translation source mapping (using relative path for GitHub Pages compatibility)
-            const koRes = await fetch('./locales/ko.json');
-            koSourceDict = await koRes.json();
-            flattenTranslations(koSourceDict);
+            // Load KO dictionary first as translation source mapping
+            const koData = await loadJsonLocale('ko');
+            if (koData) {
+                koSourceDict = koData;
+                flattenTranslations(koSourceDict);
+            }
 
             // Load target language translations
-            const res = await fetch(`./locales/${currentLang}.json`);
-            if (!res.ok) throw new Error(`Failed to load ${currentLang} locale`);
-            translations = await res.json();
-        } catch (err) {
-            console.error('[i18n] Error loading translation files:', err);
-            if (currentLang !== 'ko') {
-                currentLang = 'ko';
+            if (currentLang === 'ko') {
                 translations = koSourceDict;
+            } else {
+                const targetData = await loadJsonLocale(currentLang);
+                translations = targetData || koSourceDict;
             }
+        } catch (err) {
+            console.warn('[i18n] Notice loading translation files:', err.message);
+            translations = koSourceDict;
         }
 
         // Translate the static DOM nodes

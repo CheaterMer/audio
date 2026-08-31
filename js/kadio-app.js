@@ -693,12 +693,72 @@
   }
 
   /* ─── Quick Category Chips Carousel ─── */
+  function setupCarouselInteractions() {
+    if (!el.catChipsCarousel || el.catChipsCarousel._hasInteractionsBound) return;
+    el.catChipsCarousel._hasInteractionsBound = true;
+
+    // Mouse wheel horizontal scroll
+    el.catChipsCarousel.addEventListener('wheel', (e) => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && e.deltaY !== 0) {
+        e.preventDefault();
+        el.catChipsCarousel.scrollLeft += e.deltaY * 1.1;
+      }
+    }, { passive: false });
+
+    // Drag-to-scroll
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+    let hasMoved = false;
+
+    el.catChipsCarousel.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      isDown = true;
+      hasMoved = false;
+      el.catChipsCarousel.classList.add('is-dragging');
+      startX = e.pageX - el.catChipsCarousel.offsetLeft;
+      scrollLeft = el.catChipsCarousel.scrollLeft;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!isDown) return;
+      isDown = false;
+      el.catChipsCarousel.classList.remove('is-dragging');
+    });
+
+    el.catChipsCarousel.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - el.catChipsCarousel.offsetLeft;
+      const walk = (x - startX) * 1.4;
+      if (Math.abs(walk) > 4) {
+        hasMoved = true;
+      }
+      el.catChipsCarousel.scrollLeft = scrollLeft - walk;
+    });
+
+    el.catChipsCarousel.addEventListener('click', (e) => {
+      if (hasMoved) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+  }
+
+  function scrollActiveCategoryIntoView() {
+    if (!el.catChipsCarousel) return;
+    const activePill = el.catChipsCarousel.querySelector('.cat-tag-pill.active');
+    if (activePill) {
+      activePill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }
+
   function renderCategoryChipsCarousel() {
     if (!el.catChipsCarousel) return;
     const isAllActive = !S.activeCategory;
 
     // Pick top categories
-    const topCats = S.categories.filter(c => c !== PENDING_REVIEW_CATEGORY).slice(0, 9);
+    const topCats = S.categories.filter(c => c !== PENDING_REVIEW_CATEGORY).slice(0, 30);
     let html = `<div class="cat-tag-pill ${isAllActive ? 'active' : ''}" onclick="window._kadio.filterByChip('all')">전체 (${S.tracks.length})</div>`;
 
     topCats.forEach(cat => {
@@ -708,9 +768,16 @@
     });
 
     el.catChipsCarousel.innerHTML = html;
+    setupCarouselInteractions();
+    scrollActiveCategoryIntoView();
   }
 
   function filterByChip(cat) {
+    // Reset search and sub-filters when switching category
+    S.searchQuery = '';
+    if (el.searchInput) el.searchInput.value = '';
+    if (el.searchClearBtn) el.searchClearBtn.style.display = 'none';
+
     if (cat === 'all') {
       S.activeCategory = null;
     } else {
@@ -787,7 +854,7 @@
           return `
             <div class="inflow-card" id="inflowCard_${t.id}">
               <div class="inflow-card-row">
-                <img src="${esc(coverSrc || '/images/default-audio-cover.svg')}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;background:#161b22;" onerror="this.src='/images/default-audio-cover.svg'" />
+                <img src="${esc(coverSrc || (typeof DEFAULT_FALLBACK_IMG !== 'undefined' ? DEFAULT_FALLBACK_IMG : '/images/default-audio-cover.svg'))}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;background:#161b22;" onerror="typeof handleImgError === 'function' ? handleImgError(this) : (this.src=(typeof DEFAULT_FALLBACK_IMG !== 'undefined' ? DEFAULT_FALLBACK_IMG : '/images/default-audio-cover.svg'))" />
                 <div style="flex:1;overflow:hidden;">
                   <div style="font-size:11px;color:var(--c-accent);font-family:'DM Mono',monospace;margin-bottom:2px;">
                     🎵 ${esc(t.audioAssetId || t.id)}
@@ -2028,7 +2095,7 @@
       const imageUrl = $('addImageUrl').value.trim();
       const type = $('addType').value;
       if (!title || !audioAssetId) return toast('제목과 Asset ID는 필수입니다', 'error');
-      await addAudio({ title, audioAssetId, type, gameName, imageUrl, previewUrl: `https://roblox-audio-proxy.wolfdmitrich-github.workers.dev/preview/${audioAssetId}` });
+      await addAudio({ title, audioAssetId, type, gameName, imageUrl, previewUrl: `/api/audio/preview/${audioAssetId}` });
       closeModal();
     });
 
