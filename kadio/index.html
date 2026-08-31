@@ -7223,7 +7223,9 @@
                 document.getElementById('playerPlayBtn').textContent = '▶';
             } else if (playerAudio.src) {
                 initWebAudioEngine();
-                if (webAudioCtx && webAudioCtx.state === 'suspended') webAudioCtx.resume();
+                if (typeof webAudioCtx !== 'undefined' && webAudioCtx && webAudioCtx.state === 'suspended') {
+                    try { webAudioCtx.resume(); } catch(_) {}
+                }
                 playerAudio.play().then(() => {
                     document.getElementById('playerPlayBtn').textContent = '⏸';
                 }).catch(() => {
