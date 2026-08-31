@@ -1242,32 +1242,35 @@
             margin-top: 2px;
         }
 
-        /* ─── FLOATING DOCK MINI PLAYER ─── */
+        /* ─── FLOATING DOCK MINI PLAYER (FLUID RESPONSIVE) ─── */
         .floating-player-dock {
             position: fixed;
-            bottom: 24px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            width: min(840px, 92vw);
-            background: rgba(15, 23, 42, 0.88);
+            width: min(880px, calc(100vw - 32px));
+            background: rgba(15, 23, 42, 0.9);
             backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
             border: 1px solid rgba(255, 255, 255, 0.12);
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
             border-radius: 22px;
-            padding: 10px 20px;
+            padding: 8px 18px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 20px;
+            gap: 16px;
             z-index: 100;
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, bottom 0.3s ease, border-radius 0.3s ease;
         }
 
         .dock-left-track {
             display: flex;
             align-items: center;
             gap: 12px;
-            width: 220px;
-            flex-shrink: 0;
+            flex: 1 1 200px;
+            max-width: 260px;
+            min-width: 0; /* Crucial for child flex text truncation */
         }
 
         .dock-cover {
@@ -1277,12 +1280,15 @@
             object-fit: cover;
             background: #1e293b;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
         }
 
         .dock-track-info {
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            min-width: 0;
+            flex: 1;
         }
 
         .dock-track-title {
@@ -1292,27 +1298,33 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            display: block;
         }
 
         .dock-track-sub {
             font-size: 11px;
             font-family: var(--font-mono);
             color: var(--accent-cyan);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
         }
 
         .dock-center-controls {
-            flex: 1;
+            flex: 1.5 1 320px;
+            max-width: 400px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 4px;
-            max-width: 380px;
+            min-width: 0;
         }
 
         .dock-control-btns {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .dock-btn {
@@ -1320,10 +1332,17 @@
             border: none;
             color: var(--text-secondary);
             cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .dock-btn:hover {
             color: #fff;
+            background: rgba(255, 255, 255, 0.08);
         }
 
         .dock-play-btn {
@@ -1336,7 +1355,11 @@
             box-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
             border: none;
             cursor: pointer;
-            transition: transform 0.15s ease;
+            transition: transform 0.15s ease, background 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
         .dock-play-btn:hover {
@@ -1352,6 +1375,7 @@
             font-size: 11px;
             font-family: var(--font-mono);
             color: var(--text-muted);
+            min-width: 0;
         }
 
         .dock-progress-bar {
@@ -1361,6 +1385,7 @@
             border-radius: 2px;
             position: relative;
             cursor: pointer;
+            min-width: 0;
         }
 
         .dock-progress-fill {
@@ -1374,9 +1399,11 @@
         .dock-right-actions {
             display: flex;
             align-items: center;
-            gap: 10px;
-            width: 220px;
+            gap: 6px;
+            flex: 1 1 200px;
+            max-width: 260px;
             justify-content: flex-end;
+            min-width: 0;
         }
 
         .dock-btn.active {
@@ -1393,7 +1420,7 @@
             height: 100%;
             pointer-events: none;
             overflow: hidden;
-            border-radius: var(--radius-lg);
+            border-radius: inherit;
             opacity: 0.35;
             z-index: 0;
         }
@@ -1412,16 +1439,22 @@
         /* ─── COMPACT MINI PLAYER (PiP Mode) ─── */
         .floating-player-dock.mini-dock-mode {
             left: auto;
-            right: 24px;
-            bottom: 24px;
+            right: 20px;
+            bottom: calc(20px + env(safe-area-inset-bottom, 0px));
             transform: none;
-            width: 320px;
-            padding: 12px 16px;
+            width: min(320px, calc(100vw - 32px));
+            padding: 12px 14px;
             flex-direction: column;
-            gap: 10px;
-            background: rgba(13, 17, 23, 0.95);
+            gap: 8px;
+            background: rgba(13, 17, 23, 0.96);
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
             border: 1px solid rgba(84, 199, 255, 0.3);
+            border-radius: var(--radius-md);
+        }
+
+        .floating-player-dock.mini-dock-mode .dock-left-track {
+            max-width: 100%;
+            width: 100%;
         }
 
         .floating-player-dock.mini-dock-mode .dock-center-controls {
@@ -1431,45 +1464,43 @@
 
         .floating-player-dock.mini-dock-mode .dock-right-actions {
             width: 100%;
+            max-width: 100%;
             justify-content: space-between;
         }
 
         /* ─── DOCK MINIMIZE / COLLAPSE (SLIDE DOWN) ─── */
-        .floating-player-dock {
-            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, bottom 0.3s ease;
-        }
-
         .floating-player-dock.dock-hidden-down {
-            transform: translateX(-50%) translateY(calc(100% + 40px)) !important;
+            transform: translateX(-50%) translateY(calc(100% + 50px)) !important;
             opacity: 0 !important;
             pointer-events: none !important;
         }
 
         .floating-player-dock.mini-dock-mode.dock-hidden-down {
-            transform: translateY(calc(100% + 40px)) !important;
+            transform: translateY(calc(100% + 50px)) !important;
         }
 
         .player-expand-tab {
             position: fixed;
-            bottom: 20px;
-            right: 24px;
+            bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+            right: 16px;
             z-index: 1000;
             display: none;
             align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
-            background: rgba(15, 23, 42, 0.88);
+            gap: 8px;
+            padding: 8px 14px;
+            background: rgba(15, 23, 42, 0.92);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(0, 229, 255, 0.35);
             border-radius: 9999px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 0 15px rgba(0, 229, 255, 0.2);
             color: #f1f5f9;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             user-select: none;
+            max-width: calc(100vw - 32px);
         }
 
         .player-expand-tab:hover {
@@ -1862,7 +1893,8 @@
             z-index: 95;
         }
 
-        @media (max-width: 900px) {
+        /* ─── FLUID RESPONSIVE MEDIA QUERIES ─── */
+        @media (max-width: 1024px) {
             .app-container {
                 grid-template-columns: 1fr;
             }
@@ -1873,7 +1905,7 @@
                 left: -290px;
                 width: 280px;
                 height: 100vh;
-                z-index: 100;
+                z-index: 110;
                 transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
             }
@@ -1891,7 +1923,7 @@
             }
 
             .main-wrapper {
-                padding: 16px 16px 130px 16px;
+                padding: 14px 14px 120px 14px;
             }
 
             .top-navbar {
@@ -1910,46 +1942,153 @@
             }
 
             .tracks-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
                 gap: 12px;
+            }
+
+            .filter-sort-toolbar {
+                padding: 10px 12px;
+            }
+
+            .filter-select-box {
+                flex: 1 1 calc(50% - 6px);
+                min-width: 140px;
+            }
+        }
+
+        /* Tablet & Mobile Landscape (< 768px) */
+        @media (max-width: 768px) {
+            .main-wrapper {
+                padding: 12px 12px 105px 12px;
+            }
+
+            .tracks-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 10px;
             }
 
             .track-card {
                 border-radius: 12px;
             }
 
+            .card-body {
+                padding: 10px 12px;
+            }
+
             .track-name {
                 font-size: 13px;
             }
 
+            /* Responsive Floating Player Dock */
             .floating-player-dock {
-                width: 100%;
-                left: 0;
-                bottom: 0;
-                transform: none;
-                border-radius: 16px 16px 0 0;
-                padding: 10px 16px;
-                box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.5);
-            }
-
-            .dock-right-actions {
-                display: none;
+                width: 100% !important;
+                left: 0 !important;
+                bottom: 0 !important;
+                transform: none !important;
+                border-radius: 18px 18px 0 0 !important;
+                padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) 12px !important;
+                box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.7);
+                gap: 8px;
             }
 
             .dock-left-track {
-                max-width: 140px;
+                flex: 1 1 auto;
+                min-width: 0;
+                max-width: calc(100% - 210px);
+                gap: 8px;
+            }
+
+            .dock-cover {
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
             }
 
             .dock-track-title {
-                max-width: 90px;
                 font-size: 12px;
+            }
+
+            .dock-track-sub {
+                font-size: 10px;
+            }
+
+            .dock-center-controls {
+                flex: 0 0 auto;
+                max-width: none;
+            }
+
+            .dock-control-btns {
+                gap: 6px;
+            }
+
+            #playerShuffleBtn, #playerRepeatBtn {
+                display: none;
+            }
+
+            .dock-progress-wrap {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 3px;
+                padding: 0;
+                gap: 0;
+            }
+
+            #playerCurTime, #playerTotalTime {
+                display: none;
+            }
+
+            .dock-progress-bar {
+                width: 100%;
+                height: 3px;
+                border-radius: 0;
+                background: rgba(255, 255, 255, 0.12);
+            }
+
+            .dock-right-actions {
+                display: flex !important;
+                flex: 0 0 auto;
+                width: auto;
+                gap: 4px;
+            }
+
+            #volumeNormalizerBtn, .volume-slider-wrap, #miniPlayerToggleBtn, #hotkeysHelpBtn {
+                display: none !important;
+            }
+
+            #boomboxQuickCopyBtn, #volMuteBtn, #playerDetailBtn, #playerCollapseBtn {
+                display: inline-flex !important;
+                font-size: 13px;
+                padding: 4px 6px;
+            }
+
+            .pagination-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+                padding: 12px 14px;
+            }
+
+            .pagination-bar > div {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .pagination-btn-group {
+                justify-content: center;
             }
         }
 
+        /* Mobile Portrait (< 480px) */
         @media (max-width: 480px) {
             .tracks-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 8px;
+            }
+
+            .card-cover-wrap {
+                height: 105px;
             }
 
             .card-body {
@@ -1959,10 +2098,12 @@
             .card-category-badge {
                 font-size: 9px;
                 padding: 2px 6px;
+                left: 30px;
             }
 
             .track-meta-row {
-                margin: 4px 0;
+                margin: 3px 0;
+                font-size: 10px;
             }
 
             .roblox-id-badge {
@@ -1970,9 +2111,38 @@
             }
 
             .quick-tool-btn {
-                height: 36px;
-                padding: 0 10px;
+                height: 34px;
+                padding: 0 8px;
                 font-size: 11px;
+            }
+
+            .filter-select-box {
+                flex: 1 1 100%;
+                min-width: 100%;
+            }
+
+            .dock-left-track {
+                max-width: calc(100% - 175px);
+            }
+
+            .dock-cover {
+                width: 36px;
+                height: 36px;
+            }
+
+            .dock-play-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 12px;
+            }
+
+            .dock-right-actions {
+                gap: 2px;
+            }
+
+            .dock-btn {
+                padding: 3px;
+                font-size: 12px;
             }
         }
     </style>
@@ -6572,12 +6742,19 @@
 
             function resizeCanvas() {
                 if (canvas.parentElement) {
-                    canvas.width = canvas.parentElement.clientWidth || 300;
-                    canvas.height = canvas.parentElement.clientHeight || 70;
+                    const rect = canvas.parentElement.getBoundingClientRect();
+                    canvas.width = Math.round(rect.width) || canvas.parentElement.clientWidth || 300;
+                    canvas.height = Math.round(rect.height) || canvas.parentElement.clientHeight || 70;
                 }
             }
             resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
+            window.addEventListener('resize', resizeCanvas, { passive: true });
+            if (window.ResizeObserver && canvas.parentElement) {
+                try {
+                    const ro = new ResizeObserver(() => resizeCanvas());
+                    ro.observe(canvas.parentElement);
+                } catch(_) {}
+            }
 
             let phase = 0;
             function draw() {
