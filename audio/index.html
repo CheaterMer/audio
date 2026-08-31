@@ -2496,16 +2496,56 @@
 
                     <!-- 2. CATEGORY IMAGE & MULTILINGUAL TRANSLATION TAB -->
                     <div id="adminTabCatImg" style="display:none;">
-                        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">카테고리별 대표 배경 이미지와 국가별 다국어 번역명을 설정합니다.</p>
+                        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">
+                            카테고리별 <strong>대표 배경 이미지</strong>와 <strong>국가별 다국어 번역명</strong>을 설정합니다. (지정된 대표 이미지는 모든 화면에서 최우선으로 고정 노출됩니다)
+                        </p>
+
                         <div class="form-group">
-                            <label>카테고리 선택 (*필수)</label>
+                            <label style="font-size:11px;font-weight:700;">카테고리 선택 (*필수)</label>
                             <select class="form-input" id="adminCatSelect" style="background:#161b22;" onchange="onAdminCatSelectChange()"></select>
                         </div>
-                        <div class="form-group">
-                            <label>대표 이미지 URL</label>
-                            <input type="text" class="form-input" id="adminCatImgUrl" placeholder="https://example.com/image.png" />
+
+                        <!-- Category Image Setting & Live Preview Box -->
+                        <div style="display:flex;gap:14px;align-items:flex-start;background:rgba(0,0,0,0.3);padding:14px;border-radius:8px;border:1px solid var(--border-subtle);margin-bottom:14px;">
+                            <!-- Left: Image Preview -->
+                            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <div style="width:100px;height:100px;border-radius:8px;overflow:hidden;background:#161b22;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;position:relative;">
+                                    <img id="adminCatImgPreview" src="../images/default-audio-cover.svg" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='../images/default-audio-cover.svg'" />
+                                </div>
+                                <button type="button" class="quick-tool-btn" style="height:26px;padding:0 8px;font-size:10px;color:#f87171;" onclick="clearAdminCatImage()" title="현재 등록된 대표 이미지 삭제">🗑️ 이미지 삭제</button>
+                            </div>
+
+                            <!-- Right: 3 Selection Methods -->
+                            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:10px;">
+                                <!-- Option 1: URL input -->
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label style="font-size:11px;">🌐 대표 이미지 URL 직접 입력</label>
+                                    <input type="text" class="form-input" id="adminCatImgUrl" placeholder="https://example.com/image.png" style="height:34px;" oninput="onAdminCatImgUrlInput(this.value)" />
+                                </div>
+
+                                <!-- Option 2: Local File Upload -->
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <label class="quick-tool-btn" style="flex:1;height:34px;justify-content:center;cursor:pointer;background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.3);color:#a5b4fc;margin:0;">
+                                        <span>📁 PC 로컬 이미지 파일 업로드</span>
+                                        <input type="file" id="adminCatFileInput" accept="image/*" style="display:none;" onchange="handleAdminCatFileUpload(event)" />
+                                    </label>
+                                </div>
+
+                                <!-- Option 3: Track Thumbnails Picker Grid -->
+                                <div>
+                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                                        <span style="font-size:11px;color:var(--text-muted);">🎬 카테고리 내 등록된 곡 썸네일 중 선택:</span>
+                                        <span style="font-size:10px;color:var(--accent-cyan);cursor:pointer;" onclick="renderAdminCatThumbPicker()">🔄 새로고침</span>
+                                    </div>
+                                    <div id="adminCatThumbPickerGrid" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;max-height:75px;">
+                                        <!-- Dynamically populated sample track covers -->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div style="margin-top:14px;padding:12px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid var(--border-subtle);">
+
+                        <!-- Multilingual Translations Form -->
+                        <div style="margin-top:10px;padding:12px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid var(--border-subtle);">
                             <div style="font-size:12px;font-weight:700;color:var(--accent-cyan);margin-bottom:10px;">🌐 국가별 카테고리 번역 등록 (선택)</div>
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                                 <div class="form-group" style="margin-bottom:6px;">
@@ -2534,7 +2574,7 @@
                                 </div>
                             </div>
                         </div>
-                        <button class="quick-tool-btn primary" style="width:100%;height:40px;justify-content:center;margin-top:14px;" onclick="saveCategoryImgAndTranslations()">이미지 & 다국어 번역 일괄 저장</button>
+                        <button class="quick-tool-btn primary" style="width:100%;height:40px;justify-content:center;margin-top:14px;font-weight:700;" onclick="saveCategoryImgAndTranslations()">💾 이미지 & 다국어 번역 일괄 저장</button>
                     </div>
 
                     <!-- 2.5 CATEGORY CONTENT WARNING SETTINGS TAB (NEW) -->
@@ -3363,6 +3403,13 @@
 
         function handleImgError(img) {
             if (!img) return;
+            const isDesignated = (img.dataset.designated === '1');
+            if (isDesignated) {
+                img.onerror = null;
+                img.src = DEFAULT_FALLBACK_IMG;
+                return;
+            }
+
             const step = parseInt(img.dataset.fallbackStep || '0', 10);
             
             // Step 1: Fallback to Roblox CDN Thumbnail if available
@@ -4260,12 +4307,13 @@
             const sidebarCatList = document.getElementById('sidebarCategoryList');
             if (sidebarCatList) {
                 sidebarCatList.innerHTML = sortedCats.slice(0, 7).map(cat => {
+                    const designatedImg = categoryMetadataMap[cat];
                     const sample = visibleTracks.find(t => t.cat === cat && t.yt);
-                    let thumb = categoryMetadataMap[cat] || (sample ? `https://img.youtube.com/vi/${sample.yt}/mqdefault.jpg` : DEFAULT_FALLBACK_IMG);
+                    const thumb = designatedImg || (sample ? `https://img.youtube.com/vi/${sample.yt}/mqdefault.jpg` : DEFAULT_FALLBACK_IMG);
                     const displayName = getCategoryDisplayName(cat);
                     return `
                         <div class="cat-chip-item ${currentCategory === cat ? 'active' : ''}" onclick="filterByCat('${cat.replace(/'/g, "\\'")}')">
-                            <img src="${thumb}" class="cat-thumb" onerror="handleImgError(this)" />
+                            <img src="${esc(thumb)}" class="cat-thumb" data-cat="${esc(cat)}" data-designated="${designatedImg ? '1' : '0'}" onerror="handleImgError(this)" />
                             <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${displayName}</span>
                             <span class="cat-count">${counts[cat]}</span>
                         </div>
@@ -5912,12 +5960,13 @@
             const sortedCats = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
 
             grid.innerHTML = sortedCats.map(cat => {
+                const designatedImg = categoryMetadataMap[cat];
                 const sample = tracksData.find(t => t.cat === cat && t.yt);
-                let thumb = categoryMetadataMap[cat] || (sample ? `https://img.youtube.com/vi/${sample.yt}/mqdefault.jpg` : DEFAULT_FALLBACK_IMG);
+                const thumb = designatedImg || (sample ? `https://img.youtube.com/vi/${sample.yt}/mqdefault.jpg` : DEFAULT_FALLBACK_IMG);
                 const displayName = getCategoryDisplayName(cat);
                 return `
-                <div class="category-gallery-card" onclick="filterByCat('${cat}')">
-                    <img src="${thumb}" class="cat-card-bg-img" onerror="handleImgError(this)" />
+                <div class="category-gallery-card" onclick="filterByCat('${cat.replace(/'/g, "\\'")}')">
+                    <img src="${esc(thumb)}" class="cat-card-bg-img" data-cat="${esc(cat)}" data-designated="${designatedImg ? '1' : '0'}" onerror="handleImgError(this)" />
                     <div class="cat-card-title">${displayName}</div>
                     <div class="cat-card-count">${counts[cat]} Tracks</div>
                 </div>
@@ -7440,14 +7489,125 @@
         function onAdminCatSelectChange() {
             const cat = document.getElementById('adminCatSelect')?.value;
             if (!cat) return;
+            const currentImg = categoryMetadataMap[cat] || '';
             const imgInput = document.getElementById('adminCatImgUrl');
-            if (imgInput) imgInput.value = categoryMetadataMap[cat] || '';
+            if (imgInput) imgInput.value = currentImg;
+
+            const previewEl = document.getElementById('adminCatImgPreview');
+            if (previewEl) {
+                previewEl.src = currentImg || DEFAULT_FALLBACK_IMG;
+            }
+
+            renderAdminCatThumbPicker(cat);
 
             const trans = categoryTranslations[cat] || {};
             ['ko', 'en', 'ja', 'zh', 'ru', 'vi'].forEach(lang => {
                 const el = document.getElementById(`catTrans_${lang}`);
                 if (el) el.value = trans[lang] || '';
             });
+        }
+
+        function onAdminCatImgUrlInput(url) {
+            const previewEl = document.getElementById('adminCatImgPreview');
+            if (previewEl) {
+                previewEl.src = (url || '').trim() || DEFAULT_FALLBACK_IMG;
+            }
+        }
+
+        function clearAdminCatImage() {
+            const imgInput = document.getElementById('adminCatImgUrl');
+            if (imgInput) imgInput.value = '';
+            const previewEl = document.getElementById('adminCatImgPreview');
+            if (previewEl) previewEl.src = DEFAULT_FALLBACK_IMG;
+            renderAdminCatThumbPicker();
+            showToast('대표 이미지가 비워졌습니다. [일괄 저장]을 클릭하면 삭제가 확정됩니다.', 'info');
+        }
+
+        function renderAdminCatThumbPicker(catOverride) {
+            const cat = catOverride || document.getElementById('adminCatSelect')?.value;
+            const grid = document.getElementById('adminCatThumbPickerGrid');
+            if (!grid || !cat) return;
+
+            const currentImg = document.getElementById('adminCatImgUrl')?.value.trim() || categoryMetadataMap[cat] || '';
+
+            // Find tracks in this category
+            const catTracks = tracksData.filter(t => t.cat === cat);
+            const thumbs = new Set();
+
+            catTracks.forEach(t => {
+                if (t.imageUrl) thumbs.add(t.imageUrl);
+                if (t.yt) thumbs.add(`https://img.youtube.com/vi/${t.yt}/mqdefault.jpg`);
+                if (t.robloxThumbnailUrl && !t.robloxThumbnailUrl.includes('BrokenImage')) thumbs.add(t.robloxThumbnailUrl);
+            });
+
+            const uniqueThumbs = Array.from(thumbs).slice(0, 18);
+
+            if (uniqueThumbs.length === 0) {
+                grid.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:8px;">이 카테고리에 등록된 곡 썸네일이 없습니다.</div>';
+                return;
+            }
+
+            grid.innerHTML = uniqueThumbs.map((url) => {
+                const isSelected = (currentImg === url);
+                return `
+                    <div style="flex-shrink:0;width:80px;height:50px;border-radius:6px;overflow:hidden;border:2px solid ${isSelected ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.15)'};cursor:pointer;position:relative;background:#161b22;"
+                        onclick="selectAdminCatThumb('${esc(url)}')" title="클릭하여 대표 이미지로 선택">
+                        <img src="${esc(url)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.display='none'" />
+                        ${isSelected ? '<span style="position:absolute;top:2px;right:2px;background:var(--accent-cyan);color:#000;font-size:9px;font-weight:900;border-radius:50%;width:14px;height:14px;display:flex;align-items:center;justify-content:center;">✓</span>' : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectAdminCatThumb(url) {
+            const imgInput = document.getElementById('adminCatImgUrl');
+            if (imgInput) imgInput.value = url;
+            const previewEl = document.getElementById('adminCatImgPreview');
+            if (previewEl) previewEl.src = url;
+            renderAdminCatThumbPicker();
+            showToast('🖼️ 썸네일 선택 완료! 하단의 [일괄 저장] 버튼을 눌러 확정하세요.', 'success');
+        }
+
+        async function handleAdminCatFileUpload(event) {
+            const file = event.target?.files?.[0];
+            if (!file) return;
+
+            const cat = document.getElementById('adminCatSelect')?.value;
+            if (!cat) {
+                showToast('카테고리를 먼저 선택해주세요.', 'error');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('파일 크기는 10MB 이하만 업로드 가능합니다.', 'error');
+                return;
+            }
+
+            showToast('📁 카테고리 이미지 업로드 중...', 'info');
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const dataUrl = e.target.result;
+                try {
+                    const res = await apiFetch('/api/audio/settings/categories/upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ category_name: cat, fileData: dataUrl })
+                    });
+                    const json = await res.json();
+                    if (json.status === 'success' && json.url) {
+                        const imgInput = document.getElementById('adminCatImgUrl');
+                        if (imgInput) imgInput.value = json.url;
+                        const previewEl = document.getElementById('adminCatImgPreview');
+                        if (previewEl) previewEl.src = json.url;
+                        showToast('✅ 로컬 이미지가 성공적으로 업로드되었습니다! [일괄 저장]을 눌러 확정하세요.', 'success');
+                    } else {
+                        showToast(json.message || '업로드 실패', 'error');
+                    }
+                } catch(err) {
+                    showToast('업로드 중 오류 발생: ' + err.message, 'error');
+                }
+            };
+            reader.readAsDataURL(file);
         }
 
         async function saveCategoryImgAndTranslations() {
@@ -7459,14 +7619,19 @@
             }
 
             try {
-                // 1. Save Image Metadata if provided
+                // 1. Save or Delete Image Metadata
+                await apiFetch('/api/audio/categories/metadata', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ category: cat, imageUrl: imgUrl })
+                });
+
                 if (imgUrl) {
-                    await apiFetch('/api/audio/categories/metadata', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ category: cat, imageUrl: imgUrl })
-                    });
+                    categoryMetadataMap[cat] = imgUrl;
+                } else {
+                    delete categoryMetadataMap[cat];
                 }
+                try { saveToCache('category_metadata', categoryMetadataMap); } catch(_) {}
 
                 // 2. Save Translations
                 const translations = {};
@@ -7481,10 +7646,15 @@
                     body: JSON.stringify({ categoryKey: cat, translations })
                 });
 
-                showToast(`카테고리 '${cat}' 설정 및 다국어 번역이 저장되었습니다.`, 'success');
-                await loadRealAudios();
+                if (!categoryTranslations[cat]) categoryTranslations[cat] = {};
+                Object.assign(categoryTranslations[cat], translations);
+                try { saveToCache('category_translations', categoryTranslations); } catch(_) {}
+
+                showToast(`🎉 카테고리 '${cat}' 대표 이미지 및 다국어 번역이 저장되었습니다!`, 'success');
+                try { localStorage.removeItem('kadio_cache_tracks_data'); } catch(e) {}
+                await loadRealAudios(true);
             } catch(e) {
-                showToast('설정 저장 중 오류가 발생했습니다.', 'error');
+                showToast('설정 저장 중 오류가 발생했습니다: ' + (e.message || ''), 'error');
             }
         }
 
@@ -7945,7 +8115,10 @@
             const cats = Array.from(new Set(tracksData.map(t => t.cat).filter(Boolean))).sort();
             
             if (catSelect) {
-                catSelect.innerHTML = cats.map(c => `<option value="${c}">${getCategoryDisplayName(c)} (${c})</option>`).join('');
+                catSelect.innerHTML = cats.map(c => {
+                    const hasImg = !!categoryMetadataMap[c];
+                    return `<option value="${c}">${hasImg ? '🖼️ ' : '⚪ '}${getCategoryDisplayName(c)} (${c})</option>`;
+                }).join('');
                 onAdminCatSelectChange();
             }
             if (warnCatSelect) {
