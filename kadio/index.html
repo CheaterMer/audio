@@ -19,14 +19,14 @@
     <meta name="twitter:description" content="Discover, search, and manage Roblox audio assets with real-time verification and YouTube integration." />
     <meta name="twitter:image" content="https://mer.r-e.kr/images/icon128.png" />
 
-    <link rel="icon" type="image/png" href="./images/icon128.png" />
+    <link rel="icon" type="image/png" href="../images/icon128.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap"
         rel="stylesheet" />
     <!-- i18n Translation Engine -->
-    <script src="./js/i18n.js"></script>
+    <script src="../js/i18n.js"></script>
     <style>
         :root {
             --bg-base: #090c10;
@@ -2248,7 +2248,7 @@
             </div>
 
             <div class="dock-left-track">
-                <img src="./images/default-audio-cover.svg" class="dock-cover" id="playerCoverImg"
+                <img src="../images/default-audio-cover.svg" class="dock-cover" id="playerCoverImg"
                     onerror="handleImgError(this)" />
                 <div class="dock-track-info">
                     <span class="dock-track-title" id="playerTitle">재생 중인 곡 없음</span>
@@ -2890,7 +2890,7 @@
                     <input type="hidden" id="editTrackId" />
                     
                     <div style="display:flex;gap:14px;margin-bottom:14px;align-items:center;">
-                        <img id="editImgPreview" src="./images/default-audio-cover.svg" 
+                        <img id="editImgPreview" src="../images/default-audio-cover.svg" 
                             style="width:72px;height:72px;border-radius:10px;object-fit:cover;border:1px solid var(--border-subtle);background:#161b22;"
                             onerror="handleImgError(this)" />
                         <div style="flex:1;">
@@ -3076,7 +3076,7 @@
                     <!-- Cover + Title Banner -->
                     <div style="display:flex;gap:16px;align-items:center;background:rgba(255,255,255,0.03);padding:14px;border-radius:12px;border:1px solid var(--border-subtle);">
                         <div style="position:relative;width:80px;height:80px;flex-shrink:0;">
-                            <img id="detailCoverImg" src="./images/default-audio-cover.svg" 
+                            <img id="detailCoverImg" src="../images/default-audio-cover.svg" 
                                 style="width:80px;height:80px;border-radius:10px;object-fit:cover;border:1px solid var(--border-subtle);background:#161b22;"
                                 onerror="handleImgError(this)" />
                             <div class="play-overlay-btn" id="detailPlayDemoBtn" title="재생" style="position:absolute;inset:0;margin:auto;width:38px;height:38px;font-size:16px;">▶</div>
@@ -3359,7 +3359,7 @@
         }
         const escapeHtml = esc;
 
-        const DEFAULT_FALLBACK_IMG = './images/default-audio-cover.svg';
+        const DEFAULT_FALLBACK_IMG = '../images/default-audio-cover.svg';
 
         function handleImgError(img) {
             if (!img) return;
