@@ -4836,13 +4836,13 @@
 
             if (window.location.hostname.includes('github.io')) {
                 // GitHub Pages environment: use dedicated SSG track URL for perfect Discord Rich Embeds
-                shareUrl = `https://cheatermer.github.io/my-audio-web/track/${encodeURIComponent(shareParam)}`;
+                shareUrl = `https://cheatermer.github.io/audio/track/${encodeURIComponent(shareParam)}`;
             } else if (window.location.hostname.includes('mer.r-e.kr')) {
                 // Production backend domain
                 shareUrl = `https://mer.r-e.kr/audio?trackId=${encodeURIComponent(shareParam)}`;
             } else {
                 // Local dev or fallback: default to github pages track URL or current origin
-                shareUrl = `https://cheatermer.github.io/my-audio-web/track/${encodeURIComponent(shareParam)}`;
+                shareUrl = `https://cheatermer.github.io/audio/track/${encodeURIComponent(shareParam)}`;
             }
 
             const toastMsg = t('audio_ui.detail_share_copied_toast', '🔗 오디오 공유 링크가 복사되었습니다! (디스코드에 붙여넣으면 리치 임베드가 표시됩니다)');
