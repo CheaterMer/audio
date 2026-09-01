@@ -3525,17 +3525,26 @@
                 </div>
                 <div class="modal-body">
                     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">선택한 <strong
-                            id="bulkModalCount" style="color:var(--accent-cyan)">0</strong>개 곡의 카테고리를 한 번에 변경합니다.</p>
-                    <div class="form-group">
-                        <label>기존 메인 카테고리에서 선택</label>
-                        <select class="form-input" id="bulkSelectExisting" style="background:#161b22;"></select>
+                            id="bulkModalCount" style="color:var(--accent-cyan)">0</strong>개 곡의 카테고리와 하위 폴더를 한 번에 변경합니다.</p>
+                    
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label style="font-weight:700;font-size:12px;">1. 메인 카테고리 선택</label>
+                        <select class="form-input" id="bulkSelectExisting" onchange="onBulkMainCategoryChange(this.value)" style="background:#161b22;"></select>
                     </div>
-                    <div class="form-group">
-                        <label>또는 새 메인 카테고리 직접 입력</label>
-                        <input type="text" class="form-input" id="bulkCustomInput" placeholder="신규 카테고리명" />
+                    <div class="form-group" style="margin-bottom:14px;">
+                        <label style="font-size:11px;color:var(--text-muted);">또는 새 메인 카테고리 직접 입력</label>
+                        <input type="text" class="form-input" id="bulkCustomInput" placeholder="신규 메인 카테고리명 (직접 입력 시 우선 적용)" />
                     </div>
-                    <div class="form-group">
-                        <label>하위 분류 / AU 폴더 (선택)</label>
+
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label style="font-weight:700;font-size:12px;">2. 하위 분류 / AU 폴더 (서브 카테고리)</label>
+                        <select class="form-input" id="bulkSelectSubCategory" onchange="onBulkSubCategorySelectChange(this.value)" style="background:#161b22;">
+                            <option value="">📁 하위 폴더 없음 (직속/원작)</option>
+                            <option value="__custom__">✏️ 새 하위 폴더 직접 입력...</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="bulkSubCustomWrap" style="margin-bottom:14px;">
+                        <label style="font-size:11px;color:var(--text-muted);">하위 폴더 직접 입력 / 세부 수정</label>
                         <input type="text" class="form-input" id="bulkSubCategoryInput" placeholder="하위 폴더/AU명 (예: Underfell, 없으면 비워둠)" />
                     </div>
 
@@ -8662,10 +8671,22 @@
         }
 
         async function executeBulkCategory() {
-            const custom = document.getElementById('bulkCustomInput').value.trim();
-            const existing = document.getElementById('bulkSelectExisting').value;
+            const custom = document.getElementById('bulkCustomInput')?.value.trim() || '';
+            const existing = document.getElementById('bulkSelectExisting')?.value || '';
             const targetCat = custom || existing;
-            const targetSub = document.getElementById('bulkSubCategoryInput')?.value.trim() || null;
+
+            const subSelectVal = document.getElementById('bulkSelectSubCategory')?.value || '';
+            const subInputVal = document.getElementById('bulkSubCategoryInput')?.value.trim() || '';
+            let targetSub = null;
+
+            if (subSelectVal === '__custom__') {
+                targetSub = subInputVal || null;
+            } else if (subSelectVal) {
+                targetSub = subSelectVal;
+            } else {
+                targetSub = subInputVal || null;
+            }
+
             const autoApprove = document.getElementById('bulkCatAutoApprove')?.checked || false;
 
             if (!targetCat) {

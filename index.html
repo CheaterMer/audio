@@ -3525,17 +3525,26 @@
                 </div>
                 <div class="modal-body">
                     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">선택한 <strong
-                            id="bulkModalCount" style="color:var(--accent-cyan)">0</strong>개 곡의 카테고리를 한 번에 변경합니다.</p>
-                    <div class="form-group">
-                        <label>기존 메인 카테고리에서 선택</label>
-                        <select class="form-input" id="bulkSelectExisting" style="background:#161b22;"></select>
+                            id="bulkModalCount" style="color:var(--accent-cyan)">0</strong>개 곡의 카테고리와 하위 폴더를 한 번에 변경합니다.</p>
+                    
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label style="font-weight:700;font-size:12px;">1. 메인 카테고리 선택</label>
+                        <select class="form-input" id="bulkSelectExisting" onchange="onBulkMainCategoryChange(this.value)" style="background:#161b22;"></select>
                     </div>
-                    <div class="form-group">
-                        <label>또는 새 메인 카테고리 직접 입력</label>
-                        <input type="text" class="form-input" id="bulkCustomInput" placeholder="신규 카테고리명" />
+                    <div class="form-group" style="margin-bottom:14px;">
+                        <label style="font-size:11px;color:var(--text-muted);">또는 새 메인 카테고리 직접 입력</label>
+                        <input type="text" class="form-input" id="bulkCustomInput" placeholder="신규 메인 카테고리명 (직접 입력 시 우선 적용)" />
                     </div>
-                    <div class="form-group">
-                        <label>하위 분류 / AU 폴더 (선택)</label>
+
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label style="font-weight:700;font-size:12px;">2. 하위 분류 / AU 폴더 (서브 카테고리)</label>
+                        <select class="form-input" id="bulkSelectSubCategory" onchange="onBulkSubCategorySelectChange(this.value)" style="background:#161b22;">
+                            <option value="">📁 하위 폴더 없음 (직속/원작)</option>
+                            <option value="__custom__">✏️ 새 하위 폴더 직접 입력...</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="bulkSubCustomWrap" style="margin-bottom:14px;">
+                        <label style="font-size:11px;color:var(--text-muted);">하위 폴더 직접 입력 / 세부 수정</label>
                         <input type="text" class="form-input" id="bulkSubCategoryInput" placeholder="하위 폴더/AU명 (예: Underfell, 없으면 비워둠)" />
                     </div>
 
@@ -8662,10 +8671,22 @@
         }
 
         async function executeBulkCategory() {
-            const custom = document.getElementById('bulkCustomInput').value.trim();
-            const existing = document.getElementById('bulkSelectExisting').value;
+            const custom = document.getElementById('bulkCustomInput')?.value.trim() || '';
+            const existing = document.getElementById('bulkSelectExisting')?.value || '';
             const targetCat = custom || existing;
-            const targetSub = document.getElementById('bulkSubCategoryInput')?.value.trim() || null;
+
+            const subSelectVal = document.getElementById('bulkSelectSubCategory')?.value || '';
+            const subInputVal = document.getElementById('bulkSubCategoryInput')?.value.trim() || '';
+            let targetSub = null;
+
+            if (subSelectVal === '__custom__') {
+                targetSub = subInputVal || null;
+            } else if (subSelectVal) {
+                targetSub = subSelectVal;
+            } else {
+                targetSub = subInputVal || null;
+            }
+
             const autoApprove = document.getElementById('bulkCatAutoApprove')?.checked || false;
 
             if (!targetCat) {
@@ -9354,11 +9375,78 @@
         }
 
         function openAddAudioModal() { openModal('addAudioModal'); }
+
         function openBulkCategoryModal() { 
+            const countEl = document.getElementById('bulkModalCount');
+            if (countEl) countEl.textContent = selectedTrackIds.size;
+
             const sel = document.getElementById('bulkSelectExisting');
-            const cats = Array.from(new Set(tracksData.map(t => t.cat).filter(Boolean)));
-            sel.innerHTML = cats.map(c => `<option value="${c}">${getCategoryDisplayName(c)} (${c})</option>`).join('');
+            const customInput = document.getElementById('bulkCustomInput');
+            if (customInput) customInput.value = '';
+
+            const cats = Array.from(new Set(tracksData.map(t => t.cat).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+            if (sel) {
+                sel.innerHTML = `<option value="">-- 기존 메인 카테고리 선택 --</option>` + 
+                    cats.map(c => `<option value="${esc(c)}">${esc(getCategoryDisplayName(c))} (${esc(c)})</option>`).join('');
+                
+                // If there's a currently active category, default select it
+                if (currentCategory && cats.includes(currentCategory)) {
+                    sel.value = currentCategory;
+                } else if (cats.length > 0) {
+                    sel.value = cats[0];
+                }
+            }
+
+            onBulkMainCategoryChange(sel ? sel.value : '');
             openModal('bulkCategoryModal');
+        }
+
+        function onBulkMainCategoryChange(selectedCat) {
+            const subSelect = document.getElementById('bulkSelectSubCategory');
+            const subInput = document.getElementById('bulkSubCategoryInput');
+            const customWrap = document.getElementById('bulkSubCustomWrap');
+            if (!subSelect) return;
+
+            const cat = selectedCat || document.getElementById('bulkSelectExisting')?.value || '';
+            if (subInput) subInput.value = '';
+
+            if (!cat) {
+                subSelect.innerHTML = `<option value="">📁 하위 폴더 없음 (직속/원작)</option><option value="__custom__">✏️ 새 하위 폴더 직접 입력...</option>`;
+                if (customWrap) customWrap.style.display = 'block';
+                return;
+            }
+
+            // Find subCategories from categoryHierarchyMap & active tracks
+            const hierItem = categoryHierarchyMap[cat];
+            const definedSubs = (hierItem && Array.isArray(hierItem.subCategories)) ? hierItem.subCategories.map(s => s.name) : [];
+            const trackSubs = tracksData.filter(t => t.cat && t.cat.toLowerCase() === cat.toLowerCase() && t.subCategory).map(t => t.subCategory.trim());
+            const allSubs = Array.from(new Set([...definedSubs, ...trackSubs])).filter(Boolean).sort((a, b) => a.localeCompare(b));
+
+            let optionsHtml = `<option value="">📁 하위 폴더 없음 (직속/원작)</option>`;
+            allSubs.forEach(sub => {
+                optionsHtml += `<option value="${esc(sub)}">📂 ${esc(sub)}</option>`;
+            });
+            optionsHtml += `<option value="__custom__">✏️ 새 하위 폴더 직접 입력...</option>`;
+
+            subSelect.innerHTML = optionsHtml;
+            subSelect.value = '';
+            if (customWrap) customWrap.style.display = 'block';
+        }
+
+        function onBulkSubCategorySelectChange(val) {
+            const subInput = document.getElementById('bulkSubCategoryInput');
+            const customWrap = document.getElementById('bulkSubCustomWrap');
+            if (val === '__custom__') {
+                if (customWrap) customWrap.style.display = 'block';
+                if (subInput) {
+                    subInput.value = '';
+                    subInput.focus();
+                }
+            } else if (val) {
+                if (subInput) subInput.value = val;
+            } else {
+                if (subInput) subInput.value = '';
+            }
         }
 
         function switchAdminTab(tab, btn) {
