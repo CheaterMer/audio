@@ -802,10 +802,147 @@
             color: #fff;
         }
 
-        .breadcrumb-separator {
-            color: rgba(255, 255, 255, 0.25);
+        /* ─── FOLDER HERO CARDS SECTION (카테고리 내 하위 폴더 우선 노출) ─── */
+        .folder-hero-section {
+            margin-bottom: 24px;
+            padding: 16px 18px;
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(14px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            animation: fadeInDown 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .folder-hero-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .folder-hero-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .folder-hero-icon {
+            font-size: 18px;
+        }
+
+        .folder-hero-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.2px;
+        }
+
+        .folder-hero-badge {
             font-size: 11px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 12px;
+            background: rgba(0, 229, 255, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+        }
+
+        .folder-hero-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 14px;
+        }
+
+        .folder-hero-card {
+            background: rgba(22, 27, 34, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
             user-select: none;
+        }
+
+        .folder-hero-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(0, 229, 255, 0.5);
+            box-shadow: 0 10px 24px rgba(0, 229, 255, 0.2);
+            background: rgba(30, 41, 59, 0.95);
+        }
+
+        .folder-hero-card.active {
+            border-color: var(--accent-cyan);
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.18), rgba(99, 102, 241, 0.22));
+            box-shadow: 0 0 18px rgba(0, 229, 255, 0.35);
+        }
+
+        .folder-hero-cover-wrap {
+            width: 100%;
+            height: 90px;
+            position: relative;
+            background: #0d1117;
+            overflow: hidden;
+        }
+
+        .folder-hero-cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .folder-hero-card:hover .folder-hero-cover {
+            transform: scale(1.05);
+        }
+
+        .folder-hero-cover-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.9) 0%, transparent 60%);
+        }
+
+        .folder-hero-body {
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .folder-hero-card-name {
+            font-size: 13px;
+            font-weight: 800;
+            color: #fff;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .folder-hero-card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .folder-hero-card-count {
+            color: var(--accent-cyan);
+            font-weight: 700;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* ─── CATEGORY EXPLORATION GALLERY ─── */
@@ -2675,6 +2812,20 @@
                     <div class="filter-group-right">
                         <span class="filter-stats-badge" id="filterResultSummary">조건 일치: 0개</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- FOLDER HERO SECTION (카테고리에 하위 폴더가 존재할 때 최우선 렌더링) -->
+            <div class="folder-hero-section" id="folderHeroSection" style="display:none;">
+                <div class="folder-hero-header">
+                    <div class="folder-hero-title-wrap">
+                        <span class="folder-hero-icon">📂</span>
+                        <span class="folder-hero-title" id="folderHeroTitle">하위 폴더 / AU 선택</span>
+                    </div>
+                    <span class="folder-hero-badge" id="folderHeroCountBadge">0개 폴더 분류</span>
+                </div>
+                <div class="folder-hero-grid" id="folderHeroGrid">
+                    <!-- 동적으로 폴더 카드들이 렌더링됩니다 -->
                 </div>
             </div>
 
@@ -4846,12 +4997,15 @@
             const tracksGrid = document.getElementById('tracksGrid');
             const categoryGallery = document.getElementById('categoryGalleryView');
 
+            const folderHeroSec = document.getElementById('folderHeroSection');
+
             if (currentView === 'categories') {
                 if (titleEl) titleEl.textContent = t('audio_ui.view_categories_title', '카테고리 갤러리');
                 if (subTitleEl) subTitleEl.textContent = t('audio_ui.view_categories_sub', '모든 카테고리를 한눈에 탐색하세요.');
                 if (catWrapper) catWrapper.style.display = 'none';
                 if (subCatWrapper) subCatWrapper.style.display = 'none';
                 if (breadcrumbBar) breadcrumbBar.style.display = 'none';
+                if (folderHeroSec) folderHeroSec.style.display = 'none';
                 if (filterToolbar) filterToolbar.style.display = 'none';
                 if (quickPillsWrap) quickPillsWrap.style.display = 'none';
                 if (tracksGrid) tracksGrid.style.display = 'none';
@@ -4941,6 +5095,7 @@
 
             renderSubCategoryChips();
             renderCategoryBreadcrumbs();
+            renderFolderHeroCards();
             renderCards();
             syncStateToUrl();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -5044,6 +5199,143 @@
             bar.innerHTML = html;
         }
 
+        function renderFolderHeroCards() {
+            const section = document.getElementById('folderHeroSection');
+            const grid = document.getElementById('folderHeroGrid');
+            const countBadge = document.getElementById('folderHeroCountBadge');
+            const titleEl = document.getElementById('folderHeroTitle');
+            if (!section || !grid) return;
+
+            // Hide if view is not 'all' or no category is selected
+            if (currentView !== 'all' || !currentCategory || currentCategory === 'all') {
+                section.style.display = 'none';
+                return;
+            }
+
+            // Find defined sub-categories or tracks with subCategory
+            const hierItem = categoryHierarchyMap[currentCategory];
+            const definedSubs = (hierItem && Array.isArray(hierItem.subCategories)) ? hierItem.subCategories : [];
+            const designatedCatImg = categoryMetadataMap[currentCategory];
+
+            const subCounts = {};
+            const subImages = {};
+            let directCount = 0;
+            let totalInCat = 0;
+
+            const visibleTracks = tracksData.filter(t => t.status !== 'hidden' && t.cat && t.cat.toLowerCase() === currentCategory.toLowerCase());
+            totalInCat = visibleTracks.length;
+
+            visibleTracks.forEach(t => {
+                const sub = (t.subCategory || '').trim();
+                if (sub) {
+                    subCounts[sub] = (subCounts[sub] || 0) + 1;
+                    if (!subImages[sub]) {
+                        if (t.imageUrl) subImages[sub] = t.imageUrl;
+                        else if (t.yt) subImages[sub] = `https://img.youtube.com/vi/${t.yt}/mqdefault.jpg`;
+                    }
+                } else {
+                    directCount++;
+                }
+            });
+
+            // Map defined sub-categories custom images
+            definedSubs.forEach(s => {
+                if (s.imageUrl && !subImages[s.name]) {
+                    subImages[s.name] = s.imageUrl;
+                }
+            });
+
+            // Merge all sub-categories
+            const allSubNames = new Set(definedSubs.map(s => s.name));
+            Object.keys(subCounts).forEach(s => allSubNames.add(s));
+
+            if (allSubNames.size === 0) {
+                // No sub-categories -> hide folder hero section
+                section.style.display = 'none';
+                return;
+            }
+
+            // Show section
+            section.style.display = 'block';
+            if (titleEl) {
+                titleEl.textContent = `${getCategoryDisplayName(currentCategory)} 하위 폴더 / AU 선택`;
+            }
+            if (countBadge) {
+                const totalFolders = allSubNames.size + (directCount > 0 ? 1 : 0);
+                countBadge.textContent = `${totalFolders}개 폴더 분류`;
+            }
+
+            const sortedSubList = Array.from(allSubNames).sort((a, b) => (subCounts[b] || 0) - (subCounts[a] || 0));
+
+            let cardsHtml = '';
+
+            // 1. [🌐 전체 보기] 카드
+            const isAllActive = (!currentSubCategory || currentSubCategory === 'all');
+            const allCover = designatedCatImg || DEFAULT_FALLBACK_IMG;
+            cardsHtml += `
+                <div class="folder-hero-card ${isAllActive ? 'active' : ''}" onclick="filterBySubCat('all')">
+                    <div class="folder-hero-cover-wrap">
+                        <img src="${esc(allCover)}" class="folder-hero-cover" onerror="handleImgError(this)" />
+                        <div class="folder-hero-cover-overlay"></div>
+                    </div>
+                    <div class="folder-hero-body">
+                        <div class="folder-hero-card-name">🌐 전체 음원 보기</div>
+                        <div class="folder-hero-card-meta">
+                            <span>모든 폴더 종합</span>
+                            <span class="folder-hero-card-count">${totalInCat}곡</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 2. [📁 직속/원작 음원] 카드 (if there are direct tracks)
+            if (directCount > 0) {
+                const isDirectActive = (currentSubCategory === '__direct__');
+                const directSample = visibleTracks.find(t => (!t.subCategory || t.subCategory.trim() === '') && (t.imageUrl || t.yt));
+                const directCover = (directSample?.imageUrl) || (directSample?.yt ? `https://img.youtube.com/vi/${directSample.yt}/mqdefault.jpg` : designatedCatImg) || DEFAULT_FALLBACK_IMG;
+                cardsHtml += `
+                    <div class="folder-hero-card ${isDirectActive ? 'active' : ''}" onclick="filterBySubCat('__direct__')">
+                        <div class="folder-hero-cover-wrap">
+                            <img src="${esc(directCover)}" class="folder-hero-cover" onerror="handleImgError(this)" />
+                            <div class="folder-hero-cover-overlay"></div>
+                        </div>
+                        <div class="folder-hero-body">
+                            <div class="folder-hero-card-name">📁 직속/원작 음원</div>
+                            <div class="folder-hero-card-meta">
+                                <span>본편 직속</span>
+                                <span class="folder-hero-card-count">${directCount}곡</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 3. Sub-category AU folders
+            sortedSubList.forEach(subName => {
+                const count = subCounts[subName] || 0;
+                const isSubActive = (currentSubCategory && currentSubCategory.toLowerCase() === subName.toLowerCase());
+                const cover = subImages[subName] || designatedCatImg || DEFAULT_FALLBACK_IMG;
+
+                cardsHtml += `
+                    <div class="folder-hero-card ${isSubActive ? 'active' : ''}" onclick="filterBySubCat('${subName.replace(/'/g, "\\'")}')">
+                        <div class="folder-hero-cover-wrap">
+                            <img src="${esc(cover)}" class="folder-hero-cover" onerror="handleImgError(this)" />
+                            <div class="folder-hero-cover-overlay"></div>
+                        </div>
+                        <div class="folder-hero-body">
+                            <div class="folder-hero-card-name" title="${esc(subName)}">📂 ${esc(subName)}</div>
+                            <div class="folder-hero-card-meta">
+                                <span>하위 AU 폴더</span>
+                                <span class="folder-hero-card-count">${count}곡</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = cardsHtml;
+        }
+
         function renderCategoryChips() {
             const carousel = document.getElementById('catChipsCarousel');
             if (!carousel) return;
@@ -5065,9 +5357,10 @@
             setupCarouselInteractions();
             scrollActiveCategoryIntoView();
 
-            // Render hierarchical sub-category chips and breadcrumbs
+            // Render hierarchical sub-category chips and breadcrumbs & Folder Hero Cards
             renderSubCategoryChips();
             renderCategoryBreadcrumbs();
+            renderFolderHeroCards();
 
             // Popular categories in sidebar
             const sidebarCatList = document.getElementById('sidebarCategoryList');
