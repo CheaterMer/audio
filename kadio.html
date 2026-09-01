@@ -9375,11 +9375,78 @@
         }
 
         function openAddAudioModal() { openModal('addAudioModal'); }
+
         function openBulkCategoryModal() { 
+            const countEl = document.getElementById('bulkModalCount');
+            if (countEl) countEl.textContent = selectedTrackIds.size;
+
             const sel = document.getElementById('bulkSelectExisting');
-            const cats = Array.from(new Set(tracksData.map(t => t.cat).filter(Boolean)));
-            sel.innerHTML = cats.map(c => `<option value="${c}">${getCategoryDisplayName(c)} (${c})</option>`).join('');
+            const customInput = document.getElementById('bulkCustomInput');
+            if (customInput) customInput.value = '';
+
+            const cats = Array.from(new Set(tracksData.map(t => t.cat).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+            if (sel) {
+                sel.innerHTML = `<option value="">-- 기존 메인 카테고리 선택 --</option>` + 
+                    cats.map(c => `<option value="${esc(c)}">${esc(getCategoryDisplayName(c))} (${esc(c)})</option>`).join('');
+                
+                // If there's a currently active category, default select it
+                if (currentCategory && cats.includes(currentCategory)) {
+                    sel.value = currentCategory;
+                } else if (cats.length > 0) {
+                    sel.value = cats[0];
+                }
+            }
+
+            onBulkMainCategoryChange(sel ? sel.value : '');
             openModal('bulkCategoryModal');
+        }
+
+        function onBulkMainCategoryChange(selectedCat) {
+            const subSelect = document.getElementById('bulkSelectSubCategory');
+            const subInput = document.getElementById('bulkSubCategoryInput');
+            const customWrap = document.getElementById('bulkSubCustomWrap');
+            if (!subSelect) return;
+
+            const cat = selectedCat || document.getElementById('bulkSelectExisting')?.value || '';
+            if (subInput) subInput.value = '';
+
+            if (!cat) {
+                subSelect.innerHTML = `<option value="">📁 하위 폴더 없음 (직속/원작)</option><option value="__custom__">✏️ 새 하위 폴더 직접 입력...</option>`;
+                if (customWrap) customWrap.style.display = 'block';
+                return;
+            }
+
+            // Find subCategories from categoryHierarchyMap & active tracks
+            const hierItem = categoryHierarchyMap[cat];
+            const definedSubs = (hierItem && Array.isArray(hierItem.subCategories)) ? hierItem.subCategories.map(s => s.name) : [];
+            const trackSubs = tracksData.filter(t => t.cat && t.cat.toLowerCase() === cat.toLowerCase() && t.subCategory).map(t => t.subCategory.trim());
+            const allSubs = Array.from(new Set([...definedSubs, ...trackSubs])).filter(Boolean).sort((a, b) => a.localeCompare(b));
+
+            let optionsHtml = `<option value="">📁 하위 폴더 없음 (직속/원작)</option>`;
+            allSubs.forEach(sub => {
+                optionsHtml += `<option value="${esc(sub)}">📂 ${esc(sub)}</option>`;
+            });
+            optionsHtml += `<option value="__custom__">✏️ 새 하위 폴더 직접 입력...</option>`;
+
+            subSelect.innerHTML = optionsHtml;
+            subSelect.value = '';
+            if (customWrap) customWrap.style.display = 'block';
+        }
+
+        function onBulkSubCategorySelectChange(val) {
+            const subInput = document.getElementById('bulkSubCategoryInput');
+            const customWrap = document.getElementById('bulkSubCustomWrap');
+            if (val === '__custom__') {
+                if (customWrap) customWrap.style.display = 'block';
+                if (subInput) {
+                    subInput.value = '';
+                    subInput.focus();
+                }
+            } else if (val) {
+                if (subInput) subInput.value = val;
+            } else {
+                if (subInput) subInput.value = '';
+            }
         }
 
         function switchAdminTab(tab, btn) {

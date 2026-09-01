@@ -1324,6 +1324,10 @@
     const customVal = el.bulkCategoryCustomInput ? el.bulkCategoryCustomInput.value.trim() : '';
     const targetCategory = customVal || selectedVal;
 
+    const subSelectVal = el.bulkSubCategorySelect ? el.bulkSubCategorySelect.value.trim() : '';
+    const subCustomVal = el.bulkSubCategoryCustomInput ? el.bulkSubCategoryCustomInput.value.trim() : '';
+    const targetSub = subSelectVal === '__custom__' ? (subCustomVal || null) : (subSelectVal || subCustomVal || null);
+
     if (!targetCategory && customVal === '') {
       return toast('변경할 카테고리를 선택하거나 직접 입력해 주세요', 'error');
     }
@@ -1334,13 +1338,14 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           audioIds: ids,
-          targetCategory: targetCategory
+          category: targetCategory,
+          subCategory: targetSub
         })
       });
       const json = await res.json();
       if (json.status !== 'success') throw new Error(json.message);
 
-      toast(json.message || `${ids.length}개 오디오의 카테고리가 '${targetCategory}'(으)로 변경되었습니다! ✅`, 'success');
+      toast(json.message || `${ids.length}개 오디오의 카테고리가 '${targetCategory}${targetSub ? ' > ' + targetSub : ''}'(으)로 변경되었습니다! ✅`, 'success');
       S.batchSelected.clear();
       closeBulkCategoryModal();
       await loadTracks();
