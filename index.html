@@ -4151,15 +4151,22 @@
             // 1. Check URL query params for ?token=... or ?admin_token=... (OAuth callback or manual token)
             const urlParams = new URLSearchParams(window.location.search);
             const queryToken = urlParams.get('token') || urlParams.get('admin_token');
+            const hasAuthQuery = urlParams.has('token') || urlParams.has('admin_token') || urlParams.has('login');
             if (queryToken) {
                 tokenToVerify = queryToken;
                 try {
                     localStorage.setItem('kadio_admin_token', queryToken);
                 } catch(e) {}
-                // Clean up URL query parameters without page reload
-                const cleanUrl = window.location.origin + window.location.pathname;
-                window.history.replaceState({}, document.title, cleanUrl);
                 showToast('Discord 로그인이 성공적으로 완료되었습니다! 🎵', 'success');
+            }
+            if (hasAuthQuery) {
+                // Clean up only auth query parameters while preserving track/category filters
+                urlParams.delete('token');
+                urlParams.delete('admin_token');
+                urlParams.delete('login');
+                const remainingQuery = urlParams.toString();
+                const cleanUrl = window.location.origin + window.location.pathname + (remainingQuery ? '?' + remainingQuery : '') + (window.location.hash || '');
+                window.history.replaceState({}, document.title, cleanUrl);
             }
 
             if (tokenToVerify) {
