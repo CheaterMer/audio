@@ -7,7 +7,11 @@
   },
   "nav": {
     "dashboard": "メインダッシュボード",
+    "search": "プレイヤー探索",
     "friend_sync": "フレンド追跡",
+    "schedule": "スケジューラ",
+    "audio_library": "オーディオライブラリ",
+    "admin": "管理者",
     "mutual_friends": "共通のフレンド",
     "admin_logs": "システムログ",
     "to_main": "メインへ"

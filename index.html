@@ -5050,47 +5050,7 @@
             renderCards();
             if (syncUrl) syncStateToUrl();
         }
-
-        function filterByCat(cat, subCat = null, preserveSubFilters = false) {
-            // Check Content Warning gate first
-            if (cat && cat !== 'all' && typeof checkCategoryContentWarning === 'function' && !checkCategoryContentWarning(cat)) {
-                return;
-            }
-
-            currentCategory = (cat === 'all' || !cat) ? null : cat;
-            currentSubCategory = subCat;
-            currentPage = 1;
-
-            if (currentView !== 'all') {
-                currentView = 'all';
-                document.querySelectorAll('.nav-item').forEach(el => {
-                    el.classList.toggle('active', el.getAttribute('data-view') === 'all');
-                });
-                const catGallery = document.getElementById('categoryGalleryView');
-                const tracksGrid = document.getElementById('tracksGrid');
-                if (catGallery) catGallery.style.display = 'none';
-                if (tracksGrid) tracksGrid.style.display = 'grid';
-                const ftb = document.getElementById('filterSortToolbar');
-                const qpw = document.getElementById('quickPillsFilterWrap');
-                const ccw = document.getElementById('catChipsCarouselWrapper');
-                if (ftb) ftb.style.display = '';
-                if (qpw) qpw.style.display = '';
-                if (ccw) ccw.style.display = '';
-            }
-
-            const titleEl = document.getElementById('viewTitle');
-            if (currentCategory) {
-                const displayName = getCategoryDisplayName(currentCategory);
-                if (titleEl) titleEl.textContent = `${displayName}${currentSubCategory ? ' > ' + (currentSubCategory === '__direct__' ? '직속 음원' : currentSubCategory) : ''}`;
-            } else {
-                if (titleEl) titleEl.textContent = t('audio_ui.view_all_title', '전체 오디오 라이브러리');
-            }
-
-            renderCategoryChips();
-            renderCards();
-            syncStateToUrl();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        // Note: filterByCat is defined as a unified category/subCategory filter handler below.
 
         function filterBySubCat(subCat) {
             currentSubCategory = (subCat === 'all' || !subCat) ? null : subCat;
@@ -7264,7 +7224,14 @@
             }
         }
 
-        function filterByCat(cat, forcePass = false, updateUrl = true, resetFilters = true) {
+        function filterByCat(cat, subCatOrForcePass = null, forcePass = false, updateUrl = true, resetFilters = true) {
+            let subCat = null;
+            if (typeof subCatOrForcePass === 'boolean') {
+                forcePass = subCatOrForcePass;
+            } else if (typeof subCatOrForcePass === 'string') {
+                subCat = subCatOrForcePass;
+            }
+
             const BAN_WARNING_CATEGORY = '이거 사용해서 밴 먹어도 내 책임 아님 ㅅㄱ  you can get ban';
             if (cat === BAN_WARNING_CATEGORY) {
                 if (!isUserLoggedIn && !isAdminMode) {
@@ -7280,12 +7247,15 @@
             if (resetFilters) {
                 resetSubFilters({ resetSearch: true, resetSubFilters: true });
             }
-            currentCategory = (cat === 'all') ? null : cat;
+            currentCategory = (cat === 'all' || !cat) ? null : cat;
+            // Always reset sub-category unless an explicit subCat was specified
+            currentSubCategory = (subCat === 'all' || !subCat) ? null : subCat;
             currentPage = 1;
             switchMainView('all', false, false);
             renderCategoryChips();
             if (updateUrl) syncStateToUrl();
             toggleMobileSidebar(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         let lastClickedTrackId = null;
@@ -7651,66 +7621,85 @@
             }, 200);
         }
 
+        let isSwitchingFallback = false;
+
         function playYouTubeTrack(ytId, durationSec) {
             isYtPlayingMode = true;
-            playerAudio.pause();
-            playerAudio.src = '';
+            try {
+                playerAudio.pause();
+                playerAudio.removeAttribute('src');
+                playerAudio.load();
+            } catch(e) {}
 
             const ytBox = document.getElementById('ytPlayerContainer');
             if (!ytBox) return;
             ytBox.style.display = 'block';
 
+            const origin = window.location.origin;
+            const href = window.location.href;
+
             if (!ytPlayerInstance && window.YT && window.YT.Player) {
                 ytBox.innerHTML = '<div id="ytActualPlayer"></div>';
-                ytPlayerInstance = new YT.Player('ytActualPlayer', {
-                    height: '1',
-                    width: '1',
-                    videoId: ytId,
-                    host: 'https://www.youtube-nocookie.com',
-                    playerVars: {
-                        autoplay: 1,
-                        controls: 0,
-                        enablejsapi: 1,
-                        playsinline: 1,
-                        rel: 0,
-                        iv_load_policy: 3,
-                        modestbranding: 1,
-                        origin: window.location.origin
-                    },
-                    events: {
-                        onReady: (e) => {
-                            if (isMuted || currentVolume === 0) e.target.mute();
-                            else { e.target.unMute(); e.target.setVolume(currentVolume * 100); }
-                            e.target.playVideo();
-                            document.getElementById('playerPlayBtn').textContent = '⏸';
-                            startYtProgressPolling(durationSec);
+                try {
+                    ytPlayerInstance = new YT.Player('ytActualPlayer', {
+                        height: '1',
+                        width: '1',
+                        videoId: ytId,
+                        host: 'https://www.youtube.com',
+                        playerVars: {
+                            autoplay: 1,
+                            controls: 0,
+                            enablejsapi: 1,
+                            playsinline: 1,
+                            rel: 0,
+                            iv_load_policy: 3,
+                            modestbranding: 1,
+                            origin: origin,
+                            widget_referrer: href
                         },
-                        onStateChange: (e) => {
-                            if (e.data === YT.PlayerState.PLAYING) {
+                        events: {
+                            onReady: (e) => {
+                                try {
+                                    if (isMuted || currentVolume === 0) e.target.mute();
+                                    else { e.target.unMute(); e.target.setVolume(currentVolume * 100); }
+                                    e.target.playVideo();
+                                } catch(_) {}
                                 document.getElementById('playerPlayBtn').textContent = '⏸';
                                 startYtProgressPolling(durationSec);
-                            } else if (e.data === YT.PlayerState.PAUSED) {
-                                document.getElementById('playerPlayBtn').textContent = '▶';
-                            } else if (e.data === YT.PlayerState.ENDED) {
-                                if (ytProgressInterval) clearInterval(ytProgressInterval);
-                                playNextTrack();
+                            },
+                            onStateChange: (e) => {
+                                if (e.data === YT.PlayerState.PLAYING) {
+                                    document.getElementById('playerPlayBtn').textContent = '⏸';
+                                    startYtProgressPolling(durationSec);
+                                } else if (e.data === YT.PlayerState.PAUSED) {
+                                    document.getElementById('playerPlayBtn').textContent = '▶';
+                                } else if (e.data === YT.PlayerState.ENDED) {
+                                    if (ytProgressInterval) clearInterval(ytProgressInterval);
+                                    playNextTrack();
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                } catch (e) {
+                    console.warn('[YouTube Player] Init fallback to iframe:', e.message);
+                    ytBox.innerHTML = `<iframe id="ytIframeEmbed" width="1" height="1" src="https://www.youtube.com/embed/${ytId}?autoplay=1&enablejsapi=1&playsinline=1&rel=0&iv_load_policy=3&modestbranding=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(href)}" frameborder="0" allow="autoplay"></iframe>`;
+                    document.getElementById('playerPlayBtn').textContent = '⏸';
+                }
             } else if (ytPlayerInstance && typeof ytPlayerInstance.loadVideoById === 'function') {
-                ytPlayerInstance.loadVideoById({
-                    videoId: ytId,
-                    startSeconds: 0
-                });
-                if (isMuted || currentVolume === 0) ytPlayerInstance.mute();
-                else { ytPlayerInstance.unMute(); ytPlayerInstance.setVolume(currentVolume * 100); }
-                ytPlayerInstance.playVideo();
+                try {
+                    ytPlayerInstance.loadVideoById({
+                        videoId: ytId,
+                        startSeconds: 0
+                    });
+                    if (isMuted || currentVolume === 0) ytPlayerInstance.mute();
+                    else { ytPlayerInstance.unMute(); ytPlayerInstance.setVolume(currentVolume * 100); }
+                    ytPlayerInstance.playVideo();
+                } catch (_) {}
                 document.getElementById('playerPlayBtn').textContent = '⏸';
                 startYtProgressPolling(durationSec);
             } else {
                 // Fallback direct privacy iframe with ads reduction params
-                ytBox.innerHTML = `<iframe id="ytIframeEmbed" width="1" height="1" src="https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&enablejsapi=1&playsinline=1&rel=0&iv_load_policy=3&modestbranding=1&origin=${encodeURIComponent(window.location.origin)}" frameborder="0" allow="autoplay"></iframe>`;
+                ytBox.innerHTML = `<iframe id="ytIframeEmbed" width="1" height="1" src="https://www.youtube.com/embed/${ytId}?autoplay=1&enablejsapi=1&playsinline=1&rel=0&iv_load_policy=3&modestbranding=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(href)}" frameborder="0" allow="autoplay"></iframe>`;
                 document.getElementById('playerPlayBtn').textContent = '⏸';
             }
 
@@ -7718,16 +7707,38 @@
         }
 
         function triggerYtFallback(t) {
-            if (t && t.yt && !isYtPlayingMode) {
+            if (isYtPlayingMode || isSwitchingFallback) return;
+            isSwitchingFallback = true;
+            setTimeout(() => { isSwitchingFallback = false; }, 800);
+
+            // Clean up playerAudio immediately so browser stops retry requests
+            try {
+                playerAudio.pause();
+                playerAudio.removeAttribute('src');
+                playerAudio.load();
+            } catch(e) {}
+
+            if (t && t.yt) {
                 playYouTubeTrack(t.yt, t.durationSec || 0);
-            } else if (!isYtPlayingMode) {
+            } else {
                 document.getElementById('playerPlayBtn').textContent = '▶';
                 showToast('해당 트랙은 Roblox 권한 보호(401/403) 또는 스토어 비공개로 웹 미리듣기가 제한된 에셋입니다 (ID: ' + (t ? t.assetId : '') + ')', 'info');
             }
         }
 
+        let lastFailedAudioId = null;
+        let lastFailedTime = 0;
+
         playerAudio.onerror = () => {
-            const t = tracksData.find(x => String(x.id) === String(currentPlayingTrackId));
+            const trackId = currentPlayingTrackId;
+            const now = Date.now();
+            if (lastFailedAudioId === trackId && (now - lastFailedTime) < 1000) {
+                return;
+            }
+            lastFailedAudioId = trackId;
+            lastFailedTime = now;
+
+            const t = tracksData.find(x => String(x.id) === String(trackId));
             triggerYtFallback(t);
         };
 

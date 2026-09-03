@@ -1,6 +1,6 @@
 # AudioVault GitHub Push Script for PowerShell
 Write-Host "===================================================" -ForegroundColor Cyan
-Write-Host "[AudioVault] CheaterMer/my-audio-web GitHub 푸시 시작" -ForegroundColor Cyan
+Write-Host "[AudioVault] CheaterMer/audio GitHub 푸시 시작" -ForegroundColor Cyan
 Write-Host "===================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -11,7 +11,7 @@ Set-Location $destDir
 if (-not (Test-Path ".git")) {
     git init
     git branch -M main
-    git remote add origin https://github.com/CheaterMer/my-audio-web.git
+    git remote add origin https://github.com/CheaterMer/audio.git
 }
 
 git add -A
@@ -25,7 +25,7 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host ""
     Write-Host "===================================================" -ForegroundColor Green
     Write-Host "🎉 GitHub Pages 저장소에 성공적으로 푸시되었습니다!" -ForegroundColor Green
-    Write-Host "👉 https://cheatermer.github.io/my-audio-web/" -ForegroundColor Cyan
+    Write-Host "👉 https://cheatermer.github.io/audio/" -ForegroundColor Cyan
     Write-Host "===================================================" -ForegroundColor Green
 } else {
     Write-Host ""
@@ -34,7 +34,7 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "CheaterMer 계정으로 GitHub 로그인이 필요합니다." -ForegroundColor White
     Write-Host ""
     Write-Host "아래 대안 중 하나를 진행해 주세요:" -ForegroundColor Cyan
-    Write-Host "1. 웹 브라우저에서 업로드: https://github.com/CheaterMer/my-audio-web/upload/main" -ForegroundColor White
+    Write-Host "1. 웹 브라우저에서 업로드: https://github.com/CheaterMer/audio/upload/main" -ForegroundColor White
     Write-Host "2. GitHub CLI 로그인: gh auth login" -ForegroundColor White
     Write-Host "===================================================" -ForegroundColor Red
 }

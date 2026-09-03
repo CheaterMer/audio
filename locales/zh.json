@@ -7,7 +7,11 @@
   },
   "nav": {
     "dashboard": "主页仪表盘",
+    "search": "玩家搜寻",
     "friend_sync": "好友追踪",
+    "schedule": "定时调度",
+    "audio_library": "音频库",
+    "admin": "管理员",
     "mutual_friends": "共同好友",
     "admin_logs": "系统日志",
     "to_main": "返回主页"
